@@ -1,0 +1,35 @@
+import { User } from '..';
+import { builder } from '../../builder';
+import { db } from '../../drizzle/db';
+import { type Organisation as OrganisationType } from '../../drizzle/schema';
+import { OrganisationMember } from './Member';
+
+export const Organisation = builder.objectRef<OrganisationType>('Organisation');
+
+Organisation.implement({
+	fields: (t) => ({
+		account: t.field({
+			type: User,
+			resolve: async (_user) => {
+				const result = await db.query.user.findFirst({
+					where: (user, { eq }) => eq(user.id, _user.accountId)
+				});
+				return result!;
+			}
+		}),
+		members: t.field({
+			type: [OrganisationMember],
+			resolve: async (_organisation) => {
+				const result = await db.query.organisationMember.findMany({
+					where: (organisationMember, { eq }) =>
+						eq(organisationMember.organisationId, _organisation.id),
+					with: {
+						user: true
+					}
+				});
+				return result!;
+			}
+		}),
+		createdAt: t.expose('createdAt', { type: 'Date' })
+	})
+});

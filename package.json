@@ -1,0 +1,45 @@
+{
+	"name": "spark",
+	"version": "0.0.1",
+	"description": "Spark: the API server for Nexirift.",
+	"author": "Nexirift",
+	"license": "GPL-3.0-only",
+	"main": "server.ts",
+	"scripts": {
+		"dev": "bun --watch src/server.ts",
+		"start": "bun src/server.ts",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "dotenv bun drizzle/migrate/migrate.ts ./drizzle",
+		"db:studio": "drizzle-kit studio"
+	},
+	"keywords": [],
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.629.0",
+		"@aws-sdk/lib-storage": "^3.629.0",
+		"@nexirift/plugin-oidc": "^1.0.3",
+		"@pothos/core": "^4.2.0",
+		"@pothos/plugin-errors": "^4.2.0",
+		"@pothos/plugin-scope-auth": "^4.1.0",
+		"@pothos/plugin-validation": "^3.10.2",
+		"@types/node": "^22.2.0",
+		"dotenv": "^16.4.5",
+		"dotenv-cli": "^7.4.2",
+		"drizzle-kit": "0.24.0",
+		"drizzle-orm": "^0.33.0",
+		"gradient-string": "^2.0.2",
+		"graphql": "^16.9.0",
+		"graphql-scalars": "^1.23.0",
+		"graphql-yoga": "^5.6.3",
+		"mime-types": "^2.1.35",
+		"pg": "^8.12.0",
+		"redis": "^4.7.0",
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.1.6",
+		"@types/gradient-string": "^1.1.6",
+		"@types/mime-types": "^2.1.4",
+		"@types/pg": "^8.11.6",
+		"typescript": "^5.5.4"
+	}
+}

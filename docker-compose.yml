@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+    spark:
+        build: .
+        container_name: spark
+        ports:
+            - '3005:3005'
+        volumes:
+            - ./.env:/usr/src/app/.env
+        restart: unless-stopped
+        networks:
+            - spark
+            - keydb
+            - pgdb
+
+    keydb:
+        image: eqalpha/keydb:latest
+        container_name: keydb
+        restart: unless-stopped
+        networks:
+            - keydb
+
+    postgres:
+        image: postgres:latest
+        container_name: postgres
+        environment:
+            - POSTGRES_DB=spark
+            - POSTGRES_PASSWORD=postgres
+        volumes:
+            - ./docker-data/postgres_data:/var/lib/postgresql/data
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready']
+            interval: 1s
+            timeout: 5s
+            retries: 10
+        networks:
+            - pg
+
+networks:
+    spark:
+    keydb:
+    pgdb:
