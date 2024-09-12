@@ -49,6 +49,12 @@ _There is no public docker image (for now), so you have to build it yourself._
 2. Run the stack by doing `docker compose up -d`.
     - This _should_ auto build the image.
 
+<!-- http://authentik.local/application/o/authorize/?
+client_id=clientidgoeshere
+&redirect_uri= https://openidconnect.net/callback
+&scope=openid profile email
+&response_type=code -->
+
 ## License
 
 [GPL-3.0](/LICENSE)
