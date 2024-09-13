@@ -6,8 +6,6 @@ import { Context } from './context';
 import { DateTimeResolver } from 'graphql-scalars';
 
 export const builder = new SchemaBuilder<{
-	// TODO: Migrate to v4.
-	Defaults: 'v3';
 	Context: Context;
 	Scalars: {
 		Date: {
@@ -16,7 +14,6 @@ export const builder = new SchemaBuilder<{
 		};
 	};
 }>({
-	defaults: 'v3',
 	plugins: [ScopeAuthPlugin, ValidationPlugin, ErrorsPlugin],
 	validationOptions: {
 		// optionally customize how errors are formatted
@@ -25,8 +22,8 @@ export const builder = new SchemaBuilder<{
 			return zodError;
 		}
 	},
-	authScopes: async (context) => ({}),
-	scopeAuthOptions: {
+	scopeAuth: {
+		authScopes: async (context) => ({}),
 		// Recommended when using subscriptions
 		// when this is not set, auth checks are run when event is resolved rather than when the subscription is created
 		authorizeOnSubscribe: true
