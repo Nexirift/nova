@@ -24,6 +24,7 @@ production, you understand the risks.
     -   If you would like to know why we don't suggest it, read the comments
         [here](https://github.com/redis/redis/pull/13157).
 -   [Authentik](https://goauthentik.io)
+    -   _support for more authentication providers is in the works!_
 
 _psst: see our Authentik stuff [here](https://github.com/Nexirift/authentik)._
 
