@@ -11,6 +11,7 @@ PostInteraction.implement({
 	fields: (t) => ({
 		post: t.field({
 			type: Post,
+			nullable: false,
 			resolve: async (_post) => {
 				const result = await db.query.post.findFirst({
 					where: (post, { eq }) => eq(post.id, _post.postId)
@@ -20,6 +21,7 @@ PostInteraction.implement({
 		}),
 		user: t.field({
 			type: User,
+			nullable: false,
 			resolve: async (_user) => {
 				const result = await db.query.user.findFirst({
 					where: (user, { eq }) => eq(user.id, _user.userId)
@@ -27,6 +29,6 @@ PostInteraction.implement({
 				return result!;
 			}
 		}),
-		type: t.exposeString('type')
+		type: t.exposeString('type', { nullable: false })
 	})
 });

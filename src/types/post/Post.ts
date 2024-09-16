@@ -15,9 +15,10 @@ export const Post = builder.objectRef<PostType>('Post');
 
 Post.implement({
 	fields: (t) => ({
-		id: t.exposeString('id'),
+		id: t.exposeString('id', { nullable: false }),
 		author: t.field({
 			type: User,
+			nullable: false,
 			resolve: async (post) => {
 				const result = await db.query.user.findFirst({
 					where: (user, { eq }) => eq(user.id, post.authorId)
@@ -27,16 +28,17 @@ Post.implement({
 		}),
 		parent: t.field({
 			type: Post,
+			nullable: true,
 			resolve: async (parent) => {
 				const result = await db.query.post.findFirst({
 					where: (post, { eq }) => eq(post.id, parent.parentId!)
 				});
 				return result!;
-			},
-			nullable: true
+			}
 		}),
 		replies: t.field({
 			type: [Post],
+			nullable: true,
 			args: {
 				first: t.arg({ type: 'Int' }),
 				offset: t.arg({ type: 'Int' }),
@@ -56,11 +58,11 @@ Post.implement({
 				const user = await getUser(parent.authorId, context.oidc.sub);
 				return privacyGuardian(user, context);
 			},
-			unauthorizedResolver: () => null,
-			nullable: true
+			unauthorizedResolver: () => null
 		}),
 		media: t.field({
 			type: [PostMedia],
+			nullable: true,
 			resolve: async (post) => {
 				const result = await db.query.postMedia.findMany({
 					where: (media, { eq }) => eq(media.postId, post.id)
@@ -68,11 +70,12 @@ Post.implement({
 				return result!;
 			}
 		}),
-		published: t.exposeBoolean('published'),
-		pinned: t.exposeBoolean('pinned'),
-		hidden: t.exposeBoolean('hidden'),
+		published: t.exposeBoolean('published', { nullable: false }),
+		pinned: t.exposeBoolean('pinned', { nullable: false }),
+		hidden: t.exposeBoolean('hidden', { nullable: false }),
 		interactions: t.field({
 			type: [PostInteraction],
+			nullable: true,
 			args: {
 				first: t.arg({ type: 'Int' }),
 				offset: t.arg({ type: 'Int' }),
@@ -117,29 +120,30 @@ Post.implement({
 		}),
 		poll: t.field({
 			type: PostPoll,
+			nullable: true,
 			resolve: async (post) => {
 				const result = await db.query.postPoll.findFirst({
 					where: (postPoll, { eq }) => eq(postPoll.postId, post.id)
 				});
 				return result!;
-			},
-			nullable: true
+			}
 		}),
 		giveaway: t.field({
 			type: PostGiveaway,
+			nullable: true,
 			resolve: async (post) => {
 				const result = await db.query.postGiveaway.findFirst({
 					where: (postGiveaway, { eq }) =>
 						eq(postGiveaway.postId, post.id)
 				});
 				return result!;
-			},
-			nullable: true
+			}
 		}),
-		createdAt: t.expose('createdAt', { type: 'Date' }),
-		updatedAt: t.expose('updatedAt', { type: 'Date' }),
+		createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
+		updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
 		bookmarked: t.field({
 			type: 'Boolean',
+			nullable: false,
 			resolve: async (parent, _args, context: Context) => {
 				const result = await db.query.postInteraction.findMany({
 					where: (postInteraction, { and, eq }) =>
@@ -154,6 +158,7 @@ Post.implement({
 		}),
 		liked: t.field({
 			type: 'Boolean',
+			nullable: false,
 			resolve: async (parent, _args, context: Context) => {
 				const result = await db.query.postInteraction.findMany({
 					where: (postInteraction, { and, eq }) =>
@@ -168,6 +173,7 @@ Post.implement({
 		}),
 		likesCount: t.field({
 			type: 'Int',
+			nullable: false,
 			resolve: async (parent) => {
 				const result = await db.query.postInteraction.findMany({
 					where: (postInteraction, { and, eq }) =>
@@ -181,6 +187,7 @@ Post.implement({
 		}),
 		bookmarksCount: t.field({
 			type: 'Int',
+			nullable: false,
 			resolve: async (parent) => {
 				const result = await db.query.postInteraction.findMany({
 					where: (postInteraction, { and, eq }) =>
@@ -195,10 +202,12 @@ Post.implement({
 		/* TODO: IMPLEMENT */
 		repostsCount: t.field({
 			type: 'Int',
+			nullable: false,
 			resolve: () => 5483958
 		}),
 		repliesCount: t.field({
 			type: 'Int',
+			nullable: false,
 			resolve: async (parent) => {
 				const result = await db.query.post.findMany({
 					where: (post, { eq }) => eq(post.parentId, parent.id)
@@ -209,6 +218,7 @@ Post.implement({
 		/* TODO: IMPLEMENT */
 		reposted: t.field({
 			type: 'Boolean',
+			nullable: false,
 			resolve: () => false
 		})
 	})

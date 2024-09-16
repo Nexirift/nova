@@ -17,8 +17,12 @@ export const User = builder.objectRef<UserType>('User');
 
 User.implement({
 	fields: (t) => ({
-		id: t.exposeString('id'),
-		username: t.exposeString('username'),
+		id: t.exposeString('id', {
+			nullable: false
+		}),
+		username: t.exposeString('username', {
+			nullable: false
+		}),
 		displayName: t.exposeString('displayName', { nullable: true }),
 		bio: t.exposeString('bio', { nullable: true }),
 		extendedBio: t.exposeString('extendedBio', { nullable: true }),
@@ -28,20 +32,21 @@ User.implement({
 		type: t.exposeString('type', { nullable: true }),
 		verification: t.field({
 			type: UserVerification,
+			nullable: true,
 			resolve: async (user) => {
 				const result = await db.query.userVerification.findFirst({
 					where: (userVerification, { eq }) =>
 						eq(userVerification.userId, user.id)
 				});
 				return result!;
-			},
-			nullable: true
+			}
 		}),
 		profession: t.exposeString('profession', { nullable: true }),
 		location: t.exposeString('location', { nullable: true }),
 		website: t.exposeString('website', { nullable: true }),
 		profileFields: t.field({
 			type: [UserProfileField],
+			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
 				privacyGuardian(parent, context),
 			unauthorizedResolver: () => [] as any,
@@ -55,6 +60,7 @@ User.implement({
 		}),
 		organisations: t.field({
 			type: [OrganisationMember],
+			nullable: true,
 			resolve: async (user) => {
 				const result = await db.query.organisationMember.findMany({
 					where: (organisation, { eq }) =>
@@ -65,6 +71,7 @@ User.implement({
 		}),
 		organisation: t.field({
 			type: Organisation,
+			nullable: true,
 			resolve: async (user) => {
 				const result = await db.query.organisation.findFirst({
 					where: (organisation, { eq }) =>
@@ -75,6 +82,7 @@ User.implement({
 		}),
 		posts: t.field({
 			type: [Post],
+			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
 				privacyGuardian(parent, context),
 			args: {
@@ -103,6 +111,7 @@ User.implement({
 		}),
 		media: t.field({
 			type: [PostMedia],
+			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
 				privacyGuardian(parent, context),
 			unauthorizedResolver: () => [] as any,
@@ -128,6 +137,7 @@ User.implement({
 		}),
 		interactions: t.field({
 			type: [PostInteraction],
+			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
 				privacyGuardian(parent, context),
 			args: {
@@ -162,6 +172,7 @@ User.implement({
 		}),
 		relationships: t.field({
 			type: [UserRelationship],
+			nullable: true,
 			args: {
 				first: t.arg({ type: 'Int' }),
 				after: t.arg({ type: 'Int' })
@@ -206,10 +217,11 @@ User.implement({
 				return [...to, ...from].slice(args.after!, args.first!);
 			}
 		}),
-		createdAt: t.expose('createdAt', { type: 'Date' }),
-		updatedAt: t.expose('updatedAt', { type: 'Date' }),
+		createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
+		updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
 		bookmarksCount: t.field({
 			type: 'Int',
+			nullable: false,
 			resolve: async (user) => {
 				const result = await db.query.postInteraction.findMany({
 					where: (postInteraction, { and, eq }) =>
@@ -223,6 +235,7 @@ User.implement({
 		}),
 		likesCount: t.field({
 			type: 'Int',
+			nullable: false,
 			resolve: async (user) => {
 				const result = await db.query.postInteraction.findMany({
 					where: (postInteraction, { and, eq }) =>
@@ -236,6 +249,7 @@ User.implement({
 		}),
 		postsCount: t.field({
 			type: 'Int',
+			nullable: false,
 			resolve: async (user) => {
 				const result = await db.query.post.findMany({
 					where: (post, { eq }) => eq(post.authorId, user.id)
@@ -245,6 +259,7 @@ User.implement({
 		}),
 		followingCount: t.field({
 			type: 'Int',
+			nullable: false,
 			resolve: async (user) => {
 				const result = await db.query.userRelationship.findMany({
 					where: (userRelationship, { eq }) =>
@@ -255,6 +270,7 @@ User.implement({
 		}),
 		followersCount: t.field({
 			type: 'Int',
+			nullable: false,
 			resolve: async (user) => {
 				const result = await db.query.userRelationship.findMany({
 					where: (userRelationship, { eq }) =>
@@ -265,6 +281,7 @@ User.implement({
 		}),
 		isBlocking: t.field({
 			type: 'Boolean',
+			nullable: false,
 			resolve: async (user, _args, context: Context) => {
 				const result = await db.query.userRelationship.findMany({
 					where: (userRelationship, { and, eq }) =>
@@ -279,6 +296,7 @@ User.implement({
 		}),
 		isBlocked: t.field({
 			type: 'Boolean',
+			nullable: false,
 			resolve: async (user, _args, context: Context) => {
 				const result = await db.query.userRelationship.findMany({
 					where: (userRelationship, { and, eq }) =>
@@ -293,6 +311,7 @@ User.implement({
 		}),
 		isFollowing: t.field({
 			type: 'Boolean',
+			nullable: false,
 			resolve: async (user, _args, context: Context) => {
 				const result = await db.query.userRelationship.findMany({
 					where: (userRelationship, { and, eq }) =>
@@ -307,6 +326,7 @@ User.implement({
 		}),
 		isFollower: t.field({
 			type: 'Boolean',
+			nullable: false,
 			resolve: async (user, _args, context: Context) => {
 				const result = await db.query.userRelationship.findMany({
 					where: (userRelationship, { and, eq }) =>
@@ -321,6 +341,7 @@ User.implement({
 		}),
 		hasSentFollowRequest: t.field({
 			type: 'Boolean',
+			nullable: false,
 			resolve: async (user, _args, context: Context) => {
 				const result = await db.query.userRelationship.findMany({
 					where: (userRelationship, { and, eq }) =>

@@ -10,6 +10,7 @@ Organisation.implement({
 	fields: (t) => ({
 		account: t.field({
 			type: User,
+			nullable: false,
 			resolve: async (_user) => {
 				const result = await db.query.user.findFirst({
 					where: (user, { eq }) => eq(user.id, _user.accountId)
@@ -19,6 +20,7 @@ Organisation.implement({
 		}),
 		members: t.field({
 			type: [OrganisationMember],
+			nullable: true,
 			resolve: async (_organisation) => {
 				const result = await db.query.organisationMember.findMany({
 					where: (organisationMember, { eq }) =>
@@ -30,6 +32,6 @@ Organisation.implement({
 				return result!;
 			}
 		}),
-		createdAt: t.expose('createdAt', { type: 'Date' })
+		createdAt: t.expose('createdAt', { type: 'Date', nullable: false })
 	})
 });

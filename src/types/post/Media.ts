@@ -12,7 +12,7 @@ PostMedia.implement({
 			type: Post,
 			resolve: async (_post) => {
 				const result = await db.query.post.findFirst({
-					where: (post, { eq }) => eq(post.id, _post.postId)
+					where: (post, { eq }) => eq(post.id, _post.postId ?? '')
 				});
 				return result!;
 			}

@@ -10,6 +10,7 @@ UserProfileField.implement({
 	fields: (t) => ({
 		user: t.field({
 			type: User,
+			nullable: false,
 			resolve: async (_user) => {
 				const result = await db.query.user.findFirst({
 					where: (user, { eq }) => eq(user.id, _user.userId)
@@ -17,8 +18,8 @@ UserProfileField.implement({
 				return result!;
 			}
 		}),
-		name: t.exposeString('name'),
-		value: t.exposeString('value'),
-		spotlighted: t.exposeBoolean('spotlighted')
+		name: t.exposeString('name', { nullable: false }),
+		value: t.exposeString('value', { nullable: false }),
+		spotlighted: t.exposeBoolean('spotlighted', { nullable: false })
 	})
 });

@@ -10,6 +10,7 @@ PostGiveaway.implement({
 	fields: (t) => ({
 		post: t.field({
 			type: Post,
+			nullable: false,
 			resolve: async (_post) => {
 				const result = await db.query.post.findFirst({
 					where: (post, { eq }) => eq(post.id, _post.postId)
@@ -17,12 +18,13 @@ PostGiveaway.implement({
 				return result!;
 			}
 		}),
-		type: t.exposeString('type'),
+		type: t.exposeString('type', { nullable: false }),
 		requirements: t.field({
 			type: ['String'],
+			nullable: false,
 			resolve: async (giveaway) =>
 				giveaway.requirements!.toString().split(',')
 		}),
-		finish: t.expose('finish', { type: 'Date' })
+		finish: t.expose('finish', { type: 'Date', nullable: false })
 	})
 });

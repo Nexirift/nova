@@ -10,6 +10,7 @@ UserVerification.implement({
 	fields: (t) => ({
 		user: t.field({
 			type: User,
+			nullable: false,
 			resolve: async (_user) => {
 				const result = await db.query.user.findFirst({
 					where: (user, { eq }) => eq(user.id, _user.userId)
@@ -17,7 +18,9 @@ UserVerification.implement({
 				return result!;
 			}
 		}),
-		type: t.exposeString('type'),
-		since: t.expose('createdAt', { type: 'Date' })
+		type: t.exposeString('type', {
+			nullable: false
+		}),
+		since: t.expose('createdAt', { type: 'Date', nullable: false })
 	})
 });

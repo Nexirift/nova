@@ -10,6 +10,7 @@ PostPoll.implement({
 	fields: (t) => ({
 		post: t.field({
 			type: Post,
+			nullable: false,
 			resolve: async (_post) => {
 				const result = await db.query.post.findFirst({
 					where: (post, { eq }) => eq(post.id, _post.postId)
@@ -19,8 +20,9 @@ PostPoll.implement({
 		}),
 		options: t.field({
 			type: ['String'],
+			nullable: false,
 			resolve: async (poll) => poll.options!.toString().split(',')
 		}),
-		finish: t.expose('finish', { type: 'Date' })
+		finish: t.expose('finish', { type: 'Date', nullable: false })
 	})
 });

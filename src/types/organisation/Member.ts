@@ -10,6 +10,7 @@ OrganisationMember.implement({
 	fields: (t) => ({
 		user: t.field({
 			type: User,
+			nullable: false,
 			resolve: async (parent) => {
 				const result = await db.query.user.findFirst({
 					where: (user, { eq }) => eq(user.id, parent.userId)
@@ -19,6 +20,7 @@ OrganisationMember.implement({
 		}),
 		organisation: t.field({
 			type: Organisation,
+			nullable: false,
 			resolve: async (parent) => {
 				const result = await db.query.organisation.findFirst({
 					where: (organisation, { eq }) =>
@@ -27,8 +29,8 @@ OrganisationMember.implement({
 				return result!;
 			}
 		}),
-		affiliated: t.exposeBoolean('affiliated'),
+		affiliated: t.exposeBoolean('affiliated', { nullable: false }),
 		profession: t.exposeString('profession', { nullable: true }),
-		since: t.expose('createdAt', { type: 'Date' })
+		since: t.expose('createdAt', { type: 'Date', nullable: false })
 	})
 });
