@@ -29,6 +29,10 @@ _psst: see our Authentik stuff [here](https://github.com/Nexirift/authentik)._
 
 ### Instructions
 
+Our documentation website is still a work in progress, but you might find better
+success with guides on there as they should be updated regularly. You can visit
+that [here](https://docs.nexirift.com).
+
 #### Standard (Development)
 
 0. Set up the prerequistes first.
