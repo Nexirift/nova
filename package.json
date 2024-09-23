@@ -14,14 +14,14 @@
 	},
 	"keywords": [],
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.649.0",
-		"@aws-sdk/lib-storage": "^3.649.0",
+		"@aws-sdk/client-s3": "^3.654.0",
+		"@aws-sdk/lib-storage": "^3.654.0",
 		"@nexirift/plugin-oidc": "^1.0.3",
 		"@pothos/core": "^4.2.0",
 		"@pothos/plugin-errors": "^4.2.0",
 		"@pothos/plugin-scope-auth": "^4.1.0",
 		"@pothos/plugin-validation": "^3.10.2",
-		"@types/node": "^22.5.4",
+		"@types/node": "^22.5.5",
 		"dotenv": "^16.4.5",
 		"dotenv-cli": "^7.4.2",
 		"drizzle-kit": "0.24.2",
@@ -31,15 +31,15 @@
 		"graphql-scalars": "^1.23.0",
 		"graphql-yoga": "^5.7.0",
 		"mime-types": "^2.1.35",
-		"pg": "^8.12.0",
+		"pg": "^8.13.0",
 		"redis": "^4.7.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@types/bun": "^1.1.9",
+		"@types/bun": "^1.1.10",
 		"@types/gradient-string": "^1.1.6",
 		"@types/mime-types": "^2.1.4",
-		"@types/pg": "^8.11.9",
+		"@types/pg": "^8.11.10",
 		"typescript": "^5.6.2"
 	}
 }
