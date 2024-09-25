@@ -1,0 +1,17 @@
+{
+	"name": "migrate",
+	"version": "1.0.0",
+	"description": "This package.json is used for the migration script, the dependencies are only installed within the Dockerfile.",
+	"author": "Nexirift",
+	"license": "MIT",
+	"scripts": {
+		"db:migrate": "bun ./migrate.ts"
+	},
+	"dependencies": {
+		"dotenv": "^16.4.5",
+		"drizzle-kit": "^0.23.2",
+		"drizzle-orm": "^0.33.0",
+		"pg": "^8.13.0",
+		"typescript": "^5.6.2"
+	}
+}
