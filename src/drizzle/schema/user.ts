@@ -240,6 +240,39 @@ export const userPlanetPostRelations = relations(userPlanetPost, ({ one }) => ({
 	})
 }));
 
+export const userBadge = pgTable('user_badges', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	name: text('name').notNull(),
+	description: text('description'),
+	media: text('media'),
+	createdAt: timestamp('created_at').notNull().defaultNow()
+});
+
+export const userBadgeRelations = relations(userBadge, ({ many }) => ({
+	users: many(userBadges)
+}));
+
+export const userBadges = pgTable('user_badges', {
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	badgeId: uuid('badge_id')
+		.notNull()
+		.references(() => userBadge.id),
+	createdAt: timestamp('created_at').notNull().defaultNow()
+});
+
+export const userBadgesRelations = relations(userBadges, ({ one }) => ({
+	user: one(user, {
+		fields: [userBadges.userId],
+		references: [user.id]
+	}),
+	badge: one(userBadge, {
+		fields: [userBadges.badgeId],
+		references: [userBadge.id]
+	})
+}));
+
 export type User = InferSelectModel<typeof user>;
 export type UserRelationship = InferSelectModel<typeof userRelationship>;
 export type UserVerification = InferSelectModel<typeof userVerification>;
