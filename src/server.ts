@@ -1,13 +1,15 @@
 import { useOIDC } from '@nexirift/plugin-oidc';
 import { createYoga } from 'graphql-yoga';
 import { redisClient, syncClient, tokenClient } from './redis';
-import { dbClient } from './drizzle/db';
+import { db, prodDbClient } from './drizzle/db';
 import gradient from 'gradient-string';
 import getGitCommitHash from './git';
 import { version } from '../package.json';
 import { schema } from './schema';
 import { Config } from './config';
 import { mediaUploadEndpoint, createUsersFromRedisTokens } from './lib/server';
+import { isTestMode } from './lib/tests';
+import { migrate } from 'drizzle-orm/pglite/migrator';
 
 require('dotenv').config();
 
@@ -38,8 +40,13 @@ export async function startServer() {
 	await tokenClient.connect();
 	await syncClient.connect();
 
-	// Connect to the database.
-	await dbClient.connect();
+	if (!isTestMode) {
+		// Connect to the database.
+		await prodDbClient.connect();
+	} else {
+		// Migrate the database.
+		await migrate(db, { migrationsFolder: './drizzle' });
+	}
 
 	// Create users from Redis tokens.
 	await createUsersFromRedisTokens();
@@ -72,7 +79,7 @@ export async function startServer() {
 			`http://${server.hostname}:${server.port}`
 		)}`
 	);
-	if (process.env.NODE_ENV === 'test') {
+	if (isTestMode) {
 		console.log('🧪 Running in test mode');
 	}
 	console.log('\x1b[0m');
