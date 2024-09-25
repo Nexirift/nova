@@ -240,7 +240,7 @@ export const userPlanetPostRelations = relations(userPlanetPost, ({ one }) => ({
 	})
 }));
 
-export const userBadge = pgTable('user_badges', {
+export const userBadge = pgTable('user_badge', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	name: text('name').notNull(),
 	description: text('description'),
