@@ -10,6 +10,8 @@ import { authorize } from './authentication';
 import { syncClient, tokenClient } from '../redis';
 import { Config } from '../config';
 import mime from 'mime-types';
+import { url } from 'inspector';
+import { convertModelToUser, internalUsers, getHashedPk } from './authentik';
 
 /**
  * "Legacy" endpoint for uploading media.
@@ -163,6 +165,125 @@ async function mediaUploadEndpoint(req: Request) {
 }
 
 /**
+ * Endpoint for webhooks. Authentik is the only one used for authentication right now.
+ * @param req The request object containing the webhook data.
+ * @returns A JSON response with a status and message.
+ */
+async function webhookEndpoint(req: Request) {
+	const url = new URL(req.url);
+	switch (url.pathname) {
+		case `/webhook/${process.env.WEBHOOK_AUTH}`:
+			if (
+				process.env.AUTH_INTROSPECT_URL?.endsWith(
+					'/application/o/introspect/'
+				) &&
+				process.env.AUTH_USERINFO_URL?.endsWith(
+					'/application/o/userinfo/'
+				)
+			) {
+				// Convert the request body to JSON and sort it.
+				var json = await req.json();
+				var model = convertModelToUser(json);
+
+				// Assign the model data to variables.
+				const {
+					username = model?.data.username! ??
+						model?.data.diff?.username?.new_value!,
+					displayName = model?.data.name! ??
+						model?.data.diff?.name?.new_value!,
+					avatar = model?.data.attributes?.avatar! ??
+						model?.data.diff?.attributes?.new_value?.avatar!,
+					banner = model?.data.attributes?.banner! ??
+						model?.data.diff?.attributes?.new_value?.banner!,
+					background = model?.data.attributes?.background! ??
+						model?.data.diff?.attributes?.new_value?.background!,
+					email = model?.data.email! ??
+						model?.data.diff?.email?.new_value!
+				} = model?.data;
+
+				// Skip out on internal users.
+				if (new RegExp(internalUsers.join('|')).test(username)) {
+					return new Response(
+						'Nope, internal users are not allowed.',
+						{ status: 200 }
+					);
+				}
+
+				// Convert the ID to a hashed version.
+				const id = getHashedPk(model?.data?.model?.pk);
+
+				// Check if the user exists in the database
+				const userInDb = await db.query.user.findFirst({
+					where: (user, { eq }) => eq(user.id, id)
+				});
+
+				// Insert (or Update) the user in to the database.
+				await db
+					.insert(user)
+					.values({
+						id,
+						username,
+						displayName,
+						avatar,
+						banner,
+						background,
+						email
+					})
+					.onConflictDoUpdate({
+						target: user.id,
+						set: {
+							id,
+							username,
+							displayName,
+							avatar,
+							banner,
+							background,
+							email
+						}
+					});
+
+				// If the user does not exist, tell the console that we are creating data for the user
+				if (!userInDb) {
+					console.log(
+						`💾 Creating data for user: ${username ?? email ?? id}`
+					);
+				} else {
+					console.log(
+						`🔄 Syncing data for user: ${username ?? email ?? id}`
+					);
+				}
+
+				return Response.json({}, { status: 200 });
+			}
+
+			// If the user isn't using authentik, return a 404.
+			return Response.json(
+				{
+					status: 'WORK_IN_PROGRESS',
+					message: 'This webhook is not implemented yet'
+				},
+				{ status: 404 }
+			);
+		case `/webhook/${process.env.WEBHOOK_STRIPE}`:
+			return Response.json(
+				{
+					status: 'WORK_IN_PROGRESS',
+					message: 'This webhook is not implemented yet'
+				},
+				{ status: 404 }
+			);
+		default:
+			return Response.json(
+				{
+					status: 'NOT_FOUND',
+					message: 'Invalid webhook endpoint'
+				},
+				{ status: 404 }
+			);
+	}
+}
+
+/**
  * Grabs the token from Redis and converts it to JSON,
  * which is then used to update or add new users to the
  * database.
@@ -241,4 +362,4 @@ async function createUsersFromRedisTokens() {
 	);
 }
 
-export { mediaUploadEndpoint, createUsersFromRedisTokens };
+export { mediaUploadEndpoint, webhookEndpoint, createUsersFromRedisTokens };

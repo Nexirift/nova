@@ -8,7 +8,11 @@ import getGitCommitHash from './git';
 import { version } from '../package.json';
 import { schema } from './schema';
 import { Config } from './config';
-import { mediaUploadEndpoint, createUsersFromRedisTokens } from './lib/server';
+import {
+	mediaUploadEndpoint,
+	createUsersFromRedisTokens,
+	webhookEndpoint
+} from './lib/server';
 import { isTestMode } from './lib/tests';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 
@@ -30,6 +34,8 @@ export async function startServer() {
 				// TODO: Remove this and use event notifications instead.
 				// We are waiting on the Backblaze B2 team to allow us.
 				return mediaUploadEndpoint(req);
+			} else if (url.pathname.startsWith('/webhook/')) {
+				return webhookEndpoint(req);
 			} else {
 				return yoga.fetch(req);
 			}
