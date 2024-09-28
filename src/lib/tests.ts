@@ -11,7 +11,7 @@ import { faker } from '@faker-js/faker';
  * @returns A JSON response for the GraphQL query.
  */
 export async function makeGQLRequest(query: string, token?: string) {
-	const fetcher = await fetch('http://localhost:3005', {
+	const fetcher = await fetch('http://localhost:25447', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

@@ -33,7 +33,8 @@ export async function startServer() {
 			} else {
 				return yoga.fetch(req);
 			}
-		}
+		},
+		port: isTestMode ? 25447 : process.env.PORT ?? 3000
 	});
 
 	// Connect to Redis.
@@ -69,11 +70,15 @@ export async function startServer() {
 	console.log('\x1b[32m');
 	console.log('⚡ Nexirift Spark API Server');
 	console.log(`📦 Version Information: v${version} | ${getGitCommitHash()}`);
-	console.log(
-		`🔑 Authentication Server: ${
-			new URL(process.env.AUTH_INTROSPECT_URL!).hostname
-		}`
-	);
+	if (!isTestMode) {
+		console.log(
+			`🔑 Authentication Server: ${
+				new URL(process.env.AUTH_INTROSPECT_URL!).hostname
+			}`
+		);
+	} else {
+		console.log('🔑 Authentication Server: Test Mode');
+	}
 	console.log(
 		`🚀 Serving at ${new URL(
 			yoga.graphqlEndpoint,
