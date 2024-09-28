@@ -1,16 +1,8 @@
-import { expect, test, beforeAll } from 'bun:test';
-import { startServer } from '../../server';
-import { fetch } from 'bun';
-import { db } from '../../drizzle/db';
-import { user } from '../../drizzle/schema';
-import { migrate } from 'drizzle-orm/pglite/migrator';
-import { createToken, makeGQLRequest } from '../../lib/tests';
+import { expect, test } from 'bun:test';
+import { db } from '../drizzle/db';
+import { user } from '../drizzle/schema';
+import { createToken, makeGQLRequest } from '../lib/tests';
 import { eq } from 'drizzle-orm';
-import { tokenClient } from '../../redis';
-
-beforeAll(async () => {
-	await startServer();
-});
 
 test('unauthenticated | get non-existing user', async () => {
 	// Make the GraphQL request to the getUser endpoint.
@@ -30,14 +22,14 @@ test('unauthenticated | get non-existing user', async () => {
 test('unauthenticated | get existing user', async () => {
 	// Insert our fake user into the database.
 	await db.insert(user).values({
-		id: 'TEST_ID-AAAAA-BBBBB-CCCCC',
+		id: '254afcf6c19c4979a0231ac579499cf0',
 		username: 'test'
 	});
 
 	// Make the GraphQL request to the getUser endpoint.
 	const data = await makeGQLRequest(`
                 query {
-                    getUser(id: "TEST_ID-AAAAA-BBBBB-CCCCC") {
+                    getUser(id: "254afcf6c19c4979a0231ac579499cf0") {
                         id
                         username
                     }
@@ -45,10 +37,15 @@ test('unauthenticated | get existing user', async () => {
             `);
 
 	// Expect the ID to be the same as what was created in the database.
-	expect(data).toHaveProperty('data.getUser.id', 'TEST_ID-AAAAA-BBBBB-CCCCC');
+	expect(data).toHaveProperty(
+		'data.getUser.id',
+		'254afcf6c19c4979a0231ac579499cf0'
+	);
 
 	// Remove that test user from the database for future tests.
-	await db.delete(user).where(eq(user.id, 'TEST_ID-AAAAA-BBBBB-CCCCC'));
+	await db
+		.delete(user)
+		.where(eq(user.id, '254afcf6c19c4979a0231ac579499cf0'));
 });
 
 test('authenticated | check me endpoint', async () => {

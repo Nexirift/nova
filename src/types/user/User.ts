@@ -151,7 +151,7 @@ User.implement({
 
 				const result = await db.query.postInteraction.findMany({
 					where: (postInteraction, { and, eq, ne }) =>
-						user.id === context.oidc.sub
+						user.id === context.oidc?.sub
 							? and(
 									eq(postInteraction.userId, user.id),
 									type && eq(postInteraction.type, type)
@@ -185,7 +185,7 @@ User.implement({
 					where: (userRelationship, { eq, and, or }) =>
 						and(
 							eq(userRelationship.toId, user.id),
-							user.id === context.oidc.sub
+							user.id === context.oidc?.sub
 								? or(
 										eq(userRelationship.type, 'REQUEST'),
 										eq(userRelationship.type, 'FOLLOW')
@@ -201,7 +201,7 @@ User.implement({
 
 				const from = await db.query.userRelationship.findMany({
 					where: (userRelationship, { eq, and }) =>
-						context.oidc.sub === user.id
+						context.oidc?.sub === user.id
 							? eq(userRelationship.fromId, user.id)
 							: and(
 									eq(userRelationship.fromId, user.id),
@@ -287,7 +287,7 @@ User.implement({
 					where: (userRelationship, { and, eq }) =>
 						and(
 							eq(userRelationship.toId, user.id),
-							eq(userRelationship.fromId, context.oidc.sub),
+							eq(userRelationship.fromId, context.oidc?.sub),
 							eq(userRelationship.type, 'BLOCK')
 						)
 				});
@@ -302,7 +302,7 @@ User.implement({
 					where: (userRelationship, { and, eq }) =>
 						and(
 							eq(userRelationship.fromId, user.id),
-							eq(userRelationship.toId, context.oidc.sub),
+							eq(userRelationship.toId, context.oidc?.sub),
 							eq(userRelationship.type, 'BLOCK')
 						)
 				});
@@ -317,7 +317,7 @@ User.implement({
 					where: (userRelationship, { and, eq }) =>
 						and(
 							eq(userRelationship.toId, user.id),
-							eq(userRelationship.fromId, context.oidc.sub),
+							eq(userRelationship.fromId, context.oidc?.sub),
 							eq(userRelationship.type, 'FOLLOW')
 						)
 				});
@@ -332,7 +332,7 @@ User.implement({
 					where: (userRelationship, { and, eq }) =>
 						and(
 							eq(userRelationship.fromId, user.id),
-							eq(userRelationship.toId, context.oidc.sub),
+							eq(userRelationship.toId, context.oidc?.sub),
 							eq(userRelationship.type, 'FOLLOW')
 						)
 				});
@@ -347,7 +347,7 @@ User.implement({
 					where: (userRelationship, { and, eq }) =>
 						and(
 							eq(userRelationship.toId, user.id),
-							eq(userRelationship.fromId, context.oidc.sub),
+							eq(userRelationship.fromId, context.oidc?.sub),
 							eq(userRelationship.type, 'REQUEST')
 						)
 				});

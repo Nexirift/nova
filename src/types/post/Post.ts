@@ -55,7 +55,7 @@ Post.implement({
 		}),
 		content: t.exposeString('content', {
 			authScopes: async (parent, _args, context, _info) => {
-				const user = await getUser(parent.authorId, context.oidc.sub);
+				const user = await getUser(parent.authorId, context.oidc?.sub);
 				return privacyGuardian(user, context);
 			},
 			unauthorizedResolver: () => null
@@ -82,7 +82,7 @@ Post.implement({
 				type: t.arg({ type: 'String' })
 			},
 			authScopes: async (parent, _args, context, _info) => {
-				const user = await getUser(parent.authorId, context.oidc.sub);
+				const user = await getUser(parent.authorId, context.oidc?.sub);
 				return privacyGuardian(user, context);
 			},
 			unauthorizedResolver: () => [],
@@ -106,7 +106,7 @@ Post.implement({
 				for (const postInteraction of result) {
 					const user = await getUser(
 						postInteraction.userId,
-						context.oidc.sub
+						context.oidc?.sub
 					);
 					const check = await privacyGuardian(user, context);
 
@@ -149,7 +149,7 @@ Post.implement({
 					where: (postInteraction, { and, eq }) =>
 						and(
 							eq(postInteraction.postId, parent.id),
-							eq(postInteraction.userId, context.oidc.sub),
+							eq(postInteraction.userId, context.oidc?.sub),
 							eq(postInteraction.type, 'BOOKMARK')
 						)
 				});
@@ -164,7 +164,7 @@ Post.implement({
 					where: (postInteraction, { and, eq }) =>
 						and(
 							eq(postInteraction.postId, parent.id),
-							eq(postInteraction.userId, context.oidc.sub),
+							eq(postInteraction.userId, context.oidc?.sub),
 							eq(postInteraction.type, 'LIKE')
 						)
 				});

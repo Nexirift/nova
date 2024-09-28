@@ -19,7 +19,7 @@ async function privacyGuardian(
 	}
 
 	// Generate a unique cache key
-	const cacheKey = `privacyGuardian:${user.id}:${context.oidc.sub}`;
+	const cacheKey = `privacyGuardian:${user.id}:${context.oidc?.sub}`;
 
 	// Try to get the result from cache
 	const cachedResult = await redisClient.get(cacheKey);
@@ -29,14 +29,14 @@ async function privacyGuardian(
 
 	let result = false; // Default result
 
-	if (context.oidc.sub === user.id) {
+	if (context.oidc?.sub === user.id) {
 		result = true;
 	} else if (user.type === 'PRIVATE') {
 		const followingRelationship = await db.query.userRelationship.findFirst(
 			{
 				where: (userRelationship, { eq, and }) =>
 					and(
-						eq(userRelationship.fromId, context.oidc.sub),
+						eq(userRelationship.fromId, context.oidc?.sub),
 						eq(userRelationship.toId, user.id!),
 						eq(userRelationship.type, 'FOLLOW')
 					)
@@ -45,21 +45,21 @@ async function privacyGuardian(
 
 		result = !!followingRelationship;
 		if (!result) {
-			console.log(`user ${user.id} not followed by ${context.oidc.sub}`);
+			console.log(`user ${user.id} not followed by ${context.oidc?.sub}`);
 		}
 	} else {
 		const blockedRelationship = await db.query.userRelationship.findFirst({
 			where: (userRelationship, { eq, and }) =>
 				and(
 					eq(userRelationship.fromId, user.id!),
-					eq(userRelationship.toId, context.oidc.sub),
+					eq(userRelationship.toId, context.oidc?.sub),
 					eq(userRelationship.type, 'BLOCK')
 				)
 		});
 
 		result = !blockedRelationship;
 		if (!result) {
-			console.log(`user ${user.id} has blocked ${context.oidc.sub}`);
+			console.log(`user ${user.id} has blocked ${context.oidc?.sub}`);
 		}
 	}
 

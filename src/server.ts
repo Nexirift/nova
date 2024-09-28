@@ -1,3 +1,4 @@
+import { beforeAll } from 'bun:test';
 import { useOIDC } from '@nexirift/plugin-oidc';
 import { createYoga } from 'graphql-yoga';
 import { redisClient, syncClient, tokenClient } from './redis';
@@ -87,4 +88,8 @@ export async function startServer() {
 
 if (!isTestMode) {
 	startServer();
+} else {
+	beforeAll(async () => {
+		await startServer();
+	});
 }
