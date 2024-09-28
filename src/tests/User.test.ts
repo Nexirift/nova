@@ -1,14 +1,17 @@
 import { expect, test } from 'bun:test';
 import { db } from '../drizzle/db';
-import { user } from '../drizzle/schema';
-import { createToken, makeGQLRequest } from '../lib/tests';
-import { eq } from 'drizzle-orm';
+import { user, userRelationship } from '../drizzle/schema';
+import { createUser, makeGQLRequest, removeUser } from '../lib/tests';
+import { and, eq } from 'drizzle-orm';
+import { faker } from '@faker-js/faker';
 
 test('unauthenticated | get non-existing user', async () => {
+	const nonExistingUser = faker.string.uuid();
+
 	// Make the GraphQL request to the getUser endpoint.
 	const data = await makeGQLRequest(`
                 query {
-                    getUser(id: "254afcf6c19c4979a0231ac579499cf0") {
+                    getUser(id: "${nonExistingUser}") {
                         id
                         username
                     }
@@ -20,16 +23,17 @@ test('unauthenticated | get non-existing user', async () => {
 });
 
 test('unauthenticated | get existing user', async () => {
-	// Insert our fake user into the database.
-	await db.insert(user).values({
-		id: '254afcf6c19c4979a0231ac579499cf0',
-		username: 'test'
+	const existingUser = faker.string.uuid();
+
+	// Create our fake user.
+	await createUser({
+		sub: existingUser
 	});
 
 	// Make the GraphQL request to the getUser endpoint.
 	const data = await makeGQLRequest(`
                 query {
-                    getUser(id: "254afcf6c19c4979a0231ac579499cf0") {
+                    getUser(id: "${existingUser}") {
                         id
                         username
                     }
@@ -37,24 +41,18 @@ test('unauthenticated | get existing user', async () => {
             `);
 
 	// Expect the ID to be the same as what was created in the database.
-	expect(data).toHaveProperty(
-		'data.getUser.id',
-		'254afcf6c19c4979a0231ac579499cf0'
-	);
+	expect(data).toHaveProperty('data.getUser.id', existingUser);
 
-	// Remove that test user from the database for future tests.
-	await db
-		.delete(user)
-		.where(eq(user.id, '254afcf6c19c4979a0231ac579499cf0'));
+	// Clean up all of the testing data.
+	await removeUser(existingUser);
 });
 
 test('authenticated | check me endpoint', async () => {
-	// Let's create a fake token with a user (XFQVTJLLQTQXZETDFBAJGWSC).
-	await createToken({
-		sub: 'XFQVTJLLQTQXZETDFBAJGWSC',
-		email: 'test1@spark.local',
-		preferred_username: 'Test 1',
-		avatar: 'https://auth.nexirift.com/media/default.png'
+	const me = faker.string.uuid();
+
+	// Create our fake user.
+	await createUser({
+		sub: me
 	});
 
 	// Make the GraphQL request to the me endpoint.
@@ -67,9 +65,63 @@ test('authenticated | check me endpoint', async () => {
                     }
                 }
             `,
-		'XFQVTJLLQTQXZETDFBAJGWSC' // This is the name of our token.
+		me
 	);
 
 	// Expect the ID to be the same as what was generated.
-	expect(data).toHaveProperty('data.me.id', 'XFQVTJLLQTQXZETDFBAJGWSC');
+	expect(data).toHaveProperty('data.me.id', me);
+
+	// Clean up all of the testing data.
+	await removeUser(me);
+});
+
+test('authenticated | check blocks', async () => {
+	const user1 = faker.string.uuid();
+	const user2 = faker.string.uuid();
+
+	// Create our two fake users.
+	await createUser({
+		sub: user1
+	});
+
+	await createUser({
+		sub: user2
+	});
+
+	// TODO: Use real endpoint when implemented.
+	await db.insert(userRelationship).values({
+		fromId: user1,
+		toId: user2,
+		type: 'BLOCK'
+	});
+
+	// Make the GraphQL request to the me endpoint.
+	const data = await makeGQLRequest(
+		`
+                query {
+                    getUser(id: "${user1}") {
+                        id
+                        username
+						isBlocked
+                    }
+                }
+            `,
+		user2
+	);
+
+	// Expect the ID to be the same as what was generated.
+	expect(data).toHaveProperty('data.getUser.isBlocked', true);
+
+	// Clean up all of the testing data.
+	await db
+		.delete(userRelationship)
+		.where(
+			and(
+				eq(userRelationship.fromId, user1),
+				eq(userRelationship.toId, user2)
+			)
+		);
+
+	await removeUser(user1);
+	await removeUser(user2);
 });

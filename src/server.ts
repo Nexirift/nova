@@ -44,13 +44,13 @@ export async function startServer() {
 	if (!isTestMode) {
 		// Connect to the database.
 		await prodDbClient.connect();
+
+		// Create users from Redis tokens.
+		await createUsersFromRedisTokens();
 	} else {
 		// Migrate the database.
 		await migrate(db, { migrationsFolder: './drizzle' });
 	}
-
-	// Create users from Redis tokens.
-	await createUsersFromRedisTokens();
 
 	// Log the server information to the console.
 	console.log('');
