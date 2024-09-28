@@ -8,7 +8,7 @@ test('unauthenticated | get non-existing user', async () => {
 	// Make the GraphQL request to the getUser endpoint.
 	const data = await makeGQLRequest(`
                 query {
-                    getUser(id: "TEST_ID-DDDDD-EEEEE-FFFFF") {
+                    getUser(id: "254afcf6c19c4979a0231ac579499cf0") {
                         id
                         username
                     }
@@ -49,9 +49,9 @@ test('unauthenticated | get existing user', async () => {
 });
 
 test('authenticated | check me endpoint', async () => {
-	// Let's create a fake token with a user (TEST_1).
+	// Let's create a fake token with a user (XFQVTJLLQTQXZETDFBAJGWSC).
 	await createToken({
-		sub: 'TEST_1',
+		sub: 'XFQVTJLLQTQXZETDFBAJGWSC',
 		email: 'test1@spark.local',
 		preferred_username: 'Test 1',
 		avatar: 'https://auth.nexirift.com/media/default.png'
@@ -67,9 +67,9 @@ test('authenticated | check me endpoint', async () => {
                     }
                 }
             `,
-		'TEST_1' // This is the name of our token.
+		'XFQVTJLLQTQXZETDFBAJGWSC' // This is the name of our token.
 	);
 
 	// Expect the ID to be the same as what was generated.
-	expect(data).toHaveProperty('data.me.id', 'TEST_1');
+	expect(data).toHaveProperty('data.me.id', 'XFQVTJLLQTQXZETDFBAJGWSC');
 });
