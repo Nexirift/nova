@@ -116,7 +116,7 @@ export const postEditHistory = pgTable('post_edit_history', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	postId: uuid('post_id')
 		.notNull()
-		.references(() => post.id),
+		.references(() => post.id, { onDelete: 'cascade' }),
 	content: text('content').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
