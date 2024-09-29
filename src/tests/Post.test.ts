@@ -50,6 +50,7 @@ test('unauthenticated | get existing post', async () => {
 
 	// Expect the ID to be the same as what was created in the database.
 	expect(data).toHaveProperty('data.getPost.id', existingPost);
+	expect(data).toHaveProperty('data.getPost.content', 'test');
 
 	// Remove that test post from the database for future tests.
 	await db.delete(post).where(eq(post.id, existingPost));

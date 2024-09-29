@@ -31,6 +31,9 @@ UserRelationship.implement({
 		type: t.exposeString('type', {
 			nullable: false
 		}),
+		reason: t.exposeString('reason', {
+			nullable: true
+		}),
 		since: t.expose('createdAt', { type: 'Date', nullable: false })
 	})
 });
