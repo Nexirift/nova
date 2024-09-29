@@ -37,11 +37,13 @@ export async function createUser(data: {
 	sub: string;
 	email?: string;
 	preferred_username?: string;
+	type?: 'PUBLIC' | 'PRIVATE' | 'ARTIST';
 }) {
 	await db.insert(user).values({
 		id: data.sub,
 		username: data.preferred_username ?? faker.internet.userName(),
-		email: data.email! ?? faker.internet.email()
+		email: data.email! ?? faker.internet.email(),
+		type: data.type ?? 'PUBLIC'
 	});
 
 	return tokenClient.set(`tokens:${data.sub}`, JSON.stringify(data));

@@ -5,7 +5,7 @@ import { createUser, makeGQLRequest, removeUser } from '../lib/tests';
 import { and, eq } from 'drizzle-orm';
 import { faker } from '@faker-js/faker';
 
-test('unauthenticated | get non-existing user', async () => {
+test('Unauthenticated | General - It should get a non-existing user', async () => {
 	const nonExistingUser = faker.string.uuid();
 
 	// Make the GraphQL request to the getUser endpoint.
@@ -22,7 +22,7 @@ test('unauthenticated | get non-existing user', async () => {
 	expect(data).toHaveProperty('data.getUser', null);
 });
 
-test('unauthenticated | get existing user', async () => {
+test('Unauthenticated | General - It should get an existing user', async () => {
 	const existingUser = faker.string.uuid();
 
 	// Create our fake user.
@@ -47,7 +47,7 @@ test('unauthenticated | get existing user', async () => {
 	await removeUser(existingUser);
 });
 
-test('authenticated | check me endpoint', async () => {
+test('Authenticated | General - It should check the me endpoint', async () => {
 	const me = faker.string.uuid();
 
 	// Create our fake user.
@@ -75,53 +75,61 @@ test('authenticated | check me endpoint', async () => {
 	await removeUser(me);
 });
 
-test('authenticated | check blocks', async () => {
-	const user1 = faker.string.uuid();
-	const user2 = faker.string.uuid();
+const types = ['block', 'mute', 'follow', 'request'];
 
-	// Create our two fake users.
-	await createUser({
-		sub: user1
-	});
+for (const type of types) {
+	const _type = type === 'request' ? 'follow' : type;
 
-	await createUser({
-		sub: user2
-	});
+	test(`Authenticated | Relationships - It should check ${type}s`, async () => {
+		const user1 = faker.string.uuid();
+		const user2 = faker.string.uuid();
 
-	// TODO: Use real endpoint when implemented.
-	await db.insert(userRelationship).values({
-		fromId: user1,
-		toId: user2,
-		type: 'BLOCK'
-	});
+		// Create our two fake users efficiently
+		await Promise.all([
+			createUser({ sub: user1 }),
+			createUser({
+				sub: user2,
+				type: type === 'request' ? 'PRIVATE' : 'PUBLIC'
+			})
+		]);
 
-	// Make the GraphQL request to the me endpoint.
-	const data = await makeGQLRequest(
-		`
-                query {
-                    getUser(id: "${user1}") {
-                        id
-                        username
-						isBlocked
+		// Make the GraphQL request to the block endpoint
+		const data = await makeGQLRequest(
+			`
+                mutation {
+                    ${_type}User(id: "${user2}") {
+                        type
                     }
                 }
             `,
-		user2
-	);
-
-	// Expect the ID to be the same as what was generated.
-	expect(data).toHaveProperty('data.getUser.isBlocked', true);
-
-	// Clean up all of the testing data.
-	await db
-		.delete(userRelationship)
-		.where(
-			and(
-				eq(userRelationship.fromId, user1),
-				eq(userRelationship.toId, user2)
-			)
+			user1
 		);
 
-	await removeUser(user1);
-	await removeUser(user2);
-});
+		// Check for the expected type
+		expect(data).toHaveProperty(
+			`data.${_type}User.type`,
+			type === 'request' ? 'REQUEST' : type.toUpperCase()
+		);
+
+		// Make the GraphQL request to the unblock endpoint
+		const undata = await makeGQLRequest(
+			`
+                mutation {
+                    un${_type}User(id: "${user2}") {
+                        type
+                    }
+                }
+            `,
+			user1
+		);
+
+		// Check for the expected type after unblocking
+		expect(undata).toHaveProperty(
+			`data.un${_type}User.type`,
+			type === 'request' ? 'REQUEST' : type.toUpperCase()
+		);
+
+		// Clean up all of the testing data
+		await Promise.all([removeUser(user1), removeUser(user2)]);
+	});
+}

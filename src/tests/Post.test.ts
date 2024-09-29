@@ -5,7 +5,7 @@ import { createUser, makeGQLRequest, removeUser } from '../lib/tests';
 import { eq } from 'drizzle-orm';
 import { faker } from '@faker-js/faker';
 
-test('unauthenticated | get non-existing post', async () => {
+test('Unauthenticated | General - It should get a non-existing post', async () => {
 	const nonExistingPost = faker.string.uuid();
 
 	// Make the GraphQL request to the getPost endpoint.
@@ -22,7 +22,7 @@ test('unauthenticated | get non-existing post', async () => {
 	expect(data).toHaveProperty('data.getPost', null);
 });
 
-test('unauthenticated | get existing post', async () => {
+test('Unauthenticated | General - It should get an existing post', async () => {
 	const existingPost = faker.string.uuid();
 	const user1 = faker.string.uuid();
 
