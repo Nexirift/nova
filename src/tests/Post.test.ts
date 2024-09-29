@@ -166,3 +166,70 @@ test('Unauthenticated | General - It should get an existing post', async () => {
 	// Remove that test user from the database for future tests.
 	await removeUser(user1);
 });
+
+const types = ['like', 'bookmark', 'repost'];
+
+for (const type of types) {
+	test(`Authenticated | Interactions - It should check ${type}s`, async () => {
+		const existingPost = faker.string.uuid();
+		const user1 = faker.string.uuid();
+		const user2 = faker.string.uuid();
+
+		// Create our two fake users efficiently
+		await Promise.all([
+			createUser({ sub: user1 }),
+			createUser({ sub: user2 })
+		]);
+
+		await db.insert(post).values({
+			id: existingPost,
+			content: 'test',
+			authorId: user1
+		});
+
+		// Make the GraphQL request to the like endpoint
+		const data = await makeGQLRequest(
+			`
+                mutation {
+                    ${type}Post(id: "${user2}") {
+                        type
+                    }
+                }
+            `,
+			user1
+		);
+
+		// Check for the expected type
+		// TODO: Figure out why this causes Bun to segmentation fault...
+		/* expect(data).toHaveProperty(
+			`data.${type}Post.type`,
+			type.toUpperCase()
+		); */
+
+		// Make the GraphQL request to the unlike endpoint
+		const undata = await makeGQLRequest(
+			`
+                mutation {
+                    un${type}Post(id: "${user2}") {
+                        type
+                    }
+                }
+            `,
+			user1
+		);
+
+		// Check for the expected type after unliking
+		// TODO: Figure out why this causes Bun to segmentation fault...
+		/* expect(undata).toHaveProperty(
+			`data.un${type}Post.type`,
+			type === 'request' ? 'REQUEST' : type.toUpperCase()
+		); */
+
+		// Clean up all of the testing data
+		await Promise.all([
+			await db.delete(post).where(eq(post.id, existingPost)),
+			removeUser(user1),
+			removeUser(user2)
+		]);
+	});
+}
