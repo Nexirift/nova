@@ -191,7 +191,7 @@ for (const type of types) {
 		const data = await makeGQLRequest(
 			`
                 mutation {
-                    ${type}Post(id: "${user2}") {
+                    ${type}Post(id: "${existingPost}") {
                         type
                     }
                 }
@@ -200,17 +200,16 @@ for (const type of types) {
 		);
 
 		// Check for the expected type
-		// TODO: Figure out why this causes Bun to segmentation fault...
-		/* expect(data).toHaveProperty(
+		expect(data).toHaveProperty(
 			`data.${type}Post.type`,
 			type.toUpperCase()
-		); */
+		);
 
 		// Make the GraphQL request to the unlike endpoint
-		const undata = await makeGQLRequest(
+		const undoneData = await makeGQLRequest(
 			`
                 mutation {
-                    un${type}Post(id: "${user2}") {
+                    un${type}Post(id: "${existingPost}") {
                         type
                     }
                 }
@@ -219,11 +218,10 @@ for (const type of types) {
 		);
 
 		// Check for the expected type after unliking
-		// TODO: Figure out why this causes Bun to segmentation fault...
-		/* expect(undata).toHaveProperty(
+		expect(undoneData).toHaveProperty(
 			`data.un${type}Post.type`,
-			type === 'request' ? 'REQUEST' : type.toUpperCase()
-		); */
+			type.toUpperCase()
+		);
 
 		// Clean up all of the testing data
 		await Promise.all([
