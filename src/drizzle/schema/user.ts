@@ -73,10 +73,10 @@ export const userRelationship = pgTable(
 	{
 		toId: text('to_id')
 			.notNull()
-			.references(() => user.id),
+			.references(() => user.id, { onDelete: 'cascade' }),
 		fromId: text('from_id')
 			.notNull()
-			.references(() => user.id),
+			.references(() => user.id, { onDelete: 'cascade' }),
 		type: userRelationshipType('user_relationship_type').notNull(),
 		reason: text('reason'),
 		createdAt: timestamp('created_at').notNull().defaultNow(),

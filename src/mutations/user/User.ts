@@ -35,6 +35,109 @@ relationshipTypes.forEach((type) => {
 	);
 });
 
+builder.mutationField('acceptFollowRequest', (t) =>
+	t.field({
+		type: UserRelationship,
+		args: {
+			id: t.arg.string({ required: true })
+		},
+		// TODO: Add auth scope.
+		resolve: async (_root, args, ctx: Context) => {
+			if (ctx.oidc.sub === args.id) {
+				throw new GraphQLError(
+					`You cannot accept your own follow request.`,
+					{
+						extensions: { code: 'CANNOT_ACCEPT_OWN_FOLLOW_REQUEST' }
+					}
+				);
+			}
+
+			const requestedRelationship =
+				await db.query.userRelationship.findFirst({
+					where: (userRelationship, { and }) =>
+						and(
+							eq(userRelationship.fromId, args.id),
+							eq(userRelationship.toId, ctx.oidc.sub),
+							eq(userRelationship.type, 'REQUEST')
+						)
+				});
+
+			if (!requestedRelationship) {
+				throw new GraphQLError(
+					'This user does not exist or has not sent a follow request.',
+					{
+						extensions: { code: 'FOLLOW_REQUEST_NOT_FOUND' }
+					}
+				);
+			}
+
+			return db
+				.update(userRelationship)
+				.set({ type: 'FOLLOW' })
+				.where(
+					and(
+						eq(userRelationship.fromId, args.id),
+						eq(userRelationship.toId, ctx.oidc.sub),
+						eq(userRelationship.type, 'REQUEST')
+					)
+				)
+				.returning()
+				.then((res) => res[0]);
+		}
+	})
+);
+
+builder.mutationField('denyFollowRequest', (t) =>
+	t.field({
+		type: UserRelationship,
+		args: {
+			id: t.arg.string({ required: true })
+		},
+		// TODO: Add auth scope.
+		resolve: async (_root, args, ctx: Context) => {
+			if (ctx.oidc.sub === args.id) {
+				throw new GraphQLError(
+					`You cannot deny your own follow request.`,
+					{
+						extensions: { code: 'CANNOT_DENY_OWN_FOLLOW_REQUEST' }
+					}
+				);
+			}
+
+			const requestedRelationship =
+				await db.query.userRelationship.findFirst({
+					where: (userRelationship, { and }) =>
+						and(
+							eq(userRelationship.fromId, args.id),
+							eq(userRelationship.toId, ctx.oidc.sub),
+							eq(userRelationship.type, 'REQUEST')
+						)
+				});
+
+			if (!requestedRelationship) {
+				throw new GraphQLError(
+					'This user does not exist or has not sent a follow request.',
+					{
+						extensions: { code: 'FOLLOW_REQUEST_NOT_FOUND' }
+					}
+				);
+			}
+
+			return db
+				.delete(userRelationship)
+				.where(
+					and(
+						eq(userRelationship.fromId, args.id),
+						eq(userRelationship.toId, ctx.oidc.sub),
+						eq(userRelationship.type, 'REQUEST')
+					)
+				)
+				.returning()
+				.then((res) => res[0]);
+		}
+	})
+);
+
 // Function to modify user relationships
 async function modifyRelationship(
 	ctx: Context,

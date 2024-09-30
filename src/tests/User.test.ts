@@ -112,7 +112,7 @@ for (const type of types) {
 		);
 
 		// Make the GraphQL request to the unblock endpoint
-		const undata = await makeGQLRequest(
+		const undoneData = await makeGQLRequest(
 			`
                 mutation {
                     un${_type}User(id: "${user2}") {
@@ -124,9 +124,61 @@ for (const type of types) {
 		);
 
 		// Check for the expected type after unblocking
-		expect(undata).toHaveProperty(
+		expect(undoneData).toHaveProperty(
 			`data.un${_type}User.type`,
 			type === 'request' ? 'REQUEST' : type.toUpperCase()
+		);
+
+		// Clean up all of the testing data
+		await Promise.all([removeUser(user1), removeUser(user2)]);
+	});
+}
+
+for (const type of ['accept', 'deny']) {
+	test(`Authenticated | Relationships - It should ${type} a follow request`, async () => {
+		const user1 = faker.string.uuid();
+		const user2 = faker.string.uuid();
+
+		// Create our two fake users efficiently
+		await Promise.all([
+			createUser({ sub: user1 }),
+			createUser({
+				sub: user2,
+				type: 'PRIVATE'
+			})
+		]);
+
+		// Make the GraphQL request to the block endpoint
+		const data = await makeGQLRequest(
+			`
+                mutation {
+                    followUser(id: "${user2}") {
+                        type
+                    }
+                }
+            `,
+			user1
+		);
+
+		// Check for the expected type
+		expect(data).toHaveProperty(`data.followUser.type`, 'REQUEST');
+
+		// Make the GraphQL request to the unblock endpoint
+		const undoneData = await makeGQLRequest(
+			`
+                mutation {
+                    ${type}FollowRequest(id: "${user1}") {
+                        type
+                    }
+                }
+            `,
+			user2
+		);
+
+		// Check for the expected type after unblocking
+		expect(undoneData).toHaveProperty(
+			`data.${type}FollowRequest.type`,
+			type === 'accept' ? 'FOLLOW' : 'REQUEST'
 		);
 
 		// Clean up all of the testing data
