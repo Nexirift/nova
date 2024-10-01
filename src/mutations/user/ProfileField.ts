@@ -6,7 +6,7 @@ import { UserProfileField } from '../../types/user/ProfileField';
 import { userProfileField } from '../../drizzle/schema';
 import { and, eq } from 'drizzle-orm';
 
-builder.mutationField('addProfileField', (t) =>
+builder.mutationField('createProfileField', (t) =>
 	t.field({
 		type: UserProfileField,
 		args: {
