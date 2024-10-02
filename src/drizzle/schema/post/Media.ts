@@ -17,4 +17,4 @@ export const postMediaRelations = relations(postMedia, ({ one }) => ({
 	})
 }));
 
-export type PostMedia = InferSelectModel<typeof postMedia>;
+export type PostMediaSchemaType = InferSelectModel<typeof postMedia>;

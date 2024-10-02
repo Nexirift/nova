@@ -1,10 +1,10 @@
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
-import { type UserVerification as UserVerificationType } from '../../drizzle/schema';
+import { type UserVerificationSchemaType } from '../../drizzle/schema';
 import { User } from './User';
 
 export const UserVerification =
-	builder.objectRef<UserVerificationType>('UserVerification');
+	builder.objectRef<UserVerificationSchemaType>('UserVerification');
 
 UserVerification.implement({
 	fields: (t) => ({

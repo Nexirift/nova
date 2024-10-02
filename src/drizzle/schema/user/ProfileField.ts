@@ -24,4 +24,6 @@ export const userProfileFieldRelations = relations(
 	})
 );
 
-export type UserProfileField = InferSelectModel<typeof userProfileField>;
+export type UserProfileFieldSchemaType = InferSelectModel<
+	typeof userProfileField
+>;

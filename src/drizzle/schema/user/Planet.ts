@@ -73,4 +73,4 @@ export const userPlanetPostRelations = relations(userPlanetPost, ({ one }) => ({
 	})
 }));
 
-export type UserPlanet = InferSelectModel<typeof userPlanet>;
+export type UserPlanetSchemaType = InferSelectModel<typeof userPlanet>;

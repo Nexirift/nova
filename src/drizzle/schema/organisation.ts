@@ -135,11 +135,13 @@ export const organisationMemberRelations = relations(
 	})
 );
 
-export type Organisation = InferSelectModel<typeof organisation>;
-export type OrganisationContactInfo = InferSelectModel<
+export type OrganisationSchemaType = InferSelectModel<typeof organisation>;
+export type OrganisationContactInfoSchemaType = InferSelectModel<
 	typeof organisationContactInfo
 >;
-export type OrganisationMember = InferSelectModel<typeof organisationMember>;
-export type OrganisationRegistration = InferSelectModel<
+export type OrganisationMemberSchemaType = InferSelectModel<
+	typeof organisationMember
+>;
+export type OrganisationRegistrationSchemaType = InferSelectModel<
 	typeof organsiationRegistration
 >;

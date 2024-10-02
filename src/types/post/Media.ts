@@ -1,9 +1,9 @@
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
-import { type PostMedia as PostMediaType } from '../../drizzle/schema';
+import { type PostMediaSchemaType } from '../../drizzle/schema';
 import { Post } from './Post';
 
-export const PostMedia = builder.objectRef<PostMediaType>('PostMedia');
+export const PostMedia = builder.objectRef<PostMediaSchemaType>('PostMedia');
 
 PostMedia.implement({
 	fields: (t) => ({

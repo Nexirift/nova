@@ -2,7 +2,7 @@ import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
-import { type User as UserType } from '../../drizzle/schema';
+import { type UserSchemaType } from '../../drizzle/schema';
 import { privacyGuardian } from '../../lib/guardian';
 import { Post } from '../post';
 import { UserRelationship } from './Relationship';
@@ -13,7 +13,7 @@ import { UserProfileField } from './ProfileField';
 import { Organisation, OrganisationMember } from '..';
 import { PostMedia } from '../post/Media';
 
-export const User = builder.objectRef<UserType>('User');
+export const User = builder.objectRef<UserSchemaType>('User');
 
 User.implement({
 	fields: (t) => ({

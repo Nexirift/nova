@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
-import { type Post as PostType } from '../../drizzle/schema';
+import { type PostSchemaType } from '../../drizzle/schema';
 import { privacyGuardian } from '../../lib/guardian';
 import { redisClient } from '../../redis';
 import { User } from '../user';
@@ -11,7 +11,7 @@ import { PostPoll } from './Poll';
 import { PostGiveaway } from './Giveaway';
 import { PostMedia } from './Media';
 
-export const Post = builder.objectRef<PostType>('Post');
+export const Post = builder.objectRef<PostSchemaType>('Post');
 
 Post.implement({
 	fields: (t) => ({

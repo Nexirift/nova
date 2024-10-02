@@ -1,10 +1,11 @@
 import { User } from '..';
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
-import { type Organisation as OrganisationType } from '../../drizzle/schema';
+import { type OrganisationSchemaType } from '../../drizzle/schema';
 import { OrganisationMember } from './Member';
 
-export const Organisation = builder.objectRef<OrganisationType>('Organisation');
+export const Organisation =
+	builder.objectRef<OrganisationSchemaType>('Organisation');
 
 Organisation.implement({
 	fields: (t) => ({

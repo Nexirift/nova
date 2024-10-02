@@ -58,4 +58,4 @@ export const postRelations = relations(post, ({ one, many }) => ({
 	media: many(postMedia)
 }));
 
-export type Post = InferSelectModel<typeof post>;
+export type PostSchemaType = InferSelectModel<typeof post>;

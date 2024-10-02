@@ -1,11 +1,11 @@
 import { User } from '..';
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
-import { type PostInteraction as PostInteractionType } from '../../drizzle/schema';
+import { type PostInteractionSchemaType } from '../../drizzle/schema';
 import { Post } from './Post';
 
 export const PostInteraction =
-	builder.objectRef<PostInteractionType>('PostInteraction');
+	builder.objectRef<PostInteractionSchemaType>('PostInteraction');
 
 PostInteraction.implement({
 	fields: (t) => ({

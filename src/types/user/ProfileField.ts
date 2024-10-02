@@ -1,10 +1,10 @@
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
-import { type UserProfileField as UserProfileFieldType } from '../../drizzle/schema';
+import { type UserProfileFieldSchemaType } from '../../drizzle/schema';
 import { User } from './User';
 
 export const UserProfileField =
-	builder.objectRef<UserProfileFieldType>('UserProfileField');
+	builder.objectRef<UserProfileFieldSchemaType>('UserProfileField');
 
 UserProfileField.implement({
 	fields: (t) => ({

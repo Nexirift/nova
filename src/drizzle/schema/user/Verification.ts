@@ -32,4 +32,6 @@ export const userVerificationRelations = relations(
 	})
 );
 
-export type UserVerification = InferSelectModel<typeof userVerification>;
+export type UserVerificationSchemaType = InferSelectModel<
+	typeof userVerification
+>;

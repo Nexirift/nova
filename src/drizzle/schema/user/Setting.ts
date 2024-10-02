@@ -20,4 +20,4 @@ export const userSettingRelations = relations(userSetting, ({ one }) => ({
 	})
 }));
 
-export type UserSetting = InferSelectModel<typeof userSetting>;
+export type UserSettingSchemaType = InferSelectModel<typeof userSetting>;

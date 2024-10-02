@@ -22,4 +22,6 @@ export const postEditHistoryRelations = relations(
 	})
 );
 
-export type PostEditHistory = InferSelectModel<typeof postEditHistory>;
+export type PostEditHistorySchemaType = InferSelectModel<
+	typeof postEditHistory
+>;

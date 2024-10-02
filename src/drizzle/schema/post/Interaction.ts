@@ -41,4 +41,6 @@ export const postInteractionRelations = relations(
 	})
 );
 
-export type PostInteraction = InferSelectModel<typeof postInteraction>;
+export type PostInteractionSchemaType = InferSelectModel<
+	typeof postInteraction
+>;

@@ -53,4 +53,6 @@ export const userRelationshipRelations = relations(
 	})
 );
 
-export type UserRelationship = InferSelectModel<typeof userRelationship>;
+export type UserRelationshipSchemaType = InferSelectModel<
+	typeof userRelationship
+>;

@@ -45,5 +45,5 @@ export const postPollVoteRelations = relations(postPollVote, ({ one }) => ({
 	})
 }));
 
-export type PostPoll = InferSelectModel<typeof postPoll>;
-export type PostPollVote = InferSelectModel<typeof postPollVote>;
+export type PostPollSchemaType = InferSelectModel<typeof postPoll>;
+export type PostPollVoteSchemaType = InferSelectModel<typeof postPollVote>;

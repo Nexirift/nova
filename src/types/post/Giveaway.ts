@@ -1,10 +1,11 @@
 import { User } from '..';
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
-import { type PostGiveaway as PostGiveawayType } from '../../drizzle/schema';
+import { type PostGiveawaySchemaType } from '../../drizzle/schema';
 import { Post } from './Post';
 
-export const PostGiveaway = builder.objectRef<PostGiveawayType>('PostGiveaway');
+export const PostGiveaway =
+	builder.objectRef<PostGiveawaySchemaType>('PostGiveaway');
 
 PostGiveaway.implement({
 	fields: (t) => ({

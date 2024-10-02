@@ -1,10 +1,10 @@
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
-import { type UserRelationship as UserRelationshipType } from '../../drizzle/schema';
+import { type UserRelationshipSchemaType } from '../../drizzle/schema';
 import { User } from './User';
 
 export const UserRelationship =
-	builder.objectRef<UserRelationshipType>('UserRelationship');
+	builder.objectRef<UserRelationshipSchemaType>('UserRelationship');
 
 UserRelationship.implement({
 	fields: (t) => ({

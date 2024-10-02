@@ -57,4 +57,4 @@ export const userRelations = relations(user, ({ one, many }) => ({
 	conversations: many(conversationParticipant)
 }));
 
-export type User = InferSelectModel<typeof user>;
+export type UserSchemaType = InferSelectModel<typeof user>;

@@ -95,6 +95,10 @@ export const postGiveawayEntryRelations = relations(
 	})
 );
 
-export type PostGiveaway = InferSelectModel<typeof postGiveaway>;
-export type PostGiveawayMeta = InferSelectModel<typeof postGiveawayMeta>;
-export type PostGiveawayEntry = InferSelectModel<typeof postGiveawayEntry>;
+export type PostGiveawaySchemaType = InferSelectModel<typeof postGiveaway>;
+export type PostGiveawayMetaSchemaType = InferSelectModel<
+	typeof postGiveawayMeta
+>;
+export type PostGiveawayEntrySchemaType = InferSelectModel<
+	typeof postGiveawayEntry
+>;
