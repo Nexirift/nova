@@ -141,7 +141,7 @@ async function mediaUploadEndpoint(req: Request) {
 		}
 	})
 		.done()
-		.then((s3Upload: { Location: string }) => {
+		.then((s3Upload: { Location?: string }) => {
 			console.log('S3 upload success:', s3Upload.Location);
 		});
 

@@ -36,7 +36,7 @@ services:
             timeout: 5s
             retries: 10
         networks:
-            - pg
+            - pgdb
 
 networks:
     spark:
