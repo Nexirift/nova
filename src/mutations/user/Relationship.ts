@@ -3,8 +3,8 @@ import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
 import {
-	UserRelationship as UserRelationshipSchema,
-	userRelationship
+	userRelationship,
+	UserRelationshipSchemaType
 } from '../../drizzle/schema';
 import { Context } from '../../context';
 import { UserRelationship } from '../../types';
@@ -143,7 +143,7 @@ async function modifyRelationship(
 	ctx: Context,
 	args: { id: string; reason?: string | null },
 	type: 'BLOCK' | 'UNBLOCK' | 'MUTE' | 'UNMUTE' | 'FOLLOW' | 'UNFOLLOW'
-): Promise<UserRelationshipSchema | null> {
+): Promise<UserRelationshipSchemaType | null> {
 	// Check if ID is provided
 	if (!args.id) {
 		throw new GraphQLError('You must provide an ID.', {

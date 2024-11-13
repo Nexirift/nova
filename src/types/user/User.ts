@@ -147,7 +147,7 @@ User.implement({
 			},
 			unauthorizedResolver: () => [] as any,
 			resolve: async (user, args, context: Context) => {
-				const type = args.type! as 'LIKE' | 'BOOKMARK' | 'REPOST';
+				const type = args.type! as 'LIKE' | 'REPOST';
 
 				const result = await db.query.postInteraction.findMany({
 					where: (postInteraction, { and, eq, ne }) =>
@@ -158,7 +158,6 @@ User.implement({
 							  )
 							: and(
 									eq(postInteraction.userId, user.id),
-									ne(postInteraction.type, 'BOOKMARK'),
 									type && eq(postInteraction.type, type)
 							  ),
 					with: {
@@ -219,20 +218,6 @@ User.implement({
 		}),
 		createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
 		updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
-		bookmarksCount: t.field({
-			type: 'Int',
-			nullable: false,
-			resolve: async (user) => {
-				const result = await db.query.postInteraction.findMany({
-					where: (postInteraction, { and, eq }) =>
-						and(
-							eq(postInteraction.userId, user.id),
-							eq(postInteraction.type, 'BOOKMARK')
-						)
-				});
-				return result!.length ?? 0;
-			}
-		}),
 		likesCount: t.field({
 			type: 'Int',
 			nullable: false,

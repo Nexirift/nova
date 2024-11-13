@@ -4,21 +4,14 @@ import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
 import {
 	postInteraction,
-	PostInteraction as PostInteractionSchema
+	PostInteractionSchemaType
 } from '../../drizzle/schema';
 import { privacyGuardian } from '../../lib/guardian';
 import { PostInteraction } from '../../types/post/Interaction';
 import { Context } from '../../context';
 
 // Define the possible interaction types
-const interactionTypes = [
-	'LIKE',
-	'UNLIKE',
-	'BOOKMARK',
-	'UNBOOKMARK',
-	'REPOST',
-	'UNREPOST'
-] as const;
+const interactionTypes = ['LIKE', 'UNLIKE', 'REPOST', 'UNREPOST'] as const;
 
 // Create mutation fields for each interaction type
 interactionTypes.forEach((type) => {
@@ -39,8 +32,8 @@ interactionTypes.forEach((type) => {
 async function postInteract(
 	ctx: Context,
 	args: { id: string; reason?: string | null },
-	type: 'LIKE' | 'UNLIKE' | 'BOOKMARK' | 'UNBOOKMARK' | 'REPOST' | 'UNREPOST'
-): Promise<PostInteractionSchema | null> {
+	type: 'LIKE' | 'UNLIKE' | 'REPOST' | 'UNREPOST'
+): Promise<PostInteractionSchemaType | null> {
 	// Check if ID is provided
 	if (!args.id) {
 		throw new GraphQLError('You must provide an ID.', {
@@ -71,8 +64,6 @@ async function postInteract(
 	const interactionMap = {
 		LIKE: 'LIKE',
 		UNLIKE: 'UNLIKE',
-		BOOKMARK: 'BOOKMARK',
-		UNBOOKMARK: 'BOOKMARK',
 		REPOST: 'REPOST',
 		UNREPOST: 'REPOST'
 	};
@@ -81,8 +72,6 @@ async function postInteract(
 	const errorMap = {
 		LIKE: 'You have already liked this post.',
 		UNLIKE: 'You are not currently liking this post.',
-		BOOKMARK: 'You have already bookmarked this post.',
-		UNBOOKMARK: 'You are not currently bookmarking this post.',
 		REPOST: 'You have already reposted this post.',
 		UNREPOST: 'You are not currently reposting this post.'
 	};
@@ -96,16 +85,13 @@ async function postInteract(
 				eq(postInteraction.postId, args.id),
 				eq(
 					postInteraction.type,
-					requestedType.replace('UN', '') as
-						| 'LIKE'
-						| 'BOOKMARK'
-						| 'REPOST'
+					requestedType.replace('UN', '') as 'LIKE' | 'REPOST'
 				)
 			)
 	});
 
-	// Handle LIKE, BOOKMARK, REPOST actions
-	if (['LIKE', 'BOOKMARK', 'REPOST'].includes(type)) {
+	// Handle LIKE & REPOST actions
+	if (['LIKE', 'REPOST'].includes(type)) {
 		if (existingInteraction) {
 			throw new GraphQLError(errorMap[type], {
 				extensions: { code: `POST_ALREADY_${type}ED` }
@@ -116,7 +102,7 @@ async function postInteract(
 			.values({
 				userId: ctx.oidc.sub,
 				postId: args.id,
-				type: type as 'LIKE' | 'BOOKMARK' | 'REPOST'
+				type: type as 'LIKE' | 'REPOST'
 			})
 			.returning()
 			.then((res) => res[0]);
@@ -135,7 +121,7 @@ async function postInteract(
 					eq(postInteraction.postId, args.id),
 					eq(
 						postInteraction.type,
-						type.replace('UN', '') as 'LIKE' | 'BOOKMARK' | 'REPOST'
+						type.replace('UN', '') as 'LIKE' | 'REPOST'
 					)
 				)
 			)

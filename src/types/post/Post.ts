@@ -88,11 +88,8 @@ Post.implement({
 			unauthorizedResolver: () => [],
 			resolve: async (post, args, context: Context) => {
 				const result = await db.query.postInteraction.findMany({
-					where: (postInteraction, { and, eq, ne }) =>
-						and(
-							eq(postInteraction.postId, post.id),
-							ne(postInteraction.type, 'BOOKMARK')
-						),
+					where: (postInteraction, { eq }) =>
+						eq(postInteraction.postId, post.id),
 					with: {
 						user: true,
 						post: true
@@ -141,21 +138,6 @@ Post.implement({
 		}),
 		createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
 		updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
-		bookmarked: t.field({
-			type: 'Boolean',
-			nullable: false,
-			resolve: async (parent, _args, context: Context) => {
-				const result = await db.query.postInteraction.findMany({
-					where: (postInteraction, { and, eq }) =>
-						and(
-							eq(postInteraction.postId, parent.id),
-							eq(postInteraction.userId, context.oidc?.sub),
-							eq(postInteraction.type, 'BOOKMARK')
-						)
-				});
-				return result!.length > 0;
-			}
-		}),
 		liked: t.field({
 			type: 'Boolean',
 			nullable: false,
@@ -180,20 +162,6 @@ Post.implement({
 						and(
 							eq(postInteraction.postId, parent.id),
 							eq(postInteraction.type, 'LIKE')
-						)
-				});
-				return result!.length ?? 0;
-			}
-		}),
-		bookmarksCount: t.field({
-			type: 'Int',
-			nullable: false,
-			resolve: async (parent) => {
-				const result = await db.query.postInteraction.findMany({
-					where: (postInteraction, { and, eq }) =>
-						and(
-							eq(postInteraction.postId, parent.id),
-							eq(postInteraction.type, 'BOOKMARK')
 						)
 				});
 				return result!.length ?? 0;

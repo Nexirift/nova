@@ -5,7 +5,6 @@ import { user } from '..';
 
 export const postInteractionType = pgEnum('post_interaction_type', [
 	'LIKE',
-	'BOOKMARK',
 	'REPOST'
 ]);
 

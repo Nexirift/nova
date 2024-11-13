@@ -5,7 +5,7 @@ import { db } from '../../drizzle/db';
 import { post } from '../../drizzle/schema';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
-const types = ['like', 'bookmark', 'repost'];
+const types = ['like', 'repost'];
 
 for (const type of types) {
 	test(`Authenticated | Interactions - It should check ${type}s`, async () => {
