@@ -14,14 +14,14 @@
 	},
 	"keywords": [],
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.662.0",
-		"@aws-sdk/lib-storage": "^3.662.0",
+		"@aws-sdk/client-s3": "^3.689.0",
+		"@aws-sdk/lib-storage": "^3.689.0",
 		"@nexirift/plugin-oidc": "^1.0.3",
-		"@pothos/core": "^4.2.0",
+		"@pothos/core": "^4.3.0",
 		"@pothos/plugin-errors": "^4.2.0",
 		"@pothos/plugin-scope-auth": "^4.1.0",
 		"@pothos/plugin-validation": "^3.10.2",
-		"@types/node": "^22.7.4",
+		"@types/node": "^22.9.0",
 		"dotenv": "^16.4.5",
 		"dotenv-cli": "^7.4.2",
 		"drizzle-kit": "0.24.2",
@@ -29,21 +29,21 @@
 		"gradient-string": "^2.0.2",
 		"graphql": "^16.9.0",
 		"graphql-scalars": "^1.23.0",
-		"graphql-yoga": "^5.7.0",
+		"graphql-yoga": "^5.10.1",
 		"mime-types": "^2.1.35",
-		"pg": "^8.13.0",
+		"pg": "^8.13.1",
 		"redis": "^4.7.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@electric-sql/pglite": "^0.2.9",
-		"@faker-js/faker": "^9.0.3",
-		"@types/bun": "^1.1.10",
+		"@electric-sql/pglite": "^0.2.13",
+		"@faker-js/faker": "^9.2.0",
+		"@types/bun": "^1.1.13",
 		"@types/gradient-string": "^1.1.6",
 		"@types/mime-types": "^2.1.4",
 		"@types/pg": "^8.11.10",
-		"pg-mem": "^3.0.2",
+		"pg-mem": "^3.0.3",
 		"redis-memory-server": "^0.11.0",
-		"typescript": "^5.6.2"
+		"typescript": "^5.6.3"
 	}
 }
