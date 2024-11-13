@@ -41,7 +41,7 @@ export async function createUser(data: {
 }) {
 	await db.insert(user).values({
 		id: data.sub,
-		username: data.preferred_username ?? faker.internet.userName(),
+		username: data.preferred_username ?? faker.internet.username(),
 		email: data.email! ?? faker.internet.email(),
 		type: data.type ?? 'PUBLIC'
 	});

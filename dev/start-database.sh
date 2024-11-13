@@ -52,4 +52,4 @@ docker run -d \
   -e POSTGRES_PASSWORD="$DB_PASSWORD" \
   -e POSTGRES_DB=spark \
   -p "$DB_PORT":5432 \
-  docker.io/postgres:16.4-alpine3.20 && echo "Database container '$DB_CONTAINER_NAME' was successfully created"
+  docker.io/postgres:latest && echo "Database container '$DB_CONTAINER_NAME' was successfully created"
