@@ -1,5 +1,5 @@
-import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, pgEnum, uuid, text, timestamp } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { user } from '..';
 
 export const conversationType = pgEnum('conversation_type', [

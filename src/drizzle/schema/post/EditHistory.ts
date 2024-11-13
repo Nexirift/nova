@@ -1,5 +1,5 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, uuid, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { post } from '.';
 
 export const postEditHistory = pgTable('post_edit_history', {

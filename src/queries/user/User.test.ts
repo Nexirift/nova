@@ -1,6 +1,6 @@
-import { expect, test } from 'bun:test';
 import { faker } from '@faker-js/faker';
-import { makeGQLRequest, createUser, removeUser } from '../../lib/tests';
+import { expect, test } from 'bun:test';
+import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 test('Unauthenticated | General - It should get a non-existing user', async () => {
 	const nonExistingUser = faker.string.uuid();

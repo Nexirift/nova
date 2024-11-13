@@ -1,9 +1,9 @@
+import { faker } from '@faker-js/faker';
 import { expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import { faker } from '@faker-js/faker';
 import { db } from '../../drizzle/db';
 import { post } from '../../drizzle/schema';
-import { makeGQLRequest, createUser, removeUser } from '../../lib/tests';
+import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 test('Unauthenticated | General - It should get a non-existing post', async () => {
 	const nonExistingPost = faker.string.uuid();

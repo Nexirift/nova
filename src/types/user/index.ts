@@ -1,4 +1,4 @@
-export * from './User';
-export * from './Relationship';
 export * from './ProfileField';
+export * from './Relationship';
+export * from './User';
 export * from './Verification';

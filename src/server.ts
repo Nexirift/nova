@@ -1,20 +1,20 @@
-import { beforeAll } from 'bun:test';
 import { useOIDC } from '@nexirift/plugin-oidc';
-import { createYoga } from 'graphql-yoga';
-import { redisClient, syncClient, tokenClient } from './redis';
-import { db, prodDbClient } from './drizzle/db';
+import { beforeAll } from 'bun:test';
+import { migrate } from 'drizzle-orm/pglite/migrator';
 import gradient from 'gradient-string';
-import getGitCommitHash from './git';
+import { createYoga } from 'graphql-yoga';
 import { version } from '../package.json';
-import { schema } from './schema';
 import { Config } from './config';
+import { db, prodDbClient } from './drizzle/db';
+import getGitCommitHash from './git';
 import {
-	mediaUploadEndpoint,
 	createUsersFromRedisTokens,
+	mediaUploadEndpoint,
 	webhookEndpoint
 } from './lib/server';
 import { isTestMode } from './lib/tests';
-import { migrate } from 'drizzle-orm/pglite/migrator';
+import { redisClient, syncClient, tokenClient } from './redis';
+import { schema } from './schema';
 
 require('dotenv').config();
 

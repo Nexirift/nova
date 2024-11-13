@@ -1,4 +1,4 @@
-import { OIDCPluginOptionsBase, OIDC } from '@nexirift/plugin-oidc';
+import { OIDC, OIDCPluginOptionsBase } from '@nexirift/plugin-oidc';
 import { tokenClient } from './redis';
 
 namespace Config {

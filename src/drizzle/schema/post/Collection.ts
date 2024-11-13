@@ -1,6 +1,6 @@
+import { InferSelectModel, relations } from 'drizzle-orm';
 import { pgEnum, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core';
 import { post, user } from '..';
-import { InferSelectModel, relations } from 'drizzle-orm';
 
 export const postCollectionVisibility = pgEnum('post_collection_visibility', [
 	'PUBLIC',

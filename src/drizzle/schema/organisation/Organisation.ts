@@ -1,7 +1,7 @@
 import { InferSelectModel, relations, sql } from 'drizzle-orm';
-import { pgTable, timestamp, text } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { organisationContact, organisationRegistration } from '..';
 import { user } from '../user';
-import { organisationRegistration, organisationContact } from '..';
 
 export const organisation = pgTable('organisation', {
 	id: text('id')

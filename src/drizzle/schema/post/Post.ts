@@ -1,21 +1,21 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
 import {
+	AnyPgColumn,
+	boolean,
 	pgTable,
-	uuid,
 	text,
 	timestamp,
-	boolean,
-	AnyPgColumn
+	uuid
 } from 'drizzle-orm/pg-core';
 import {
-	user,
-	userPlanetPost,
+	postCollectionItem,
+	postEditHistory,
 	postGiveaway,
-	postPoll,
 	postInteraction,
 	postMedia,
-	postEditHistory,
-	postCollectionItem
+	postPoll,
+	user,
+	userPlanetPost
 } from '..';
 
 export const post = pgTable('post', {

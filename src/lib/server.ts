@@ -4,14 +4,13 @@
 
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
+import mime from 'mime-types';
+import { Config } from '../config';
 import { db } from '../drizzle/db';
 import { postMedia, user } from '../drizzle/schema';
-import { authorize } from './authentication';
 import { syncClient, tokenClient } from '../redis';
-import { Config } from '../config';
-import mime from 'mime-types';
-import { url } from 'inspector';
-import { convertModelToUser, internalUsers, getHashedPk } from './authentik';
+import { authorize } from './authentication';
+import { convertModelToUser, getHashedPk, internalUsers } from './authentik';
 
 /**
  * "Legacy" endpoint for uploading media.
@@ -362,4 +361,4 @@ async function createUsersFromRedisTokens() {
 	);
 }
 
-export { mediaUploadEndpoint, webhookEndpoint, createUsersFromRedisTokens };
+export { createUsersFromRedisTokens, mediaUploadEndpoint, webhookEndpoint };

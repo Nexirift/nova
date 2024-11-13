@@ -1,14 +1,14 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
 import {
+	boolean,
+	integer,
+	json,
+	pgEnum,
 	pgTable,
-	uuid,
+	primaryKey,
 	text,
 	timestamp,
-	primaryKey,
-	json,
-	integer,
-	boolean,
-	pgEnum
+	uuid
 } from 'drizzle-orm/pg-core';
 import { post } from '.';
 import { user } from '..';

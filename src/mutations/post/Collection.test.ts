@@ -1,6 +1,6 @@
+import { faker } from '@faker-js/faker';
 import { expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import { faker } from '@faker-js/faker';
 import { db } from '../../drizzle/db';
 import { post, postCollection, postCollectionItem } from '../../drizzle/schema';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';

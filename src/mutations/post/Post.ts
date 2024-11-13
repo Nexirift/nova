@@ -1,10 +1,10 @@
+import { eq } from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
-import { Post } from '../../types';
-import { eq } from 'drizzle-orm';
 import { post, postEditHistory } from '../../drizzle/schema';
+import { Post } from '../../types';
 
 builder.mutationField('createPost', (t) =>
 	t.field({

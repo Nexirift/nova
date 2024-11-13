@@ -1,9 +1,9 @@
+import { faker } from '@faker-js/faker';
 import { expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import { faker } from '@faker-js/faker';
 import { db } from '../../drizzle/db';
 import { postCollection } from '../../drizzle/schema';
-import { makeGQLRequest, createUser, removeUser } from '../../lib/tests';
+import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 // Test for unauthenticated request to get a non-existing post collection
 test('Unauthenticated | General - It should get a non-existing post collection', async () => {

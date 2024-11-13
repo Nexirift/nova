@@ -1,12 +1,12 @@
 import { and, eq, or } from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
+import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import {
 	userRelationship,
 	UserRelationshipSchemaType
 } from '../../drizzle/schema';
-import { Context } from '../../context';
 import { UserRelationship } from '../../types';
 
 // Define the possible relationship types

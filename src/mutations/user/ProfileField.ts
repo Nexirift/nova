@@ -1,10 +1,10 @@
+import { and, eq } from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
 import { Context } from 'vm';
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
-import { UserProfileField } from '../../types/user/ProfileField';
 import { userProfileField } from '../../drizzle/schema';
-import { and, eq } from 'drizzle-orm';
+import { UserProfileField } from '../../types/user/ProfileField';
 
 builder.mutationField('createProfileField', (t) =>
 	t.field({

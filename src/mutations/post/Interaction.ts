@@ -1,6 +1,7 @@
-import { eq, and } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
+import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import {
 	postInteraction,
@@ -8,7 +9,6 @@ import {
 } from '../../drizzle/schema';
 import { privacyGuardian } from '../../lib/guardian';
 import { PostInteraction } from '../../types/post/Interaction';
-import { Context } from '../../context';
 
 // Define the possible interaction types
 const interactionTypes = ['LIKE', 'UNLIKE', 'REPOST', 'UNREPOST'] as const;

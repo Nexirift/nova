@@ -1,5 +1,5 @@
-import { expect, test } from 'bun:test';
 import { faker } from '@faker-js/faker';
+import { expect, test } from 'bun:test';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 const types = ['block', 'mute', 'follow', 'request'];

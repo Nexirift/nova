@@ -1,5 +1,5 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, pgEnum, timestamp, text, uuid } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { organisation } from '..';
 
 export const organisationType = pgEnum('organisation_type', [

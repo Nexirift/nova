@@ -1,5 +1,5 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, uuid, json, timestamp, text } from 'drizzle-orm/pg-core';
+import { json, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { post } from '.';
 import { user } from '..';
 

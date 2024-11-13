@@ -1,10 +1,10 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
 import {
-	pgTable,
 	pgEnum,
-	timestamp,
+	pgTable,
+	primaryKey,
 	text,
-	primaryKey
+	timestamp
 } from 'drizzle-orm/pg-core';
 import { user } from '.';
 

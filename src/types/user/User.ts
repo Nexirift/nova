@@ -1,17 +1,15 @@
-import { GraphQLError } from 'graphql';
+import { Organisation, OrganisationMember } from '..';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import { type UserSchemaType } from '../../drizzle/schema';
 import { privacyGuardian } from '../../lib/guardian';
 import { Post } from '../post';
+import { PostInteraction } from '../post/Interaction';
+import { PostMedia } from '../post/Media';
+import { UserProfileField } from './ProfileField';
 import { UserRelationship } from './Relationship';
 import { UserVerification } from './Verification';
-import { redisClient } from '../../redis';
-import { PostInteraction } from '../post/Interaction';
-import { UserProfileField } from './ProfileField';
-import { Organisation, OrganisationMember } from '..';
-import { PostMedia } from '../post/Media';
 
 export const User = builder.objectRef<UserSchemaType>('User');
 

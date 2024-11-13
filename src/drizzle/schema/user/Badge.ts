@@ -1,10 +1,10 @@
 import { relations } from 'drizzle-orm';
 import {
 	pgTable,
-	uuid,
+	primaryKey,
 	text,
 	timestamp,
-	primaryKey
+	uuid
 } from 'drizzle-orm/pg-core';
 import { user } from '.';
 

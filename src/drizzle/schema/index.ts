@@ -1,3 +1,3 @@
-export * from './user';
-export * from './post';
 export * from './organisation';
+export * from './post';
+export * from './user';

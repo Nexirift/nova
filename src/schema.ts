@@ -1,8 +1,8 @@
 import { builder } from './builder';
 
-import './types';
-import './queries';
 import './mutations';
+import './queries';
+import './types';
 
 builder.queryType({});
 builder.mutationType({});

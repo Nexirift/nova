@@ -1,2 +1,2 @@
-export * from './Relationship';
 export * from './ProfileField';
+export * from './Relationship';

@@ -1,16 +1,16 @@
 import { InferSelectModel, relations, sql } from 'drizzle-orm';
-import { pgTable, pgEnum, timestamp, text, boolean } from 'drizzle-orm/pg-core';
+import { boolean, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import {
-	userProfileField,
-	userRelationship,
-	userVerification,
-	userSetting,
+	conversationParticipant,
+	post,
+	postCollection,
+	postInteraction,
 	userPlanet,
 	userPlanetMember,
-	post,
-	postInteraction,
-	conversationParticipant,
-	postCollection
+	userProfileField,
+	userRelationship,
+	userSetting,
+	userVerification
 } from '..';
 
 export const userType = pgEnum('user_type', ['PUBLIC', 'PRIVATE', 'ARTIST']);

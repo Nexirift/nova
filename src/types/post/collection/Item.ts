@@ -1,8 +1,8 @@
 import { builder } from '../../../builder';
 import { db } from '../../../drizzle/db';
 import { type PostCollectionItemSchemaType } from '../../../drizzle/schema';
-import { PostCollection } from './Collection';
 import { Post } from '../Post';
+import { PostCollection } from './Collection';
 
 export const PostCollectionItem =
 	builder.objectRef<PostCollectionItemSchemaType>('PostCollectionItem');

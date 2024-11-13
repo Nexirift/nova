@@ -1,4 +1,3 @@
-import { User } from '..';
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
 import {

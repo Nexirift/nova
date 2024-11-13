@@ -1,5 +1,5 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, uuid, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { boolean, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { user } from '.';
 
 export const userProfileField = pgTable('user_profile_field', {
