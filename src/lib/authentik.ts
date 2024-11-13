@@ -7,7 +7,7 @@ export const internalUsers = ['akadmin', '^ak-outpost-[a-f0-9]{32}$'];
  * @param jsonObject The JSON object to convert.
  * @returns A more usable (parsed and fixed) object.
  */
-export function convertModelToUser(jsonObject: any) {
+export function convertModelToUser(jsonObject: { body: string }) {
 	// Replace some common values
 	var modelData = jsonObject.body;
 	modelData = modelData.replace(/True/g, 'true');

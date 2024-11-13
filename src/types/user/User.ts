@@ -49,7 +49,7 @@ User.implement({
 			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
 				privacyGuardian(parent, context),
-			unauthorizedResolver: () => [] as any,
+			unauthorizedResolver: () => [],
 			resolve: async (user) => {
 				const result = await db.query.userProfileField.findMany({
 					where: (userProfileField, { eq }) =>
@@ -90,7 +90,7 @@ User.implement({
 				offset: t.arg({ type: 'Int' }),
 				type: t.arg({ type: 'String' })
 			},
-			unauthorizedResolver: () => [] as any,
+			unauthorizedResolver: () => [],
 			resolve: async (user, args) => {
 				const result = await db.query.post.findMany({
 					where: (post, { and, eq, isNull, isNotNull }) =>
@@ -114,7 +114,7 @@ User.implement({
 			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
 				privacyGuardian(parent, context),
-			unauthorizedResolver: () => [] as any,
+			unauthorizedResolver: () => [],
 			resolve: async (user) => {
 				const result = await db.query.post.findMany({
 					where: (post, { eq }) => eq(post.authorId, user.id),
@@ -145,7 +145,7 @@ User.implement({
 				offset: t.arg({ type: 'Int' }),
 				type: t.arg({ type: 'String' })
 			},
-			unauthorizedResolver: () => [] as any,
+			unauthorizedResolver: () => [],
 			resolve: async (user, args, context: Context) => {
 				const type = args.type! as 'LIKE' | 'REPOST';
 
@@ -178,7 +178,7 @@ User.implement({
 			},
 			authScopes: (parent, _args, context, _info) =>
 				privacyGuardian(parent, context),
-			unauthorizedResolver: () => [] as any,
+			unauthorizedResolver: () => [],
 			resolve: async (user, args, context: Context) => {
 				const to = await db.query.userRelationship.findMany({
 					where: (userRelationship, { eq, and, or }) =>

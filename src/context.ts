@@ -7,11 +7,11 @@ export interface Context {
 	/**
 	 * The request object.
 	 */
-	req: any;
+	req: Request;
 	/**
 	 * The response object.
 	 */
-	res: any;
+	res: Response;
 	/**
 	 * The OIDC token content.
 	 */
