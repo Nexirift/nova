@@ -4,3 +4,4 @@ export * from './Giveaway';
 export * from './Media';
 export * from './Poll';
 export * from './EditHistory';
+export * from './Collection';

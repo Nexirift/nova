@@ -9,7 +9,8 @@ import {
 	userPlanetMember,
 	post,
 	postInteraction,
-	conversationParticipant
+	conversationParticipant,
+	postCollection
 } from '..';
 
 export const userType = pgEnum('user_type', ['PUBLIC', 'PRIVATE', 'ARTIST']);
@@ -54,7 +55,8 @@ export const userRelations = relations(user, ({ one, many }) => ({
 	ownedPlanets: many(userPlanet),
 	joinedPlanets: many(userPlanetMember),
 	settings: many(userSetting),
-	conversations: many(conversationParticipant)
+	conversations: many(conversationParticipant),
+	collections: many(postCollection)
 }));
 
 export type UserSchemaType = InferSelectModel<typeof user>;

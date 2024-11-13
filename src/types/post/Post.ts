@@ -188,6 +188,38 @@ Post.implement({
 			type: 'Boolean',
 			nullable: false,
 			resolve: () => false
+		}),
+		collectionCount: t.field({
+			type: 'Int',
+			nullable: false,
+			resolve: async (post) => {
+				const result = await db.query.postCollectionItem.findMany({
+					where: (postCollectionItem, { eq }) =>
+						eq(postCollectionItem.postId, post.id)
+				});
+				return result!.length ?? 0;
+			}
+		}),
+		isInCollection: t.field({
+			type: 'Boolean',
+			nullable: false,
+			resolve: async (post, args, context: Context) => {
+				const result = await db.query.postCollectionItem.findMany({
+					where: (postCollectionItem, { eq }) =>
+						eq(postCollectionItem.postId, post.id),
+					with: {
+						collection: {
+							with: {
+								user: true
+							}
+						}
+					}
+				});
+
+				return result.some(
+					(item) => item.collection.user.id === context.oidc?.sub
+				);
+			}
 		})
 	})
 });

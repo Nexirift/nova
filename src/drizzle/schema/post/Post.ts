@@ -14,7 +14,8 @@ import {
 	postPoll,
 	postInteraction,
 	postMedia,
-	postEditHistory
+	postEditHistory,
+	postCollectionItem
 } from '..';
 
 export const post = pgTable('post', {
@@ -55,7 +56,8 @@ export const postRelations = relations(post, ({ one, many }) => ({
 	poll: one(postPoll),
 	giveaway: one(postGiveaway),
 	planet: one(userPlanetPost),
-	media: many(postMedia)
+	media: many(postMedia),
+	collections: many(postCollectionItem)
 }));
 
 export type PostSchemaType = InferSelectModel<typeof post>;
