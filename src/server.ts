@@ -15,7 +15,6 @@ import {
 import { isTestMode } from './lib/tests';
 import { redisClient, syncClient, tokenClient } from './redis';
 import { schema } from './schema';
-import debug from 'debug';
 import { enableAll } from './lib/logger';
 
 require('dotenv').config();

@@ -11,6 +11,7 @@ import { postMedia, user } from '../drizzle/schema';
 import { syncClient, tokenClient } from '../redis';
 import { authorize } from './authentication';
 import { convertModelToUser, getHashedPk, internalUsers } from './authentik';
+import { isTestMode } from './tests';
 
 /**
  * "Legacy" endpoint for uploading media.
@@ -164,18 +165,22 @@ async function mediaUploadEndpoint(req: Request) {
 }
 
 /**
+ *
  * Endpoint for webhooks. Authentik is the only one used for authentication right now.
  * @param req The request object containing the webhook data.
  * @returns A JSON response with a status and message.
  */
 async function webhookEndpoint(req: Request) {
 	const url = new URL(req.url);
+	console.log(url.pathname, isTestMode);
 	switch (url.pathname) {
-		case `/webhook/${process.env.WEBHOOK_AUTH}`:
+		case `/webhook/${isTestMode ? 'TEST-AUTH' : process.env.WEBHOOK_AUTH}`:
 			if (
-				process.env.AUTH_INTROSPECT_URL?.endsWith(
+				isTestMode ||
+				(process.env.AUTH_INTROSPECT_URL?.endsWith(
 					'/application/o/introspect/'
 				) &&
+					isTestMode) ||
 				process.env.AUTH_USERINFO_URL?.endsWith(
 					'/application/o/userinfo/'
 				)
@@ -263,7 +268,9 @@ async function webhookEndpoint(req: Request) {
 				},
 				{ status: 404 }
 			);
-		case `/webhook/${process.env.WEBHOOK_STRIPE}`:
+		case `/webhook/${
+			isTestMode ? 'TEST-STRIPE' : process.env.WEBHOOK_STRIPE
+		}`:
 			return Response.json(
 				{
 					status: 'WORK_IN_PROGRESS',

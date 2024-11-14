@@ -14,7 +14,7 @@ const createRequest = (url: string, body: any = null) => {
 
 test('Webhook | Authentik - Should return 200 for valid request', async () => {
 	const req = createRequest(
-		`http://localhost/webhook/${process.env.WEBHOOK_AUTH}`,
+		`http://localhost:25447/webhook/TEST-AUTH`,
 		mockUserData
 	);
 	const response = await webhookEndpoint(req);
@@ -22,7 +22,7 @@ test('Webhook | Authentik - Should return 200 for valid request', async () => {
 });
 
 test('Webhook | Authentik - Should return 404 for invalid webhook endpoint', async () => {
-	const req = createRequest('http://localhost/webhook/invalid');
+	const req = createRequest('http://localhost:25447/webhook/invalid');
 	const response = await webhookEndpoint(req);
 	expect(response.status).toBe(404);
 });
@@ -32,7 +32,7 @@ test('Webhook | Authentik - Should return 200 for internal users', async () => {
 		body: mockUserData.body.replace('Test', 'ak-outpost-123')
 	};
 	const req = createRequest(
-		`http://localhost/webhook/${process.env.WEBHOOK_AUTH}`,
+		`http://localhost:25447/webhook/TEST-AUTH`,
 		mockUserDataInternal
 	);
 	const response = await webhookEndpoint(req);
@@ -40,9 +40,7 @@ test('Webhook | Authentik - Should return 200 for internal users', async () => {
 });
 
 test('Webhook | Stripe - Should return 404 for unimplemented webhook', async () => {
-	const req = createRequest(
-		`http://localhost/webhook/${process.env.WEBHOOK_STRIPE}`
-	);
+	const req = createRequest(`http://localhost:25447/webhook/TEST-STRIPE`);
 	const response = await webhookEndpoint(req);
 	expect(response.status).toBe(404);
 });
@@ -52,7 +50,7 @@ test('Webhook | Authentik - Should handle missing fields gracefully', async () =
 		body: mockUserData.body.replace("pk: 'this-is-a-id', ", '')
 	};
 	const req = createRequest(
-		`http://localhost/webhook/${process.env.WEBHOOK_AUTH}`,
+		`http://localhost:25447/webhook/TEST-AUTH`,
 		mockUserDataMissingFields
 	);
 	const response = await webhookEndpoint(req);
