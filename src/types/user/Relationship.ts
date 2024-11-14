@@ -3,6 +3,10 @@ import { db } from '../../drizzle/db';
 import { type UserRelationshipSchemaType } from '../../drizzle/schema';
 import { User } from './User';
 
+export const UserRelationshipType = builder.enumType('UserRelationshipType', {
+	values: ['FOLLOW', 'REQUEST', 'BLOCK', 'MUTE']
+});
+
 export const UserRelationship =
 	builder.objectRef<UserRelationshipSchemaType>('UserRelationship');
 
@@ -28,7 +32,8 @@ UserRelationship.implement({
 				return result!;
 			}
 		}),
-		type: t.exposeString('type', {
+		type: t.expose('type', {
+			type: UserRelationshipType,
 			nullable: false
 		}),
 		reason: t.exposeString('reason', {

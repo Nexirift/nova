@@ -9,7 +9,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { organisation, user } from '..';
 
-export const organisationRole = pgEnum('organisation_role', [
+export const organisationMemberRole = pgEnum('organisation_member_role', [
 	'OWNER',
 	'ADMIN',
 	'MEMBER'
@@ -23,7 +23,7 @@ export const organisationMember = pgTable('organisation_member', {
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id),
-	role: organisationRole('organisation_role').notNull(),
+	role: organisationMemberRole('organisation_member_role').notNull(),
 	affiliated: boolean('affiliated').notNull().default(false),
 	profession: text('profession'),
 	createdAt: timestamp('created_at').notNull().defaultNow(),

@@ -11,6 +11,10 @@ import { UserProfileField } from './ProfileField';
 import { UserRelationship } from './Relationship';
 import { UserVerification } from './Verification';
 
+export const UserType = builder.enumType('UserType', {
+	values: ['PUBLIC', 'PRIVATE', 'ARTIST']
+});
+
 export const User = builder.objectRef<UserSchemaType>('User');
 
 User.implement({
@@ -27,7 +31,7 @@ User.implement({
 		avatar: t.exposeString('avatar', { nullable: true }),
 		banner: t.exposeString('banner', { nullable: true }),
 		background: t.exposeString('background', { nullable: true }),
-		type: t.exposeString('type', { nullable: true }),
+		type: t.expose('type', { type: UserType, nullable: true }),
 		verification: t.field({
 			type: UserVerification,
 			nullable: true,

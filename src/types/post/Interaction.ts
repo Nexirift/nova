@@ -4,6 +4,10 @@ import { db } from '../../drizzle/db';
 import { type PostInteractionSchemaType } from '../../drizzle/schema';
 import { Post } from './Post';
 
+export const PostInteractionType = builder.enumType('PostInteractionType', {
+	values: ['LIKE', 'REPOST']
+});
+
 export const PostInteraction =
 	builder.objectRef<PostInteractionSchemaType>('PostInteraction');
 
@@ -29,6 +33,6 @@ PostInteraction.implement({
 				return result!;
 			}
 		}),
-		type: t.exposeString('type', { nullable: false })
+		type: t.expose('type', { type: PostInteractionType, nullable: false })
 	})
 });

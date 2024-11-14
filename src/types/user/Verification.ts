@@ -3,6 +3,10 @@ import { db } from '../../drizzle/db';
 import { type UserVerificationSchemaType } from '../../drizzle/schema';
 import { User } from './User';
 
+export const UserVerificationType = builder.enumType('UserVerificationType', {
+	values: ['NOTABLE', 'BUSINESS', 'OFFICIAL', 'TESTER']
+});
+
 export const UserVerification =
 	builder.objectRef<UserVerificationSchemaType>('UserVerification');
 
@@ -18,7 +22,8 @@ UserVerification.implement({
 				return result!;
 			}
 		}),
-		type: t.exposeString('type', {
+		type: t.expose('type', {
+			type: UserVerificationType,
 			nullable: false
 		}),
 		since: t.expose('createdAt', { type: 'Date', nullable: false })
