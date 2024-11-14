@@ -7,34 +7,46 @@ import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 const types = ['PUBLIC', 'PRIVATE'];
 
-// Loop through each type (PUBLIC and PRIVATE) to test creating a new post collection
+async function setupUserAndCollection() {
+	const user1 = faker.string.uuid();
+	await createUser({ sub: user1 });
+	const postCollectionName = faker.lorem.words(5);
+	const postCollectionDescription = faker.lorem.words(10);
+	return { user1, postCollectionName, postCollectionDescription };
+}
+
+async function cleanup(user1: string, collectionId?: string, postId?: string) {
+	if (postId) {
+		await db
+			.delete(postCollectionItem)
+			.where(eq(postCollectionItem.postId, postId));
+		await db.delete(post).where(eq(post.id, postId));
+	}
+	if (collectionId) {
+		await db
+			.delete(postCollection)
+			.where(eq(postCollection.id, collectionId));
+	}
+	await removeUser(user1);
+}
+
 for (const type of types) {
-	test(`Authenticated | General - It should create a new post collection (${type})`, async () => {
-		const postCollectionName = faker.lorem.words(5);
-		const postCollectionDescription = faker.lorem.words(10);
-		const user1 = faker.string.uuid();
+	test(`Authenticated | Collections - It should create a new post collection (${type})`, async () => {
+		const { user1, postCollectionName, postCollectionDescription } =
+			await setupUserAndCollection();
 
-		// Insert our fake user into the database.
-		await createUser({
-			sub: user1
-		});
-
-		// Make the GraphQL request to the createPostCollection endpoint.
 		const data = await makeGQLRequest(
-			`
-                mutation {
-                    createPostCollection(name: "${postCollectionName}", description: "${postCollectionDescription}", visibility: "${type}") {
-                        id
-                        name
-                        description
-                        visibility
-                    }
-                }
-            `,
+			`mutation {
+				createPostCollection(name: "${postCollectionName}", description: "${postCollectionDescription}", visibility: "${type}") {
+					id
+					name
+					description
+					visibility
+				}
+			}`,
 			user1
 		);
 
-		// Validate the response data
 		expect(data).toHaveProperty(
 			'data.createPostCollection.name',
 			postCollectionName
@@ -48,32 +60,18 @@ for (const type of types) {
 			type
 		);
 
-		// Remove the test post collection from the database for future tests.
-		await db
-			.delete(postCollection)
-			.where(eq(postCollection.id, data.data.createPostCollection.id));
-
-		// Remove the test user from the database for future tests.
-		await removeUser(user1);
+		await cleanup(user1, data.data.createPostCollection.id);
 	});
 }
 
-// Loop through each type (PUBLIC and PRIVATE) to test updating an existing post collection
 for (const type of types) {
-	test(`Authenticated | General - It should update an existing post collection (${
+	test(`Authenticated | Collections - It should update an existing post collection (${
 		type === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC'
 	} to ${type})`, async () => {
+		const { user1, postCollectionName, postCollectionDescription } =
+			await setupUserAndCollection();
 		const existingPostCollection = faker.string.uuid();
-		const postCollectionName = faker.lorem.words(5);
-		const postCollectionDescription = faker.lorem.words(10);
-		const user1 = faker.string.uuid();
 
-		// Insert our fake user into the database.
-		await createUser({
-			sub: user1
-		});
-
-		// Insert our fake post collection into the database.
 		await db.insert(postCollection).values({
 			id: existingPostCollection,
 			name: postCollectionName,
@@ -82,22 +80,18 @@ for (const type of types) {
 			userId: user1
 		});
 
-		// Make the GraphQL request to the updatePostCollection endpoint.
 		const data = await makeGQLRequest(
-			`
-                mutation {
-                    updatePostCollection(id: "${existingPostCollection}", name: "Test Collection", description: "This is a test collection.", visibility: "${type}") {
-                        id
-                        name
-                        description
-                        visibility
-                    }
-                }
-            `,
+			`mutation {
+				updatePostCollection(id: "${existingPostCollection}", name: "Test Collection", description: "This is a test collection.", visibility: "${type}") {
+					id
+					name
+					description
+					visibility
+				}
+			}`,
 			user1
 		);
 
-		// Validate the response data
 		expect(data).toHaveProperty(
 			'data.updatePostCollection.id',
 			existingPostCollection
@@ -115,27 +109,14 @@ for (const type of types) {
 			type
 		);
 
-		// Remove the test post collection from the database for future tests.
-		await db
-			.delete(postCollection)
-			.where(eq(postCollection.id, existingPostCollection));
-
-		// Remove the test user from the database for future tests.
-		await removeUser(user1);
+		await cleanup(user1, existingPostCollection);
 	});
 }
 
-// Test deleting an existing post collection
-test('Authenticated | General - It should delete an existing post collection', async () => {
+test('Authenticated | Collections - It should delete an existing post collection', async () => {
+	const { user1 } = await setupUserAndCollection();
 	const existingPostCollection = faker.string.uuid();
-	const user1 = faker.string.uuid();
 
-	// Insert our fake user into the database.
-	await createUser({
-		sub: user1
-	});
-
-	// Insert our fake post collection into the database.
 	await db.insert(postCollection).values({
 		id: existingPostCollection,
 		name: 'Test Collection',
@@ -144,41 +125,21 @@ test('Authenticated | General - It should delete an existing post collection', a
 		userId: user1
 	});
 
-	// Make the GraphQL request to the deletePostCollection endpoint.
 	const data = await makeGQLRequest(
-		`
-                mutation {
-                    deletePostCollection(id: "${existingPostCollection}")
-                }
-            `,
+		`mutation { deletePostCollection(id: "${existingPostCollection}") }`,
 		user1
 	);
 
-	// Validate the response data
 	expect(data).toHaveProperty('data.deletePostCollection', true);
 
-	// Remove the test post collection from the database for future tests.
-	await db
-		.delete(postCollection)
-		.where(eq(postCollection.id, existingPostCollection));
-
-	// Remove the test user from the database for future tests.
-	await removeUser(user1);
+	await cleanup(user1, existingPostCollection);
 });
 
-// Test adding a post to a collection
-test('Authenticated | General - It should add a post to a collection', async () => {
+test('Authenticated | Collections - It should add a post to a collection', async () => {
+	const { user1 } = await setupUserAndCollection();
 	const existingPostCollection = faker.string.uuid();
 	const existingPost = faker.string.uuid();
-	const postContent = faker.lorem.words(10);
-	const user1 = faker.string.uuid();
 
-	// Insert our fake user into the database.
-	await createUser({
-		sub: user1
-	});
-
-	// Insert our fake post collection into the database.
 	await db.insert(postCollection).values({
 		id: existingPostCollection,
 		name: 'Test Collection',
@@ -187,35 +148,22 @@ test('Authenticated | General - It should add a post to a collection', async () 
 		userId: user1
 	});
 
-	// Insert our fake post into the database.
 	await db.insert(post).values({
 		id: existingPost,
 		content: 'test',
 		authorId: user1
 	});
 
-	// Make the GraphQL request to the addPostToCollection endpoint.
 	const data = await makeGQLRequest(
-		`
-                mutation {
-                    addPostToCollection(id: "${existingPostCollection}", postId: "${existingPost}") {
-                        post {
-                            id
-                            content
-                        }
-                        collection {
-                            id
-                            name
-                            description
-                            visibility
-                        }
-                    }
-                }
-            `,
+		`mutation {
+			addPostToCollection(id: "${existingPostCollection}", postId: "${existingPost}") {
+				post { id content }
+				collection { id name description visibility }
+			}
+		}`,
 		user1
 	);
 
-	// Validate the response data
 	expect(data).toHaveProperty(
 		'data.addPostToCollection.post.id',
 		existingPost
@@ -241,37 +189,14 @@ test('Authenticated | General - It should add a post to a collection', async () 
 		'PUBLIC'
 	);
 
-	// Remove the test post from the database for future tests.
-	await db
-		.delete(postCollectionItem)
-		.where(
-			eq(postCollectionItem.postId, data.data.addPostToCollection.post.id)
-		);
-
-	// Remove the test post from the database for future tests.
-	await db.delete(post).where(eq(post.id, existingPost));
-
-	// Remove the test post collection from the database for future tests.
-	await db
-		.delete(postCollection)
-		.where(eq(postCollection.id, existingPostCollection));
-
-	// Remove the test user from the database for future tests.
-	await removeUser(user1);
+	await cleanup(user1, existingPostCollection, existingPost);
 });
 
-// Test removing a post from a collection
-test('Authenticated | General - It should remove a post from a collection', async () => {
+test('Authenticated | Collections - It should remove a post from a collection', async () => {
+	const { user1 } = await setupUserAndCollection();
 	const existingPostCollection = faker.string.uuid();
 	const existingPost = faker.string.uuid();
-	const user1 = faker.string.uuid();
 
-	// Insert our fake user into the database.
-	await createUser({
-		sub: user1
-	});
-
-	// Insert our fake post collection into the database.
 	await db.insert(postCollection).values({
 		id: existingPostCollection,
 		name: 'Test Collection',
@@ -280,45 +205,138 @@ test('Authenticated | General - It should remove a post from a collection', asyn
 		userId: user1
 	});
 
-	// Insert our fake post into the database.
 	await db.insert(post).values({
 		id: existingPost,
 		content: 'test',
 		authorId: user1
 	});
 
-	// Insert the post into the post collection item table
 	await db.insert(postCollectionItem).values({
 		collectionId: existingPostCollection,
 		postId: existingPost
 	});
 
-	// Make the GraphQL request to the removePostFromCollection endpoint.
 	const data = await makeGQLRequest(
-		`
-                mutation {
-                    removePostFromCollection(id: "${existingPostCollection}", postId: "${existingPost}") 
-                }
-            `,
+		`mutation { removePostFromCollection(id: "${existingPostCollection}", postId: "${existingPost}") }`,
 		user1
 	);
 
-	// Validate the response data
 	expect(data).toHaveProperty('data.removePostFromCollection', true);
 
-	// Remove the test post from the database for future tests.
-	await db
-		.delete(postCollectionItem)
-		.where(eq(postCollectionItem.postId, existingPost));
+	await cleanup(user1, existingPostCollection, existingPost);
+});
 
-	// Remove the test post from the database for future tests.
-	await db.delete(post).where(eq(post.id, existingPost));
+test('Authenticated | Collections - It should fail if the post collection already exists', async () => {
+	const { user1, postCollectionName } = await setupUserAndCollection();
+	const existingPostCollection = faker.string.uuid();
 
-	// Remove the test post collection from the database for future tests.
-	await db
-		.delete(postCollection)
-		.where(eq(postCollection.id, existingPostCollection));
+	await db.insert(postCollection).values({
+		id: existingPostCollection,
+		name: postCollectionName,
+		description: 'This is a collection for testing purposes.',
+		visibility: 'PUBLIC',
+		userId: user1
+	});
 
-	// Remove the test user from the database for future tests.
-	await removeUser(user1);
+	const data = await makeGQLRequest(
+		`mutation { createPostCollection(name: "${postCollectionName}") { id } }`,
+		user1
+	);
+
+	expect(data.errors[0]).toHaveProperty(
+		'message',
+		'Post collection already exists.'
+	);
+	expect(data.errors[0].extensions).toHaveProperty(
+		'code',
+		'POST_COLLECTION_ALREADY_EXISTS'
+	);
+
+	await cleanup(user1, existingPostCollection);
+});
+
+test('Authenticated | Collections - It should fail if the post collection does not exist for update', async () => {
+	const { user1, postCollectionName } = await setupUserAndCollection();
+	const existingPostCollection = faker.string.uuid();
+
+	const data = await makeGQLRequest(
+		`mutation { updatePostCollection(id: "${existingPostCollection}", name: "${postCollectionName}") { id } }`,
+		user1
+	);
+
+	expect(data.errors[0]).toHaveProperty(
+		'message',
+		'Post collection not found.'
+	);
+	expect(data.errors[0].extensions).toHaveProperty(
+		'code',
+		'POST_COLLECTION_NOT_FOUND'
+	);
+
+	await cleanup(user1);
+});
+
+test('Authenticated | Collections - It should fail if the post collection does not exist for delete', async () => {
+	const { user1 } = await setupUserAndCollection();
+	const existingPostCollection = faker.string.uuid();
+
+	const data = await makeGQLRequest(
+		`mutation { deletePostCollection(id: "${existingPostCollection}") }`,
+		user1
+	);
+
+	expect(data.errors[0]).toHaveProperty(
+		'message',
+		'Post collection not found.'
+	);
+	expect(data.errors[0].extensions).toHaveProperty(
+		'code',
+		'POST_COLLECTION_NOT_FOUND'
+	);
+
+	await cleanup(user1);
+});
+
+test('Authenticated | Collections - It should fail if the post collection does not exist for add post to collection', async () => {
+	const { user1 } = await setupUserAndCollection();
+	const existingPostCollection = faker.string.uuid();
+	const existingPost = faker.string.uuid();
+
+	const data = await makeGQLRequest(
+		`mutation { addPostToCollection(id: "${existingPostCollection}", postId: "${existingPost}") { post { id } } }`,
+		user1
+	);
+
+	expect(data.errors[0]).toHaveProperty(
+		'message',
+		'Post collection not found.'
+	);
+	expect(data.errors[0].extensions).toHaveProperty(
+		'code',
+		'POST_COLLECTION_NOT_FOUND'
+	);
+
+	await cleanup(user1);
+});
+
+test('Authenticated | Collections - It should fail if the post collection does not exist for remove post from collection', async () => {
+	const { user1 } = await setupUserAndCollection();
+	const existingPostCollection = faker.string.uuid();
+	const existingPost = faker.string.uuid();
+
+	const data = await makeGQLRequest(
+		`mutation { removePostFromCollection(id: "${existingPostCollection}", postId: "${existingPost}") }`,
+		user1
+	);
+
+	expect(data.errors[0]).toHaveProperty(
+		'message',
+		'Post collection not found.'
+	);
+	expect(data.errors[0].extensions).toHaveProperty(
+		'code',
+		'POST_COLLECTION_NOT_FOUND'
+	);
+
+	await cleanup(user1);
 });

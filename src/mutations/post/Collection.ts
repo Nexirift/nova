@@ -7,6 +7,12 @@ import { postCollection, postCollectionItem } from '../../drizzle/schema';
 import { PostCollection } from '../../types/post/collection/Collection';
 import { PostCollectionItem } from '../../types/post/collection/Item';
 
+const findPostCollectionById = async (id: string) => {
+	return db.query.postCollection.findFirst({
+		where: (postCollection, { eq }) => eq(postCollection.id, id)
+	});
+};
+
 builder.mutationField('createPostCollection', (t) =>
 	t.field({
 		type: PostCollection,
@@ -16,7 +22,22 @@ builder.mutationField('createPostCollection', (t) =>
 			visibility: t.arg.string({ defaultValue: 'PUBLIC' })
 		},
 		resolve: async (_root, args, ctx: Context) => {
-			const createPostCollection = await db
+			const originalPostCollection =
+				await db.query.postCollection.findFirst({
+					where: (postCollection, { and, eq }) =>
+						and(
+							eq(postCollection.name, args.name),
+							eq(postCollection.userId, ctx.oidc.sub)
+						)
+				});
+
+			if (originalPostCollection) {
+				throw new GraphQLError('Post collection already exists.', {
+					extensions: { code: 'POST_COLLECTION_ALREADY_EXISTS' }
+				});
+			}
+
+			const newPostCollection = await db
 				.insert(postCollection)
 				.values({
 					name: args.name,
@@ -27,7 +48,7 @@ builder.mutationField('createPostCollection', (t) =>
 				.returning()
 				.execute();
 
-			return createPostCollection[0];
+			return newPostCollection[0];
 		}
 	})
 );
@@ -42,10 +63,9 @@ builder.mutationField('updatePostCollection', (t) =>
 			visibility: t.arg.string({ defaultValue: 'PUBLIC' })
 		},
 		resolve: async (_root, args, ctx: Context) => {
-			const originalPostCollection =
-				await db.query.postCollection.findFirst({
-					where: (post, { eq }) => eq(post.id, args.id)
-				});
+			const originalPostCollection = await findPostCollectionById(
+				args.id
+			);
 
 			if (!originalPostCollection) {
 				throw new GraphQLError('Post collection not found.', {
@@ -76,10 +96,9 @@ builder.mutationField('deletePostCollection', (t) =>
 			id: t.arg.string({ required: true })
 		},
 		resolve: async (_root, args, ctx: Context) => {
-			const originalPostCollection =
-				await db.query.postCollection.findFirst({
-					where: (post, { eq }) => eq(post.id, args.id)
-				});
+			const originalPostCollection = await findPostCollectionById(
+				args.id
+			);
 
 			if (!originalPostCollection) {
 				throw new GraphQLError('Post collection not found.', {
@@ -105,10 +124,9 @@ builder.mutationField('addPostToCollection', (t) =>
 			postId: t.arg.string({ required: true })
 		},
 		resolve: async (_root, args, ctx: Context) => {
-			const originalPostCollection =
-				await db.query.postCollection.findFirst({
-					where: (post, { eq }) => eq(post.id, args.id)
-				});
+			const originalPostCollection = await findPostCollectionById(
+				args.id
+			);
 
 			if (!originalPostCollection) {
 				throw new GraphQLError('Post collection not found.', {
@@ -116,7 +134,7 @@ builder.mutationField('addPostToCollection', (t) =>
 				});
 			}
 
-			const updatedPostCollection = await db
+			const newPostCollectionItem = await db
 				.insert(postCollectionItem)
 				.values({
 					collectionId: args.id,
@@ -125,7 +143,7 @@ builder.mutationField('addPostToCollection', (t) =>
 				.returning()
 				.execute();
 
-			return updatedPostCollection[0];
+			return newPostCollectionItem[0];
 		}
 	})
 );
@@ -138,10 +156,9 @@ builder.mutationField('removePostFromCollection', (t) =>
 			postId: t.arg.string({ required: true })
 		},
 		resolve: async (_root, args, ctx: Context) => {
-			const originalPostCollection =
-				await db.query.postCollection.findFirst({
-					where: (post, { eq }) => eq(post.id, args.id)
-				});
+			const originalPostCollection = await findPostCollectionById(
+				args.id
+			);
 
 			if (!originalPostCollection) {
 				throw new GraphQLError('Post collection not found.', {
@@ -157,7 +174,6 @@ builder.mutationField('removePostFromCollection', (t) =>
 						eq(postCollectionItem.postId, args.postId)
 					)
 				)
-				.returning()
 				.execute();
 
 			return true;

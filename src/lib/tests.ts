@@ -37,16 +37,22 @@ export async function createUser(data: {
 	sub: string;
 	email?: string;
 	preferred_username?: string;
-	type?: 'PUBLIC' | 'PRIVATE' | 'ARTIST';
+	type?: 'PUBLIC' | 'PRIVATE';
 }) {
-	await db.insert(user).values({
-		id: data.sub,
-		username: data.preferred_username ?? faker.internet.username(),
-		email: data.email! ?? faker.internet.email(),
-		type: data.type ?? 'PUBLIC'
-	});
+	const userdb = await db
+		.insert(user)
+		.values({
+			id: data.sub,
+			username: data.preferred_username ?? faker.internet.username(),
+			email: data.email! ?? faker.internet.email(),
+			type: data.type ?? 'PUBLIC'
+		})
+		.returning()
+		.execute();
 
-	return tokenClient.set(`tokens:${data.sub}`, JSON.stringify(data));
+	await tokenClient.set(`tokens:${data.sub}`, JSON.stringify(data));
+
+	return userdb[0];
 }
 
 /**

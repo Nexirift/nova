@@ -43,15 +43,6 @@ builder.mutationField('acceptFollowRequest', (t) =>
 		},
 		// TODO: Add auth scope.
 		resolve: async (_root, args, ctx: Context) => {
-			if (ctx.oidc.sub === args.id) {
-				throw new GraphQLError(
-					`You cannot accept your own follow request.`,
-					{
-						extensions: { code: 'CANNOT_ACCEPT_OWN_FOLLOW_REQUEST' }
-					}
-				);
-			}
-
 			const requestedRelationship =
 				await db.query.userRelationship.findFirst({
 					where: (userRelationship, { and }) =>
@@ -89,21 +80,12 @@ builder.mutationField('acceptFollowRequest', (t) =>
 
 builder.mutationField('denyFollowRequest', (t) =>
 	t.field({
-		type: UserRelationship,
+		type: 'Boolean',
 		args: {
 			id: t.arg.string({ required: true })
 		},
 		// TODO: Add auth scope.
 		resolve: async (_root, args, ctx: Context) => {
-			if (ctx.oidc.sub === args.id) {
-				throw new GraphQLError(
-					`You cannot deny your own follow request.`,
-					{
-						extensions: { code: 'CANNOT_DENY_OWN_FOLLOW_REQUEST' }
-					}
-				);
-			}
-
 			const requestedRelationship =
 				await db.query.userRelationship.findFirst({
 					where: (userRelationship, { and }) =>
@@ -123,7 +105,7 @@ builder.mutationField('denyFollowRequest', (t) =>
 				);
 			}
 
-			return db
+			await db
 				.delete(userRelationship)
 				.where(
 					and(
@@ -134,6 +116,8 @@ builder.mutationField('denyFollowRequest', (t) =>
 				)
 				.returning()
 				.then((res) => res[0]);
+
+			return true;
 		}
 	})
 );
@@ -144,16 +128,9 @@ async function modifyRelationship(
 	args: { id: string; reason?: string | null },
 	type: 'BLOCK' | 'UNBLOCK' | 'MUTE' | 'UNMUTE' | 'FOLLOW' | 'UNFOLLOW'
 ): Promise<UserRelationshipSchemaType | null> {
-	// Check if ID is provided
-	if (!args.id) {
-		throw new GraphQLError('You must provide an ID.', {
-			extensions: { code: 'MISSING_ID' }
-		});
-	}
-
 	// Prevent users from performing actions on themselves
 	if (ctx.oidc.sub === args.id) {
-		throw new GraphQLError(`You cannot ${type} yourself.`, {
+		throw new GraphQLError(`You cannot ${type.toLowerCase()} yourself.`, {
 			extensions: { code: `CANNOT_${type.toUpperCase()}_SELF` }
 		});
 	}

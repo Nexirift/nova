@@ -56,7 +56,7 @@ Post.implement({
 		content: t.exposeString('content', {
 			authScopes: async (parent, _args, context, _info) => {
 				const user = await getUser(parent.authorId, context.oidc?.sub);
-				return privacyGuardian(user, context);
+				return privacyGuardian(user, context.oidc);
 			},
 			unauthorizedResolver: () => null
 		}),
@@ -83,7 +83,7 @@ Post.implement({
 			},
 			authScopes: async (parent, _args, context, _info) => {
 				const user = await getUser(parent.authorId, context.oidc?.sub);
-				return privacyGuardian(user, context);
+				return privacyGuardian(user, context.oidc);
 			},
 			unauthorizedResolver: () => [],
 			resolve: async (post, args, context: Context) => {
@@ -105,7 +105,7 @@ Post.implement({
 						postInteraction.userId,
 						context.oidc?.sub
 					);
-					const check = await privacyGuardian(user, context);
+					const check = await privacyGuardian(user, context.oidc);
 
 					if (check) {
 						finalResult.push(postInteraction);

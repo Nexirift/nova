@@ -34,13 +34,6 @@ async function postInteract(
 	args: { id: string; reason?: string | null },
 	type: 'LIKE' | 'UNLIKE' | 'REPOST' | 'UNREPOST'
 ): Promise<PostInteractionSchemaType | null> {
-	// Check if ID is provided
-	if (!args.id) {
-		throw new GraphQLError('You must provide an ID.', {
-			extensions: { code: 'MISSING_ID' }
-		});
-	}
-
 	const post = await db.query.post.findFirst({
 		where: (post, { eq }) => eq(post.id, args.id),
 		with: {
@@ -54,7 +47,7 @@ async function postInteract(
 		});
 	}
 
-	if ((await privacyGuardian(post.author, ctx)) === false) {
+	if ((await privacyGuardian(post.author, ctx.oidc)) === false) {
 		throw new GraphQLError('You cannot interact with this post.', {
 			extensions: { code: 'POST_PRIVACY' }
 		});
@@ -109,7 +102,11 @@ async function postInteract(
 	} else {
 		if (!existingInteraction) {
 			throw new GraphQLError(errorMap[type], {
-				extensions: { code: `POST_NOT_${type}ED` }
+				extensions: {
+					code: `POST_NOT_${
+						type.startsWith('UN') ? type.replace('UN', '') : type
+					}ED`
+				}
 			});
 		}
 

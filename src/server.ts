@@ -15,6 +15,8 @@ import {
 import { isTestMode } from './lib/tests';
 import { redisClient, syncClient, tokenClient } from './redis';
 import { schema } from './schema';
+import debug from 'debug';
+import { enableAll } from './lib/logger';
 
 require('dotenv').config();
 
@@ -92,6 +94,7 @@ export async function startServer() {
 		)}`
 	);
 	if (isTestMode) {
+		enableAll();
 		console.log('🧪 Running in test mode');
 	}
 	console.log('\x1b[0m');

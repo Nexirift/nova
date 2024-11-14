@@ -12,7 +12,7 @@ import { UserRelationship } from './Relationship';
 import { UserVerification } from './Verification';
 
 export const UserType = builder.enumType('UserType', {
-	values: ['PUBLIC', 'PRIVATE', 'ARTIST']
+	values: ['PUBLIC', 'PRIVATE']
 });
 
 export const User = builder.objectRef<UserSchemaType>('User');
@@ -50,7 +50,7 @@ User.implement({
 			type: [UserProfileField],
 			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context),
+				privacyGuardian(parent, context.oidc),
 			unauthorizedResolver: () => [],
 			resolve: async (user) => {
 				const result = await db.query.userProfileField.findMany({
@@ -86,7 +86,7 @@ User.implement({
 			type: [Post],
 			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context),
+				privacyGuardian(parent, context.oidc),
 			args: {
 				first: t.arg({ type: 'Int' }),
 				offset: t.arg({ type: 'Int' }),
@@ -115,7 +115,7 @@ User.implement({
 			type: [PostMedia],
 			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context),
+				privacyGuardian(parent, context.oidc),
 			unauthorizedResolver: () => [],
 			resolve: async (user) => {
 				const result = await db.query.post.findMany({
@@ -141,7 +141,7 @@ User.implement({
 			type: [PostInteraction],
 			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context),
+				privacyGuardian(parent, context.oidc),
 			args: {
 				first: t.arg({ type: 'Int' }),
 				offset: t.arg({ type: 'Int' }),
@@ -179,7 +179,7 @@ User.implement({
 				after: t.arg({ type: 'Int' })
 			},
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context),
+				privacyGuardian(parent, context.oidc),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args, context: Context) => {
 				const to = await db.query.userRelationship.findMany({

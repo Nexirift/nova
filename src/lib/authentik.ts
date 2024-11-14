@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { authentikLog } from './logger';
 
 export const internalUsers = ['akadmin', '^ak-outpost-[a-f0-9]{32}$'];
 
@@ -23,6 +24,8 @@ export function convertModelToUser(jsonObject: { body: string }) {
 		type = modelData.substring(0, firstSpace).replace(':', '');
 		modelData = modelData.substring(firstSpace);
 	}
+
+	authentikLog(`Type: ${type} with data: ${modelData}`);
 
 	// Parse the model data as JSON
 	return {

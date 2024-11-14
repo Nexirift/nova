@@ -13,7 +13,7 @@ import {
 	userVerification
 } from '..';
 
-export const userType = pgEnum('user_type', ['PUBLIC', 'PRIVATE', 'ARTIST']);
+export const userType = pgEnum('user_type', ['PUBLIC', 'PRIVATE']);
 
 export const user = pgTable('user', {
 	id: text('id')
