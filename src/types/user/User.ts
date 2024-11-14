@@ -55,7 +55,10 @@ User.implement({
 			resolve: async (user) => {
 				const result = await db.query.userProfileField.findMany({
 					where: (userProfileField, { eq }) =>
-						eq(userProfileField.userId, user.id)
+						eq(userProfileField.userId, user.id),
+					orderBy: (userProfileField, { asc }) => [
+						asc(userProfileField.createdAt)
+					]
 				});
 				return result!;
 			}
