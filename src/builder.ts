@@ -1,9 +1,13 @@
 import ValidationPlugin from '@pothos/plugin-validation';
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import ErrorsPlugin from '@pothos/plugin-errors';
+import SmartSubscriptionsPlugin, {
+	subscribeOptionsFromIterator
+} from '@pothos/plugin-smart-subscriptions';
 import SchemaBuilder from '@pothos/core';
 import { Context } from './context';
 import { DateTimeResolver } from 'graphql-scalars';
+import { pubsub } from './pubsub';
 
 export const builder = new SchemaBuilder<{
 	Context: Context;
@@ -14,7 +18,12 @@ export const builder = new SchemaBuilder<{
 		};
 	};
 }>({
-	plugins: [ScopeAuthPlugin, ValidationPlugin, ErrorsPlugin],
+	plugins: [
+		ScopeAuthPlugin,
+		ValidationPlugin,
+		ErrorsPlugin,
+		SmartSubscriptionsPlugin
+	],
 	validationOptions: {
 		// optionally customize how errors are formatted
 		validationError: (zodError, args, context, info) => {
@@ -27,6 +36,11 @@ export const builder = new SchemaBuilder<{
 		// Recommended when using subscriptions
 		// when this is not set, auth checks are run when event is resolved rather than when the subscription is created
 		authorizeOnSubscribe: true
+	},
+	smartSubscriptions: {
+		...subscribeOptionsFromIterator((name) =>
+			pubsub.asyncIterableIterator(name)
+		)
 	}
 });
 

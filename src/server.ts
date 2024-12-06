@@ -16,6 +16,8 @@ import { isTestMode } from './lib/tests';
 import { redisClient, syncClient, tokenClient } from './redis';
 import { schema } from './schema';
 import { enableAll } from './lib/logger';
+import { makeHandler, handleProtocols } from 'graphql-ws/lib/use/bun';
+import { pubsub } from './pubsub';
 
 require('dotenv').config();
 
@@ -29,18 +31,52 @@ const yoga = createYoga({
 
 export async function startServer() {
 	const server = Bun.serve({
-		async fetch(req) {
-			const url = new URL(req.url);
-			if (url.pathname === '/upload') {
-				// TODO: Remove this and use event notifications instead.
-				// We are waiting on the Backblaze B2 team to allow us.
-				return mediaUploadEndpoint(req);
-			} else if (url.pathname.startsWith('/webhook/')) {
-				return webhookEndpoint(req);
+		async fetch(req, server) {
+			// determine whether or not the user is trying to access websockets
+			// this probably isn't perfect but i don't know any other ways to do this
+			if (
+				req.headers.get('sec-websocket-protocol') ||
+				req.headers.get('sec-websocket-version') ||
+				req.headers.get('sec-websocket-key') ||
+				req.headers.get('sec-websocket-extensions') ||
+				req.headers.get('upgrade') === 'websocket' ||
+				req.headers.get('connection') === 'upgrade'
+			) {
+				if (req.headers.get('upgrade') != 'websocket') {
+					return new Response('Upgrade Required', {
+						status: 426
+					});
+				}
+				if (
+					!handleProtocols(
+						req.headers.get('sec-websocket-protocol') || ''
+					)
+				) {
+					return new Response('Bad Request', { status: 404 });
+				}
+				if (!server.upgrade(req)) {
+					return new Response('Internal Server Error', {
+						status: 500
+					});
+				}
+				return new Response();
 			} else {
-				return yoga.fetch(req);
+				const url = new URL(req.url);
+				if (url.pathname === '/upload') {
+					// TODO: Remove this and use event notifications instead.
+					// We are waiting on the Backblaze B2 team to allow us.
+					return mediaUploadEndpoint(req);
+				} else if (url.pathname === '/wstest') {
+					pubsub.publish('dbUpdatedUser', {});
+					return new Response();
+				} else if (url.pathname.startsWith('/webhook/')) {
+					return webhookEndpoint(req);
+				} else {
+					return yoga.fetch(req);
+				}
 			}
 		},
+		websocket: makeHandler({ schema, context: { pubsub } }),
 		port: isTestMode ? 25447 : process.env.PORT ?? 3000
 	});
 
@@ -87,9 +123,15 @@ export async function startServer() {
 		console.log('🔑 Authentication Server: Test Mode');
 	}
 	console.log(
-		`🚀 Serving at ${new URL(
+		`🚀 Serving HTTP at ${new URL(
 			yoga.graphqlEndpoint,
 			`http://${server.hostname}:${server.port}`
+		)}`
+	);
+	console.log(
+		`🔌 Serving WS at ${new URL(
+			yoga.graphqlEndpoint,
+			`ws://${server.hostname}:${server.port}`
 		)}`
 	);
 	if (isTestMode) {
