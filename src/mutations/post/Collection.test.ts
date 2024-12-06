@@ -151,7 +151,8 @@ test('Authenticated | Collections - It should add a post to a collection', async
 	await db.insert(post).values({
 		id: existingPost,
 		content: 'test',
-		authorId: user1
+		authorId: user1,
+		published: true
 	});
 
 	const data = await makeGQLRequest(
@@ -208,7 +209,8 @@ test('Authenticated | Collections - It should remove a post from a collection', 
 	await db.insert(post).values({
 		id: existingPost,
 		content: 'test',
-		authorId: user1
+		authorId: user1,
+		published: true
 	});
 
 	await db.insert(postCollectionItem).values({
@@ -217,11 +219,19 @@ test('Authenticated | Collections - It should remove a post from a collection', 
 	});
 
 	const data = await makeGQLRequest(
-		`mutation { removePostFromCollection(id: "${existingPostCollection}", postId: "${existingPost}") }`,
+		`mutation { removePostFromCollection(id: "${existingPostCollection}", postId: "${existingPost}") { collection { id } post { id } } }`,
 		user1
 	);
 
-	expect(data).toHaveProperty('data.removePostFromCollection', true);
+	expect(data).toHaveProperty(
+		'data.removePostFromCollection.collection.id',
+		existingPostCollection
+	);
+
+	expect(data).toHaveProperty(
+		'data.removePostFromCollection.post.id',
+		existingPost
+	);
 
 	await cleanup(user1, existingPostCollection, existingPost);
 });
@@ -325,7 +335,7 @@ test('Authenticated | Collections - It should fail if the post collection does n
 	const existingPost = faker.string.uuid();
 
 	const data = await makeGQLRequest(
-		`mutation { removePostFromCollection(id: "${existingPostCollection}", postId: "${existingPost}") }`,
+		`mutation { removePostFromCollection(id: "${existingPostCollection}", postId: "${existingPost}") { collection { id } post { id } } }`,
 		user1
 	);
 

@@ -17,7 +17,8 @@ const setupTest = async () => {
 	await db.insert(post).values({
 		id: existingPost,
 		content: 'test',
-		authorId: user1
+		authorId: user1,
+		published: true
 	});
 
 	return { existingPost, user1, user2 };
@@ -163,7 +164,8 @@ test(`Authenticated | Interactions - It should fail if the author of the post is
 	await db.insert(post).values({
 		id: existingPost,
 		content: 'test',
-		authorId: user2
+		authorId: user2,
+		published: true
 	});
 
 	const data = await makeGQLRequest(

@@ -16,7 +16,7 @@ test('Authenticated | General - It should create a new post', async () => {
 	const data = await makeGQLRequest(
 		`
 		mutation {
-			createPost(content: "${postContent}") {
+			createPost(content: "${postContent}", published: true) {
 				id
 				content
 			}
@@ -47,7 +47,8 @@ test('Authenticated | General - It should update an existing post', async () => 
 	await db.insert(post).values({
 		id: existingPost,
 		content: 'test',
-		authorId: user1
+		authorId: user1,
+		published: true
 	});
 
 	// Make the GraphQL request to update the post.
@@ -84,7 +85,8 @@ test('Authenticated | General - It should delete an existing post', async () => 
 	await db.insert(post).values({
 		id: existingPost,
 		content: 'test',
-		authorId: user1
+		authorId: user1,
+		published: true
 	});
 
 	// Make the GraphQL request to delete the post.

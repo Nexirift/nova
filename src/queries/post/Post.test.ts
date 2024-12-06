@@ -19,7 +19,8 @@ beforeEach(async () => {
 	await db.insert(post).values({
 		id: existingPost,
 		content: 'test',
-		authorId: user1
+		authorId: user1,
+		published: true
 	});
 });
 
