@@ -88,28 +88,49 @@ User.implement({
 		posts: t.field({
 			type: [Post],
 			nullable: true,
-			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context.oidc),
 			args: {
 				first: t.arg({ type: 'Int' }),
-				offset: t.arg({ type: 'Int' }),
-				type: t.arg({ type: 'String' })
+				offset: t.arg({ type: 'Int' })
 			},
+			authScopes: (parent, _args, context, _info) =>
+				privacyGuardian(parent, context.oidc),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args) => {
 				const result = await db.query.post.findMany({
-					where: (post, { and, eq, isNull, isNotNull }) =>
-						args.type === 'POST'
-							? and(
-									eq(post.authorId, user.id),
-									isNull(post.parentId)
-							  )
-							: args.type === 'REPLY'
-							? and(
-									eq(post.authorId, user.id),
-									isNotNull(post.parentId)
-							  )
-							: eq(post.authorId, user.id)
+					where: (post, { and, eq, isNull }) =>
+						and(
+							eq(post.authorId, user.id),
+							isNull(post.parentId),
+							eq(post.deleted, false),
+							eq(post.published, true)
+						),
+					limit: args.first!,
+					offset: args.offset!
+				});
+				return result!;
+			}
+		}),
+		replies: t.field({
+			type: [Post],
+			nullable: true,
+			args: {
+				first: t.arg({ type: 'Int' }),
+				offset: t.arg({ type: 'Int' })
+			},
+			authScopes: (parent, _args, context, _info) =>
+				privacyGuardian(parent, context.oidc),
+			unauthorizedResolver: () => [],
+			resolve: async (user, args) => {
+				const result = await db.query.post.findMany({
+					where: (post, { and, eq, isNotNull }) =>
+						and(
+							eq(post.authorId, user.id),
+							isNotNull(post.parentId),
+							eq(post.deleted, false),
+							eq(post.published, true)
+						),
+					limit: args.first!,
+					offset: args.offset!
 				});
 				return result!;
 			}

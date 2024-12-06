@@ -14,6 +14,15 @@ import { PostPoll } from './Poll';
 export const Post = builder.objectRef<PostSchemaType>('Post');
 
 Post.implement({
+	authScopes: async (_parent, context) => {
+		if (!_parent.published && context.oidc?.sub === _parent.authorId) {
+			throw new GraphQLError('You cannot view this post.', {
+				extensions: { code: 'UNAUTHORIZED' }
+			});
+		}
+		return true;
+	},
+	runScopesOnType: true,
 	fields: (t) => ({
 		id: t.exposeString('id', { nullable: false }),
 		author: t.field({
@@ -167,11 +176,19 @@ Post.implement({
 				return result!.length ?? 0;
 			}
 		}),
-		/* TODO: IMPLEMENT */
 		repostsCount: t.field({
 			type: 'Int',
 			nullable: false,
-			resolve: () => 5483958
+			resolve: async (parent) => {
+				const result = await db.query.postInteraction.findMany({
+					where: (postInteraction, { and, eq }) =>
+						and(
+							eq(postInteraction.postId, parent.id),
+							eq(postInteraction.type, 'REPOST')
+						)
+				});
+				return result!.length ?? 0;
+			}
 		}),
 		repliesCount: t.field({
 			type: 'Int',
@@ -183,11 +200,34 @@ Post.implement({
 				return result!.length ?? 0;
 			}
 		}),
-		/* TODO: IMPLEMENT */
+		replied: t.field({
+			type: 'Boolean',
+			nullable: false,
+			resolve: async (parent, _args, context: Context) => {
+				const result = await db.query.post.findMany({
+					where: (post, { and, eq }) =>
+						and(
+							eq(post.parentId, parent.id),
+							eq(post.authorId, context.oidc?.sub)
+						)
+				});
+				return result!.length > 0;
+			}
+		}),
 		reposted: t.field({
 			type: 'Boolean',
 			nullable: false,
-			resolve: () => false
+			resolve: async (parent, _args, context: Context) => {
+				const result = await db.query.postInteraction.findMany({
+					where: (post, { and, eq }) =>
+						and(
+							eq(post.userId, context.oidc?.sub),
+							eq(post.postId, parent.id),
+							eq(post.type, 'REPOST')
+						)
+				});
+				return result!.length > 0;
+			}
 		}),
 		collectionCount: t.field({
 			type: 'Int',
@@ -200,7 +240,7 @@ Post.implement({
 				return result!.length ?? 0;
 			}
 		}),
-		isInCollection: t.field({
+		inCollection: t.field({
 			type: 'Boolean',
 			nullable: false,
 			resolve: async (post, args, context: Context) => {

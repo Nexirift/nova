@@ -150,7 +150,7 @@ builder.mutationField('addPostToCollection', (t) =>
 
 builder.mutationField('removePostFromCollection', (t) =>
 	t.field({
-		type: 'Boolean',
+		type: PostCollectionItem,
 		args: {
 			id: t.arg.string({ required: true }),
 			postId: t.arg.string({ required: true })
@@ -176,7 +176,7 @@ builder.mutationField('removePostFromCollection', (t) =>
 				)
 				.execute();
 
-			return true;
+			return { collectionId: args.id, postId: args.postId };
 		}
 	})
 );
