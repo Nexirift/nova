@@ -75,7 +75,9 @@ export async function startServer() {
 			}
 		},
 		websocket: makeHandler({ schema, context: { pubsub } }),
-		port: isTestMode ? 25447 : process.env.PORT ?? 3000
+		port: isTestMode ? 25447 : process.env.PORT ?? 3000,
+		hostname: Bun.env.HOST || 'localhost',
+		development: !!(Bun.env.NODE_ENV === 'development') || isTestMode
 	});
 
 	// Connect to Redis.
@@ -122,7 +124,7 @@ export async function startServer() {
 		console.log('🔑 Authentication Server: Test Mode');
 	}
 	console.log(
-		`🚀 Serving HTTP at ${new URL(
+		`🌐 Serving HTTP at ${new URL(
 			yoga.graphqlEndpoint,
 			`http://${server.hostname}:${server.port}`
 		)}`
