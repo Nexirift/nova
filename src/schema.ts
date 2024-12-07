@@ -6,5 +6,6 @@ import './types';
 
 builder.queryType({});
 builder.mutationType({});
+builder.subscriptionType({});
 
 export const schema = builder.toSchema();

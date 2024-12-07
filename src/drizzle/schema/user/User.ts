@@ -2,7 +2,7 @@ import { InferSelectModel, relations, sql } from 'drizzle-orm';
 import { boolean, pgEnum, pgTable, timestamp } from 'drizzle-orm/pg-core';
 import {
 	citext,
-	conversationParticipant,
+	userConversationParticipant,
 	post,
 	postCollection,
 	postInteraction,
@@ -56,7 +56,9 @@ export const userRelations = relations(user, ({ one, many }) => ({
 	ownedPlanets: many(userPlanet),
 	joinedPlanets: many(userPlanetMember),
 	settings: many(userSetting),
-	conversations: many(conversationParticipant),
+	conversations: many(userConversationParticipant, {
+		relationName: 'user_conversation_participants'
+	}),
 	collections: many(postCollection)
 }));
 

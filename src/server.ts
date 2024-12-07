@@ -67,9 +67,6 @@ export async function startServer() {
 					// TODO: Remove this and use event notifications instead.
 					// We are waiting on the Backblaze B2 team to allow us.
 					return mediaUploadEndpoint(req);
-				} else if (url.pathname === '/wstest') {
-					pubsub.publish('dbUpdatedUser', {});
-					return new Response();
 				} else if (url.pathname.startsWith('/webhook/')) {
 					return webhookEndpoint(req);
 				} else {
@@ -141,19 +138,6 @@ export async function startServer() {
 		console.log('🧪 Running in test mode');
 	}
 	console.log('\x1b[0m');
-
-	if (
-		(await db
-			.execute(
-				sql`SELECT * FROM pg_available_extensions WHERE name = 'citext';`
-			)
-			.then((r) => r.rows[0].installed_version)) === null
-	) {
-		console.log(
-			'🔑 Citext extension has not been found on the database. We will attempt to install it now.'
-		);
-		await db.execute(sql`CREATE EXTENSION IF NOT EXISTS citext;`);
-	}
 }
 
 if (!isTestMode) {
