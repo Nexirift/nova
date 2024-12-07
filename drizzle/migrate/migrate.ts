@@ -9,7 +9,7 @@ const migrationsFolder = process.argv[2] ?? '../drizzle';
 dotenv.config({ path: __dirname + '/../.env' });
 
 export const dbClient = new Client({
-	connectionString: process.env.DATABASE_URL as string
+	connectionString: Bun.env.DATABASE_URL as string
 });
 
 const db = drizzle(dbClient);

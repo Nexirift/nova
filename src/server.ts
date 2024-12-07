@@ -1,4 +1,4 @@
-import { useOIDC } from '@nexirift/plugin-oidc';
+import { OIDCToken, useOIDC } from '@nexirift/plugin-oidc';
 import { beforeAll } from 'bun:test';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import gradient from 'gradient-string';
@@ -19,10 +19,10 @@ import { enableAll } from './lib/logger';
 import { makeHandler, handleProtocols } from 'graphql-ws/lib/use/bun';
 import { pubsub } from './pubsub';
 import { sql } from 'drizzle-orm';
+import { authorize } from './lib/authentication';
+import { Context } from './context';
 
-require('dotenv').config();
-
-// Create a new instance of GraphQL Yoga with the schema and plugins
+// Create a new instance of GraphQL Yoga with the schema and plugins.
 const yoga = createYoga({
 	schema: schema,
 	graphiql: false,
@@ -33,8 +33,8 @@ const yoga = createYoga({
 export async function startServer() {
 	const server = Bun.serve({
 		async fetch(req, server) {
-			// determine whether or not the user is trying to access websockets
-			// this probably isn't perfect but i don't know any other ways to do this
+			// Determine whether or not the user is trying to access websockets.
+			// This probably isn't perfect but i don't know any other ways to do this.
 			if (
 				req.headers.get('sec-websocket-protocol') ||
 				req.headers.get('sec-websocket-version') ||
@@ -43,11 +43,13 @@ export async function startServer() {
 				req.headers.get('upgrade') === 'websocket' ||
 				req.headers.get('connection') === 'upgrade'
 			) {
+				// Require websockets to be upgraded.
 				if (req.headers.get('upgrade') != 'websocket') {
 					return new Response('Upgrade Required', {
 						status: 426
 					});
 				}
+				// Require the protocol to be valid.
 				if (
 					!handleProtocols(
 						req.headers.get('sec-websocket-protocol') || ''
@@ -55,12 +57,18 @@ export async function startServer() {
 				) {
 					return new Response('Bad Request', { status: 404 });
 				}
-				if (!server.upgrade(req)) {
+				// Upgrade the connection.
+				// This function uses a hacky way to pass the Authorization header.
+				// Hopefully, Bun will provide the full request object in the future.
+				if (
+					!server.upgrade(req, {
+						data: req.headers.get('authorization')
+					})
+				) {
 					return new Response('Internal Server Error', {
 						status: 500
 					});
 				}
-				return new Response();
 			} else {
 				const url = new URL(req.url);
 				if (url.pathname === '/upload') {
@@ -68,15 +76,42 @@ export async function startServer() {
 					// We are waiting on the Backblaze B2 team to allow us.
 					return mediaUploadEndpoint(req);
 				} else if (url.pathname.startsWith('/webhook/')) {
+					// Handle webhooks.
 					return webhookEndpoint(req);
 				} else {
+					// Let the GraphQL server handle the rest.
 					return yoga.fetch(req);
 				}
 			}
 		},
-		websocket: makeHandler({ schema, context: { pubsub } }),
-		port: isTestMode ? 25447 : process.env.PORT ?? 3000,
-		hostname: Bun.env.HOST || 'localhost',
+		websocket: makeHandler({
+			schema,
+			context: async (ctx) => {
+				if (ctx.extra.socket.data) {
+					const checkAuth = await authorize(
+						Config.OpenID,
+						(ctx.extra.socket.data! as string).split(' ')[1]
+					);
+					try {
+						return {
+							oidc: JSON.parse(checkAuth!) as OIDCToken,
+							pubsub
+						} as Context;
+					} catch (e) {
+						ctx.extra.socket.send(
+							JSON.stringify({
+								type: 'pong',
+								payload: { message: checkAuth! }
+							})
+						);
+						ctx.extra.socket.close(3003, checkAuth);
+					}
+				} else {
+					return { pubsub } as Context;
+				}
+			}
+		}),
+		port: isTestMode ? 25447 : Bun.env.PORT ?? 3000,
 		development: !!(Bun.env.NODE_ENV === 'development') || isTestMode
 	});
 
@@ -100,7 +135,7 @@ export async function startServer() {
 	// Log the server information to the console.
 	console.log('');
 	console.log(
-		gradient('yellow', 'cyan').multiline(
+		gradient(['yellow', 'cyan']).multiline(
 			[
 				'███████╗██████╗  █████╗ ██████╗ ██╗  ██╗',
 				'██╔════╝██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝',
@@ -117,7 +152,7 @@ export async function startServer() {
 	if (!isTestMode) {
 		console.log(
 			`🔑 Authentication Server: ${
-				new URL(process.env.AUTH_INTROSPECT_URL!).hostname
+				new URL(Bun.env.AUTH_INTROSPECT_URL!).hostname
 			}`
 		);
 	} else {

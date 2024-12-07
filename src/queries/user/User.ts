@@ -37,6 +37,9 @@ builder.queryField('getUser', (t) =>
 builder.queryField('me', (t) =>
 	t.field({
 		type: User,
+		authScopes: {
+			loggedIn: true
+		},
 		resolve: async (_root, _args, ctx: Context) => {
 			const user = await db.query.user.findFirst({
 				where: (user, { eq }) => eq(user.id, ctx.oidc.sub)

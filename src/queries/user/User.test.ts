@@ -62,7 +62,7 @@ test('Authenticated | General - It should check the me endpoint (Synced)', async
 test('Authenticated | General - It should check the me endpoint (Not Synced)', async () => {
 	const me = faker.string.uuid();
 
-	await tokenClient.set(`tokens:${me}`, JSON.stringify({ id: me }));
+	await tokenClient.set(`tokens:${me}`, JSON.stringify({ sub: me }));
 
 	const data = await makeGQLRequest(meQuery, me);
 

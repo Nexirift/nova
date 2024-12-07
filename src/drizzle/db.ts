@@ -3,7 +3,7 @@ import { Client as prodClient } from 'pg'; // for production use
 import * as schema from './schema'; // get all the schema
 
 export const prodDbClient = new prodClient({
-	connectionString: process.env.DATABASE_URL as string
+	connectionString: Bun.env.DATABASE_URL as string
 });
 
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -13,7 +13,7 @@ let db:
 	| (NodePgDatabase<typeof schema> & { $client: prodClient })
 	| (PgliteDatabase<typeof schema> & { $client: any });
 
-if (process.env.NODE_ENV !== 'test') {
+if (Bun.env.NODE_ENV !== 'test') {
 	db = prodDrizzle(prodDbClient, { schema }); // we want to use a real database
 } else {
 	import('@electric-sql/pglite').then(({ PGlite: testClient }) => {

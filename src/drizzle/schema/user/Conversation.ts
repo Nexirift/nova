@@ -1,5 +1,11 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+	pgEnum,
+	pgTable,
+	primaryKey,
+	timestamp,
+	uuid
+} from 'drizzle-orm/pg-core';
 import { citext, user } from '..';
 
 export const userConversationType = pgEnum('user_conversation_type', [
@@ -24,13 +30,29 @@ export const userConversationRelations = relations(
 	})
 );
 
-export const userConversationMessage = pgTable('user_conversation_message', {
-	id: uuid('id').defaultRandom().primaryKey(),
-	conversationId: uuid('conversation_id').notNull(),
-	senderId: citext('sender_id').notNull(),
-	content: citext('content').notNull(),
-	createdAt: timestamp('created_at').notNull().defaultNow()
-});
+export const userConversationMessage = pgTable(
+	'user_conversation_message',
+	{
+		id: uuid('id').defaultRandom(),
+		conversationId: uuid('conversation_id').notNull(),
+		senderId: citext('sender_id').notNull(),
+		content: citext('content').notNull(),
+		createdAt: timestamp('created_at').notNull().defaultNow()
+	},
+	(t) => {
+		return {
+			pk: primaryKey({
+				columns: [
+					t.id,
+					t.conversationId,
+					t.senderId,
+					t.createdAt,
+					t.content
+				]
+			})
+		};
+	}
+);
 
 export const userConversationMessageRelations = relations(
 	userConversationMessage,
@@ -52,6 +74,13 @@ export const userConversationParticipant = pgTable(
 		conversationId: uuid('conversation_id').notNull(),
 		userId: citext('user_id').notNull(),
 		joinedAt: timestamp('joined_at').notNull().defaultNow()
+	},
+	(t) => {
+		return {
+			pk: primaryKey({
+				columns: [t.conversationId, t.userId]
+			})
+		};
 	}
 );
 

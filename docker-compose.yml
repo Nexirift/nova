@@ -12,6 +12,11 @@ services:
             - postgres
             - keydb
         restart: unless-stopped
+        healthcheck:
+            test: ['CMD-SHELL', 'curl -f http://localhost:3005 || exit 1']
+            interval: 1s
+            timeout: 5s
+            retries: 10
         networks:
             - spark
             - keydb
@@ -21,6 +26,11 @@ services:
         image: eqalpha/keydb:latest
         container_name: keydb
         restart: unless-stopped
+        healthcheck:
+            test: ['CMD-SHELL', 'redis-cli ping']
+            interval: 1s
+            timeout: 5s
+            retries: 10
         networks:
             - keydb
 

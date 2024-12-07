@@ -8,6 +8,7 @@ import SchemaBuilder from '@pothos/core';
 import { Context } from './context';
 import { DateTimeResolver } from 'graphql-scalars';
 import { pubsub } from './pubsub';
+import { GraphQLError } from 'graphql';
 
 export const builder = new SchemaBuilder<{
 	Context: Context;
@@ -16,6 +17,9 @@ export const builder = new SchemaBuilder<{
 			Input: Date;
 			Output: Date;
 		};
+	};
+	AuthScopes: {
+		loggedIn: boolean;
 	};
 }>({
 	plugins: [
@@ -32,10 +36,33 @@ export const builder = new SchemaBuilder<{
 		}
 	},
 	scopeAuth: {
-		authScopes: async (context) => ({}),
 		// Recommended when using subscriptions
 		// when this is not set, auth checks are run when event is resolved rather than when the subscription is created
-		authorizeOnSubscribe: true
+		authorizeOnSubscribe: true,
+		authScopes: async (context) => ({
+			loggedIn: !!context.oidc?.sub
+		}),
+		unauthorizedError: (parent, context, info, result) => {
+			if (context.oidc?.sub) {
+				return new GraphQLError(
+					'You do not have permission to access this resource.',
+					{
+						extensions: {
+							code: 'PERMISSION_DENIED'
+						}
+					}
+				);
+			} else {
+				return new GraphQLError(
+					'You must be logged in to access this resource.',
+					{
+						extensions: {
+							code: 'AUTHENTICATION_REQUIRED'
+						}
+					}
+				);
+			}
+		}
 	},
 	smartSubscriptions: {
 		...subscribeOptionsFromIterator((name) =>

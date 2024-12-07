@@ -58,6 +58,8 @@ async function authorize(oidcConfig: OIDCPluginOptionsBase, token: string) {
 			return oidcConfig.messages?.invalidPermissions;
 		}
 	}
+
+	return ct;
 }
 
 export { authorize };
