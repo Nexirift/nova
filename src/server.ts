@@ -12,7 +12,7 @@ import {
 	mediaUploadEndpoint,
 	webhookEndpoint
 } from './lib/server';
-import { isTestMode } from './lib/tests';
+import { isTestMode } from './lib/server';
 import { redisClient, syncClient, tokenClient } from './redis';
 import { schema } from './schema';
 import { enableAll } from './lib/logger';
@@ -94,6 +94,7 @@ export async function startServer() {
 		await createUsersFromRedisTokens();
 	} else {
 		// Migrate the database.
+		await db.execute(sql`CREATE EXTENSION IF NOT EXISTS citext;`);
 		await migrate(db, { migrationsFolder: './drizzle' });
 	}
 

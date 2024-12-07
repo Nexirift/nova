@@ -8,6 +8,9 @@ services:
             - '3005:3005'
         volumes:
             - ./.env:/usr/src/app/.env
+        depends_on:
+            - postgres
+            - keydb
         restart: unless-stopped
         networks:
             - spark
@@ -26,6 +29,7 @@ services:
         container_name: postgres
         environment:
             - POSTGRES_DB=spark
+            - POSTGRES_USER=spark
             - POSTGRES_PASSWORD=postgres
         volumes:
             - ./docker-data/postgres_data:/var/lib/postgresql/data

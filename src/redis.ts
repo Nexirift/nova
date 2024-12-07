@@ -1,10 +1,13 @@
 import { createClient } from 'redis';
-import RedisMemoryServer from 'redis-memory-server';
-import { isTestMode } from './lib/tests';
+import { isTestMode } from './lib/server';
 
 if (isTestMode) {
-	const testRedisClient = new RedisMemoryServer({ instance: { port: 1234 } });
-	testRedisClient.start();
+	import('redis-memory-server').then(({ default: RedisMemoryServer }) => {
+		const testRedisClient = new RedisMemoryServer({
+			instance: { port: 1234 }
+		});
+		testRedisClient.start();
+	});
 }
 
 // Create a Redis client using the createClient function.

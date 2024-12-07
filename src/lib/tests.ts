@@ -65,6 +65,3 @@ export async function removeUser(sub: string) {
 
 	return tokenClient.del(`tokens:${sub}`);
 }
-
-// Just a shortcut for checking if we are in test mode.
-export const isTestMode = process.env.NODE_ENV === 'test';

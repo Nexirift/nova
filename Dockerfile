@@ -6,6 +6,8 @@ WORKDIR /usr/src/app
 FROM base AS install
 RUN mkdir -p /temp/dev
 COPY package.json bun.lockb /temp/dev/
+# required in order for redis-memory-store to be installed
+RUN apt-get update && apt-get install -y build-essential
 RUN cd /temp/dev && bun install --frozen-lockfile
 
 # install with --production (exclude devDependencies)

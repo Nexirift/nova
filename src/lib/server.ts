@@ -11,7 +11,6 @@ import { postMedia, user } from '../drizzle/schema';
 import { syncClient, tokenClient } from '../redis';
 import { authorize } from './authentication';
 import { convertModelToUser, getHashedPk, internalUsers } from './authentik';
-import { isTestMode } from './tests';
 
 /**
  * "Legacy" endpoint for uploading media.
@@ -368,4 +367,12 @@ async function createUsersFromRedisTokens() {
 	);
 }
 
-export { createUsersFromRedisTokens, mediaUploadEndpoint, webhookEndpoint };
+// Just a shortcut for checking if we are in test mode.
+const isTestMode = process.env.NODE_ENV === 'test';
+
+export {
+	createUsersFromRedisTokens,
+	mediaUploadEndpoint,
+	webhookEndpoint,
+	isTestMode
+};
