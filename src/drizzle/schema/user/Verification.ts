@@ -1,12 +1,6 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import {
-	pgEnum,
-	pgTable,
-	primaryKey,
-	text,
-	timestamp
-} from 'drizzle-orm/pg-core';
-import { user } from '.';
+import { pgEnum, pgTable, primaryKey, timestamp } from 'drizzle-orm/pg-core';
+import { citext, user } from '..';
 
 export const userVerificationType = pgEnum('user_verification_type', [
 	'NOTABLE',
@@ -18,7 +12,7 @@ export const userVerificationType = pgEnum('user_verification_type', [
 export const userVerification = pgTable(
 	'user_verification',
 	{
-		userId: text('user_id')
+		userId: citext('user_id')
 			.notNull()
 			.references(() => user.id),
 		type: userVerificationType('user_verification_type').notNull(),

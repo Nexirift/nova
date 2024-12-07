@@ -1,6 +1,7 @@
 import { InferSelectModel, relations, sql } from 'drizzle-orm';
-import { boolean, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, pgEnum, pgTable, timestamp } from 'drizzle-orm/pg-core';
 import {
+	citext,
 	conversationParticipant,
 	post,
 	postCollection,
@@ -16,22 +17,22 @@ import {
 export const userType = pgEnum('user_type', ['PUBLIC', 'PRIVATE']);
 
 export const user = pgTable('user', {
-	id: text('id')
+	id: citext('id')
 		.default(sql`gen_random_uuid()`)
 		.primaryKey(),
-	email: text('email').unique(),
-	username: text('username').notNull().unique(),
-	displayName: text('display_name'),
-	bio: text('bio'),
-	extendedBio: text('extended_bio'),
-	avatar: text('avatar'),
-	banner: text('banner'),
-	background: text('background'),
+	email: citext('email').unique(),
+	username: citext('username').notNull().unique(),
+	displayName: citext('display_name'),
+	bio: citext('bio'),
+	extendedBio: citext('extended_bio'),
+	avatar: citext('avatar'),
+	banner: citext('banner'),
+	background: citext('background'),
 	suspended: boolean('suspended').default(false),
 	type: userType('user_type').default('PUBLIC'),
-	profession: text('profession'),
-	location: text('location'),
-	website: text('website'),
+	profession: citext('profession'),
+	location: citext('location'),
+	website: citext('website'),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at')
 		.notNull()

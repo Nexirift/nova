@@ -1,7 +1,6 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { json, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { post } from '.';
-import { user } from '..';
+import { json, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { citext, post, user } from '..';
 
 export const postPoll = pgTable('post_poll', {
 	id: uuid('id').defaultRandom().primaryKey(),
@@ -27,10 +26,10 @@ export const postPollVote = pgTable('post_poll_vote', {
 	postId: uuid('post_id')
 		.notNull()
 		.references(() => post.id),
-	userId: text('user_id')
+	userId: citext('user_id')
 		.notNull()
 		.references(() => user.id),
-	option: text('option').notNull(),
+	option: citext('option').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 

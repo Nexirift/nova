@@ -1,12 +1,6 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import {
-	pgEnum,
-	pgTable,
-	primaryKey,
-	text,
-	timestamp
-} from 'drizzle-orm/pg-core';
-import { user } from '.';
+import { pgEnum, pgTable, primaryKey, timestamp } from 'drizzle-orm/pg-core';
+import { citext, user } from '..';
 
 export const userRelationshipType = pgEnum('user_relationship_type', [
 	'FOLLOW',
@@ -18,14 +12,14 @@ export const userRelationshipType = pgEnum('user_relationship_type', [
 export const userRelationship = pgTable(
 	'user_relationship',
 	{
-		toId: text('to_id')
+		toId: citext('to_id')
 			.notNull()
 			.references(() => user.id, { onDelete: 'cascade' }),
-		fromId: text('from_id')
+		fromId: citext('from_id')
 			.notNull()
 			.references(() => user.id, { onDelete: 'cascade' }),
 		type: userRelationshipType('user_relationship_type').notNull(),
-		reason: text('reason'),
+		reason: citext('reason'),
 		createdAt: timestamp('created_at').notNull().defaultNow(),
 		updatedAt: timestamp('updated_at')
 			.notNull()

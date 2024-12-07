@@ -6,12 +6,10 @@ import {
 	pgEnum,
 	pgTable,
 	primaryKey,
-	text,
 	timestamp,
 	uuid
 } from 'drizzle-orm/pg-core';
-import { post } from '.';
-import { user } from '..';
+import { citext, post, user } from '..';
 
 export const postGiveawayType = pgEnum('post_giveaway_type', [
 	'GIVEAWAY',
@@ -72,7 +70,7 @@ export const postGiveawayEntry = pgTable('post_giveaway_entry', {
 	giveawayId: uuid('giveaway_id')
 		.notNull()
 		.references(() => postGiveaway.id),
-	userId: text('user_id')
+	userId: citext('user_id')
 		.notNull()
 		.references(() => user.id),
 	requirements: json('requirements').notNull(),

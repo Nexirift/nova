@@ -1,6 +1,6 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { organisation } from '..';
+import { pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { citext, organisation } from '..';
 
 export const organisationType = pgEnum('organisation_type', [
 	'GENERAL',
@@ -9,11 +9,11 @@ export const organisationType = pgEnum('organisation_type', [
 
 export const organisationRegistration = pgTable('organisation_registration', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	organisationId: text('organisation_id')
+	organisationId: citext('organisation_id')
 		.notNull()
 		.references(() => organisation.id),
-	number: text('number').notNull(),
-	country: text('country').notNull(),
+	number: citext('number').notNull(),
+	country: citext('country').notNull(),
 	type: organisationType('organisation_type').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at')

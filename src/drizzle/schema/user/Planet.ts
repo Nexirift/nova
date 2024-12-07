@@ -1,14 +1,14 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { post, user } from '..';
+import { pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { citext, post, user } from '..';
 
 export const userPlanet = pgTable('user_planet', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	creatorId: text('creator_id')
+	creatorId: citext('creator_id')
 		.notNull()
 		.references(() => user.id),
-	name: text('name').notNull(),
-	description: text('description'),
+	name: citext('name').notNull(),
+	description: citext('description'),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
@@ -22,7 +22,7 @@ export const userPlanetRelations = relations(userPlanet, ({ one, many }) => ({
 }));
 
 export const userPlanetMember = pgTable('user_planet_member', {
-	userId: text('user_id')
+	userId: citext('user_id')
 		.notNull()
 		.references(() => user.id),
 	planetId: uuid('planet_id')
@@ -46,7 +46,7 @@ export const userPlanetMemberRelations = relations(
 );
 
 export const userPlanetPost = pgTable('user_planet_post', {
-	userId: text('user_id')
+	userId: citext('user_id')
 		.notNull()
 		.references(() => user.id),
 	planetId: uuid('planet_id')

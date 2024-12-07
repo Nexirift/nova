@@ -3,11 +3,11 @@ import {
 	AnyPgColumn,
 	boolean,
 	pgTable,
-	text,
 	timestamp,
 	uuid
 } from 'drizzle-orm/pg-core';
 import {
+	citext,
 	postCollectionItem,
 	postEditHistory,
 	postGiveaway,
@@ -20,11 +20,11 @@ import {
 
 export const post = pgTable('post', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	authorId: text('author_id')
+	authorId: citext('author_id')
 		.notNull()
 		.references(() => user.id),
 	parentId: uuid('parent_id').references((): AnyPgColumn => post.id),
-	content: text('content').notNull(),
+	content: citext('content').notNull(),
 	published: boolean('published').notNull().default(false),
 	deleted: boolean('deleted').notNull().default(false),
 	pinned: boolean('pinned').notNull().default(false),

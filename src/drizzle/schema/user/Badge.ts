@@ -1,18 +1,12 @@
 import { relations } from 'drizzle-orm';
-import {
-	pgTable,
-	primaryKey,
-	text,
-	timestamp,
-	uuid
-} from 'drizzle-orm/pg-core';
-import { user } from '.';
+import { pgTable, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { citext, user } from '..';
 
 export const userBadge = pgTable('user_badge', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	name: text('name').notNull(),
-	description: text('description'),
-	media: text('media'),
+	name: citext('name').notNull(),
+	description: citext('description'),
+	media: citext('media'),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
@@ -23,7 +17,7 @@ export const userBadgeRelations = relations(userBadge, ({ many }) => ({
 export const userBadges = pgTable(
 	'user_badges',
 	{
-		userId: text('user_id')
+		userId: citext('user_id')
 			.notNull()
 			.references(() => user.id),
 		badgeId: uuid('badge_id')

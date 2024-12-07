@@ -1,11 +1,11 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { post } from '.';
+import { pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { citext, post } from '..';
 
 export const postMedia = pgTable('post_media', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	postId: uuid('post_id').references(() => post.id),
-	url: text('url').notNull(),
+	url: citext('url').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 

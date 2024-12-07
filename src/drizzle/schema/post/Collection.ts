@@ -1,6 +1,6 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgEnum, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core';
-import { post, user } from '..';
+import { pgEnum, pgTable, primaryKey, uuid } from 'drizzle-orm/pg-core';
+import { citext, post, user } from '..';
 
 export const postCollectionVisibility = pgEnum('post_collection_visibility', [
 	'PUBLIC',
@@ -9,12 +9,12 @@ export const postCollectionVisibility = pgEnum('post_collection_visibility', [
 
 export const postCollection = pgTable('post_collection', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	name: text('name').notNull(),
-	description: text('description'),
+	name: citext('name').notNull(),
+	description: citext('description'),
 	visibility: postCollectionVisibility('visibility')
 		.notNull()
 		.default('PRIVATE'),
-	userId: text('user_id')
+	userId: citext('user_id')
 		.notNull()
 		.references(() => user.id)
 });

@@ -1,7 +1,6 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgEnum, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core';
-import { post } from '.';
-import { user } from '..';
+import { pgEnum, pgTable, primaryKey, uuid } from 'drizzle-orm/pg-core';
+import { citext, post, user } from '..';
 
 export const postInteractionType = pgEnum('post_interaction_type', [
 	'LIKE',
@@ -11,7 +10,7 @@ export const postInteractionType = pgEnum('post_interaction_type', [
 export const postInteraction = pgTable(
 	'post_interaction',
 	{
-		userId: text('user_id')
+		userId: citext('user_id')
 			.notNull()
 			.references(() => user.id),
 		postId: uuid('post_id')

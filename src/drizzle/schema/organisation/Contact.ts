@@ -1,13 +1,13 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { organisation } from '..';
+import { pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { citext, organisation } from '..';
 
 export const organisationContact = pgTable('organisation_contact_info', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	name: text('name').notNull(),
-	email: text('email').notNull(),
-	phone: text('phone').notNull(),
-	address: text('address').notNull(),
+	name: citext('name').notNull(),
+	email: citext('email').notNull(),
+	phone: citext('phone').notNull(),
+	address: citext('address').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at')
 		.notNull()

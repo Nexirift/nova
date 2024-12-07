@@ -1,14 +1,14 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { user } from '.';
+import { pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { citext, user } from '..';
 
 export const userSetting = pgTable('user_setting', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	userId: text('user_id')
+	userId: citext('user_id')
 		.notNull()
 		.references(() => user.id),
-	key: text('key').notNull(),
-	value: text('value').notNull(),
+	key: citext('key').notNull(),
+	value: citext('value').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 

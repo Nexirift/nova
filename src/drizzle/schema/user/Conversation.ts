@@ -1,6 +1,6 @@
 import { relations } from 'drizzle-orm';
-import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { user } from '..';
+import { pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { citext, user } from '..';
 
 export const conversationType = pgEnum('conversation_type', [
 	'DIRECT',
@@ -23,8 +23,8 @@ export const conversationRelations = relations(conversation, ({ many }) => ({
 export const conversationMessage = pgTable('conversation_message', {
 	id: uuid('id').primaryKey(),
 	conversationId: uuid('conversation_id').notNull(),
-	senderId: text('sender_id').notNull(),
-	content: text('content').notNull(),
+	senderId: citext('sender_id').notNull(),
+	content: citext('content').notNull(),
 	createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
@@ -44,7 +44,7 @@ export const conversationMessageRelations = relations(
 
 export const conversationParticipant = pgTable('conversation_participant', {
 	conversationId: uuid('conversation_id').notNull(),
-	userId: text('user_id').notNull(),
+	userId: citext('user_id').notNull(),
 	joinedAt: timestamp('joined_at').notNull().defaultNow()
 });
 

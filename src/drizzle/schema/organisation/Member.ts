@@ -1,13 +1,6 @@
 import { InferSelectModel, relations } from 'drizzle-orm';
-import {
-	boolean,
-	pgEnum,
-	pgTable,
-	text,
-	timestamp,
-	uuid
-} from 'drizzle-orm/pg-core';
-import { organisation, user } from '..';
+import { boolean, pgEnum, pgTable, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { citext, organisation, user } from '..';
 
 export const organisationMemberRole = pgEnum('organisation_member_role', [
 	'OWNER',
@@ -17,15 +10,15 @@ export const organisationMemberRole = pgEnum('organisation_member_role', [
 
 export const organisationMember = pgTable('organisation_member', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	organisationId: text('organisation_id')
+	organisationId: citext('organisation_id')
 		.notNull()
 		.references(() => organisation.id),
-	userId: text('user_id')
+	userId: citext('user_id')
 		.notNull()
 		.references(() => user.id),
 	role: organisationMemberRole('organisation_member_role').notNull(),
 	affiliated: boolean('affiliated').notNull().default(false),
-	profession: text('profession'),
+	profession: citext('profession'),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at')
 		.notNull()

@@ -18,6 +18,7 @@ import { schema } from './schema';
 import { enableAll } from './lib/logger';
 import { makeHandler, handleProtocols } from 'graphql-ws/lib/use/bun';
 import { pubsub } from './pubsub';
+import { sql } from 'drizzle-orm';
 
 require('dotenv').config();
 
@@ -139,6 +140,19 @@ export async function startServer() {
 		console.log('🧪 Running in test mode');
 	}
 	console.log('\x1b[0m');
+
+	if (
+		(await db
+			.execute(
+				sql`SELECT * FROM pg_available_extensions WHERE name = 'citext';`
+			)
+			.then((r) => r.rows[0].installed_version)) === null
+	) {
+		console.log(
+			'🔑 Citext extension has not been found on the database. We will attempt to install it now.'
+		);
+		await db.execute(sql`CREATE EXTENSION IF NOT EXISTS citext;`);
+	}
 }
 
 if (!isTestMode) {
