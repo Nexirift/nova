@@ -3,7 +3,7 @@
 pwd
 
 echo "Migrating database..."
-bun db:migrate & PID=$!
+bun run db:migrate & PID=$!
 # Wait for migration to finish
 wait $PID
 

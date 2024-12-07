@@ -1,5 +1,3 @@
-version: '3'
-
 services:
     spark:
         build: .
@@ -12,15 +10,6 @@ services:
             - postgres
             - keydb
         restart: unless-stopped
-        healthcheck:
-            test: ['CMD-SHELL', 'curl -f http://localhost:3005 || exit 1']
-            interval: 1s
-            timeout: 5s
-            retries: 10
-        networks:
-            - spark
-            - keydb
-            - pgdb
 
     keydb:
         image: eqalpha/keydb:latest
@@ -31,8 +20,6 @@ services:
             interval: 1s
             timeout: 5s
             retries: 10
-        networks:
-            - keydb
 
     postgres:
         image: postgres:latest
@@ -49,10 +36,3 @@ services:
             interval: 1s
             timeout: 5s
             retries: 10
-        networks:
-            - pgdb
-
-networks:
-    spark:
-    keydb:
-    pgdb:

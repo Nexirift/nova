@@ -1,12 +1,11 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import dotenv from 'dotenv';
 import { Client } from 'pg';
 import { sql } from 'drizzle-orm';
 
 const migrationsFolder = process.argv[2] ?? '../drizzle';
 
-dotenv.config({ path: __dirname + '/../.env' });
+console.log(Bun.env.DATABASE_URL);
 
 export const dbClient = new Client({
 	connectionString: Bun.env.DATABASE_URL as string

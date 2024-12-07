@@ -9,7 +9,7 @@
 		"dev": "bun --watch src/server.ts",
 		"start": "bun src/server.ts",
 		"db:generate": "drizzle-kit generate",
-		"db:migrate": "dotenv bun drizzle/migrate/migrate.ts ./drizzle",
+		"db:migrate": "bun drizzle/migrate.ts ./drizzle",
 		"db:studio": "drizzle-kit studio"
 	},
 	"keywords": [],

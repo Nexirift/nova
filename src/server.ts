@@ -78,6 +78,9 @@ export async function startServer() {
 				} else if (url.pathname.startsWith('/webhook/')) {
 					// Handle webhooks.
 					return webhookEndpoint(req);
+				} else if (url.pathname === '/health') {
+					// Health check endpoint.
+					return new Response('OK', { status: 200 });
 				} else {
 					// Let the GraphQL server handle the rest.
 					return yoga.fetch(req);
