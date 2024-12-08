@@ -41,7 +41,7 @@ export function convertModelToUser(jsonObject: { body: string }) {
  */
 export function getHashedPk(pk: string) {
 	const hashedPk = createHash('sha256')
-		.update(pk + '-' + process.env.AUTH_INSTALLATION_ID)
+		.update(pk + '-' + Bun.env.AUTH_INSTALLATION_ID)
 		.digest('hex');
 	return hashedPk;
 }

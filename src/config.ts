@@ -4,10 +4,10 @@ import { tokenClient } from './redis';
 namespace Config {
 	export const OpenID: OIDCPluginOptionsBase = {
 		oidc: new OIDC({
-			introspect_url: process.env.AUTH_INTROSPECT_URL!,
-			userinfo_url: process.env.AUTH_USERINFO_URL,
-			client_id: process.env.AUTH_CLIENT_ID,
-			client_secret: process.env.AUTH_CLIENT_SECRET
+			introspect_url: Bun.env.AUTH_INTROSPECT_URL!,
+			userinfo_url: Bun.env.AUTH_USERINFO_URL,
+			client_id: Bun.env.AUTH_CLIENT_ID,
+			client_secret: Bun.env.AUTH_CLIENT_SECRET
 		}),
 		redis: tokenClient,
 		messages: {
