@@ -114,8 +114,8 @@ export async function startServer() {
 				}
 			}
 		}),
-		port: isTestMode ? 25447 : Bun.env.PORT ?? 3000,
-		development: !!(Bun.env.NODE_ENV === 'development') || isTestMode
+		port: isTestMode ? 25447 : process.env.PORT ?? 3000,
+		development: !!(process.env.NODE_ENV === 'development') || isTestMode
 	});
 
 	// Connect to Redis.
@@ -155,7 +155,7 @@ export async function startServer() {
 	if (!isTestMode) {
 		console.log(
 			`🔑 Authentication Server: ${
-				new URL(Bun.env.AUTH_INTROSPECT_URL!).hostname
+				new URL(process.env.AUTH_INTROSPECT_URL!).hostname
 			}`
 		);
 	} else {

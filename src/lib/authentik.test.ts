@@ -48,7 +48,7 @@ describe('getHashedPk', () => {
 
 	test('should return hashed version of user ID', () => {
 		const hashedPk = createHash('sha256')
-			.update(pk1 + '-' + Bun.env.AUTH_INSTALLATION_ID)
+			.update(pk1 + '-' + process.env.AUTH_INSTALLATION_ID)
 			.digest('hex');
 		const result = getHashedPk(pk1);
 		expect(result).toBe(hashedPk);

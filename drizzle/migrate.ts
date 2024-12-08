@@ -5,10 +5,10 @@ import { sql } from 'drizzle-orm';
 
 const migrationsFolder = process.argv[2] ?? '../drizzle';
 
-console.log(Bun.env.DATABASE_URL);
+console.log(process.env.DATABASE_URL);
 
 export const dbClient = new Client({
-	connectionString: Bun.env.DATABASE_URL as string
+	connectionString: process.env.DATABASE_URL as string
 });
 
 const db = drizzle(dbClient);

@@ -117,7 +117,7 @@ async function mediaUploadEndpoint(req: Request) {
 
 	// Generate a predicted key for the S3 upload.
 	const s3PredictedKey =
-		Bun.env.S3_UPLOAD_DIR! +
+		process.env.S3_UPLOAD_DIR! +
 		'/' +
 		possibleUUID +
 		'.' +
@@ -126,15 +126,15 @@ async function mediaUploadEndpoint(req: Request) {
 	new Upload({
 		client: new S3Client({
 			credentials: {
-				accessKeyId: Bun.env.AWS_ACCESS_KEY_ID!,
-				secretAccessKey: Bun.env.AWS_SECRET_ACCESS_KEY!
+				accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+				secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
 			},
-			region: Bun.env.S3_REGION!,
-			endpoint: Bun.env.AWS_ENDPOINT!
+			region: process.env.S3_REGION!,
+			endpoint: process.env.AWS_ENDPOINT!
 		}),
 		params: {
 			ACL: 'public-read',
-			Bucket: Bun.env.S3_BUCKET!,
+			Bucket: process.env.S3_BUCKET!,
 			Key: s3PredictedKey,
 			Body: media
 		}
@@ -173,14 +173,16 @@ async function webhookEndpoint(req: Request) {
 	const url = new URL(req.url);
 	console.log(url.pathname, isTestMode);
 	switch (url.pathname) {
-		case `/webhook/${isTestMode ? 'TEST-AUTH' : Bun.env.WEBHOOK_AUTH}`:
+		case `/webhook/${isTestMode ? 'TEST-AUTH' : process.env.WEBHOOK_AUTH}`:
 			if (
 				isTestMode ||
-				(Bun.env.AUTH_INTROSPECT_URL?.endsWith(
+				(process.env.AUTH_INTROSPECT_URL?.endsWith(
 					'/application/o/introspect/'
 				) &&
 					isTestMode) ||
-				Bun.env.AUTH_USERINFO_URL?.endsWith('/application/o/userinfo/')
+				process.env.AUTH_USERINFO_URL?.endsWith(
+					'/application/o/userinfo/'
+				)
 			) {
 				// Convert the request body to JSON and sort it.
 				var json = await req.json();
@@ -265,7 +267,9 @@ async function webhookEndpoint(req: Request) {
 				},
 				{ status: 404 }
 			);
-		case `/webhook/${isTestMode ? 'TEST-STRIPE' : Bun.env.WEBHOOK_STRIPE}`:
+		case `/webhook/${
+			isTestMode ? 'TEST-STRIPE' : process.env.WEBHOOK_STRIPE
+		}`:
 			return Response.json(
 				{
 					status: 'WORK_IN_PROGRESS',
@@ -364,7 +368,7 @@ async function createUsersFromRedisTokens() {
 }
 
 // Just a shortcut for checking if we are in test mode.
-const isTestMode = Bun.env.NODE_ENV === 'test';
+const isTestMode = process.env.NODE_ENV === 'test';
 
 export {
 	createUsersFromRedisTokens,
