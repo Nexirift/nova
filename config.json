@@ -1,0 +1,14 @@
+{
+	"features": {
+		"verification": {
+			"enabled": true,
+			"types": ["notable", "business", "tester", "official"]
+		},
+		"age_verification": {
+			"enabled": false
+		},
+		"messaging": {
+			"enabled": true
+		}
+	}
+}
