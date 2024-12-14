@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/Nexirift/.github/main/banner.svg" width="300" />
+<img src="https://raw.githubusercontent.com/Nexirift/media-kit/main/nexirift/banner.svg" width="300" />
 </p>
 
 # Nova
