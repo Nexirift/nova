@@ -40,16 +40,15 @@ export const post = pgTable('post', {
 export const postRelations = relations(post, ({ one, many }) => ({
 	author: one(user, {
 		fields: [post.authorId],
-		references: [user.id],
-		relationName: 'posts'
+		references: [user.id]
 	}),
 	parent: one(post, {
+		relationName: 'post_parent_replies',
 		fields: [post.parentId],
-		references: [post.id],
-		relationName: 'replies'
+		references: [post.id]
 	}),
 	replies: many(post, {
-		relationName: 'replies'
+		relationName: 'post_parent_replies'
 	}),
 	interactions: many(postInteraction),
 	editHistory: many(postEditHistory),

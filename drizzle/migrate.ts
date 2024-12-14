@@ -5,8 +5,6 @@ import { sql } from 'drizzle-orm';
 
 const migrationsFolder = process.argv[2] ?? '../drizzle';
 
-console.log(Bun.env.DATABASE_URL);
-
 export const dbClient = new Client({
 	connectionString: Bun.env.DATABASE_URL as string
 });

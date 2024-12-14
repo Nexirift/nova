@@ -1,8 +1,8 @@
-import { User } from '../..';
 import { builder } from '../../../builder';
 import { db } from '../../../drizzle/db';
 import { type UserConversationSchemaType } from '../../../drizzle/schema';
 import { UserConversationParticipant } from './Participant';
+import { UserConversationRole } from './Role';
 
 export const UserConversationType = builder.enumType('UserConversationType', {
 	values: ['DIRECT', 'GROUP']
@@ -15,10 +15,7 @@ UserConversation.implement({
 	fields: (t) => ({
 		id: t.exposeString('id', { nullable: false }),
 		name: t.exposeString('name', { nullable: true }),
-		type: t.expose('type', {
-			type: UserConversationType,
-			nullable: false
-		}),
+		type: t.expose('type', { type: UserConversationType, nullable: false }),
 		participants: t.field({
 			type: [UserConversationParticipant],
 			nullable: false,
@@ -26,22 +23,27 @@ UserConversation.implement({
 				first: t.arg({ type: 'Int' }),
 				offset: t.arg({ type: 'Int' })
 			},
-			resolve: async (parent, args) => {
-				const result =
-					await db.query.userConversationParticipant.findMany({
-						where: (userConversationParticipant, { eq }) =>
-							eq(
-								userConversationParticipant.conversationId,
-								parent.id
-							),
-						limit: args.first!,
-						offset: args.offset!,
-						with: {
-							user: true
-						}
-					});
-				return result!;
-			}
+			resolve: async (parent, { first, offset }) =>
+				(await db.query.userConversationParticipant.findMany({
+					where: (userConversationParticipant, { eq }) =>
+						eq(
+							userConversationParticipant.conversationId,
+							parent.id
+						),
+					limit: first!,
+					offset: offset!,
+					with: { user: true }
+				}))!
+		}),
+		roles: t.field({
+			type: [UserConversationRole],
+			nullable: true,
+			resolve: async (parent) =>
+				(await db.query.userConversationRole.findMany({
+					where: (userConversationRole, { eq }) =>
+						eq(userConversationRole.conversationId, parent.id),
+					with: { members: true }
+				}))!
 		}),
 		createdAt: t.expose('createdAt', { type: 'Date', nullable: false })
 	})

@@ -47,18 +47,14 @@ export const userRelations = relations(user, ({ one, many }) => ({
 	fromRelationships: many(userRelationship, {
 		relationName: 'user_from_relationships'
 	}),
-	posts: many(post, {
-		relationName: 'posts'
-	}),
+	posts: many(post),
 	postInteraction: many(postInteraction),
 	verification: one(userVerification),
 	profileFields: many(userProfileField),
 	ownedPlanets: many(userPlanet),
 	joinedPlanets: many(userPlanetMember),
 	settings: many(userSetting),
-	conversations: many(userConversationParticipant, {
-		relationName: 'user_conversation_participants'
-	}),
+	conversations: many(userConversationParticipant),
 	collections: many(postCollection)
 }));
 

@@ -2,6 +2,7 @@ import { User, UserConversation } from '../..';
 import { builder } from '../../../builder';
 import { db } from '../../../drizzle/db';
 import { type UserConversationParticipantSchemaType } from '../../../drizzle/schema';
+import { UserConversationParticipantRole } from './ParticipantRole';
 
 export const UserConversationParticipant =
 	builder.objectRef<UserConversationParticipantSchemaType>(
@@ -10,30 +11,35 @@ export const UserConversationParticipant =
 
 UserConversationParticipant.implement({
 	fields: (t) => ({
+		id: t.expose('id', { type: 'String', nullable: false }),
 		user: t.field({
 			type: User,
 			nullable: false,
-			resolve: async (userConversationParticipant) => {
-				const result = await db.query.user.findFirst({
-					where: (user, { eq }) =>
-						eq(user.id, userConversationParticipant.userId)
-				});
-				return result!;
-			}
+			resolve: async ({ userId }) =>
+				await db.query.user
+					.findFirst({
+						where: (user, { eq }) => eq(user.id, userId)
+					})
+					.then((result) => result!)
 		}),
 		conversation: t.field({
 			type: UserConversation,
 			nullable: false,
-			resolve: async (userConversationParticipant) => {
-				const result = await db.query.userConversation.findFirst({
-					where: (userConversation, { eq }) =>
-						eq(
-							userConversation.id,
-							userConversationParticipant.conversationId
-						)
-				});
-				return result!;
-			}
+			resolve: async ({ conversationId }) =>
+				await db.query.userConversation
+					.findFirst({
+						where: (userConversation, { eq }) =>
+							eq(userConversation.id, conversationId)
+					})
+					.then((result) => result!)
+		}),
+		roles: t.field({
+			type: [UserConversationParticipantRole],
+			nullable: false,
+			resolve: async ({ id }) =>
+				await db.query.userConversationParticipantRole.findMany({
+					where: (role, { eq }) => eq(role.participantId, id)
+				})
 		}),
 		joinedAt: t.expose('joinedAt', { type: 'Date', nullable: false })
 	})

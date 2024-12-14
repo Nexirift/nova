@@ -47,7 +47,7 @@ builder.queryField('me', (t) =>
 
 			if (!user) {
 				throw new GraphQLError(
-					'The user has not been synced to the database yet.',
+					'This user has not been synced to the database yet.',
 					{
 						extensions: { code: 'USER_NOT_SYNCED' }
 					}

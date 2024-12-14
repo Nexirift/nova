@@ -8,10 +8,144 @@ import {
 } from '../../drizzle/schema';
 import { UserConversationMessage } from '../../types/user/conversation/Message';
 import { pubsub } from '../../pubsub';
-import { GraphQLError } from 'graphql';
 import { UserConversation, UserConversationType } from '../../types';
+import { and, eq } from 'drizzle-orm';
+import { UserConversationParticipant } from '../../types/user/conversation/Participant';
+import {
+	checkPermissions,
+	getConversation,
+	getParticipant
+} from '../../helpers/user/Conversation';
+import { throwError } from '../../helpers/common';
 
-builder.mutationField('createConversation', (t) =>
+const validateParticipants = (
+	participants: string[],
+	currentUserId: string
+) => {
+	if (!participants.includes(currentUserId)) participants.push(currentUserId);
+	if (participants.length < 2) {
+		throwError(
+			'A conversation must have at least 2 participants.',
+			'CONVERSATION_MIN_PARTICIPANTS'
+		);
+	}
+};
+
+const checkDirectConversation = async (participants: string[]) => {
+	if (participants.length > 2) {
+		throwError(
+			'A direct conversation can only have 2 participants.',
+			'CONVERSATION_DIRECT_MAX_PARTICIPANTS'
+		);
+	}
+	const directConversations = await db.query.userConversation.findMany({
+		where: (userConversation, { eq }) =>
+			eq(userConversation.type, 'DIRECT'),
+		with: { participants: { columns: { userId: true } } }
+	});
+	const existingConversation = directConversations.find((conversation) =>
+		conversation.participants.every((participant) =>
+			participants.includes(participant.userId)
+		)
+	);
+	if (existingConversation) {
+		throwError(
+			'You are already in a direct conversation with one of the other participants.',
+			'CONVERSATION_ALREADY_IN_DIRECT'
+		);
+	}
+};
+
+const createConversation = async (
+	type: string,
+	name: string | null,
+	participants: string[]
+) => {
+	const conversation = await db
+		.insert(userConversation)
+		.values({
+			name: type === 'DIRECT' ? null : name,
+			type: type as 'DIRECT' | 'GROUP'
+		})
+		.returning()
+		.then((res) => res[0]);
+
+	await db.insert(userConversationParticipant).values(
+		participants.map((userId) => ({
+			conversationId: conversation.id,
+			userId
+		}))
+	);
+
+	return db.query.userConversation.findFirst({
+		where: (userConversation, { eq }) =>
+			eq(userConversation.id, conversation.id)
+	});
+};
+
+const handleParticipants = async (
+	conversationId: string,
+	participants: string[],
+	action: 'add' | 'remove'
+) => {
+	const existingParticipants =
+		await db.query.userConversationParticipant.findMany({
+			where: (userConversationParticipant, { eq }) =>
+				eq(userConversationParticipant.conversationId, conversationId)
+		});
+
+	const participantActions = participants.map(async (participant) => {
+		const isParticipant = existingParticipants.some(
+			(p) => p.userId === participant
+		);
+		if (action === 'add' && isParticipant) {
+			throwError(
+				`User ${participant} is already in this conversation.`,
+				'CONVERSATION_PARTICIPANT_ALREADY_EXISTS'
+			);
+		} else if (action === 'remove' && !isParticipant) {
+			throwError(
+				`User ${participant} is not in this conversation.`,
+				'CONVERSATION_PARTICIPANT_NOT_FOUND'
+			);
+		}
+
+		if (action === 'add') {
+			return db
+				.insert(userConversationParticipant)
+				.values({
+					conversationId,
+					userId: participant
+				})
+				.returning()
+				.then((res) => res[0]);
+		} else {
+			await db
+				.delete(userConversationParticipant)
+				.where(
+					and(
+						eq(
+							userConversationParticipant.conversationId,
+							conversationId
+						),
+						eq(userConversationParticipant.userId, participant)
+					)
+				);
+			return null;
+		}
+	});
+
+	return (await Promise.all(participantActions)).filter(
+		(participant) => participant !== null
+	) as {
+		id: string;
+		userId: string;
+		conversationId: string;
+		joinedAt: Date;
+	}[];
+};
+
+builder.mutationField('createUserConversation', (t) =>
 	t.field({
 		type: UserConversation,
 		args: {
@@ -20,146 +154,119 @@ builder.mutationField('createConversation', (t) =>
 			participants: t.arg.stringList({ required: true })
 		},
 		resolve: async (_root, args, ctx: Context) => {
-			// Ensure that the current user is included in the participants list.
-			const _participants = args.participants.map((id) => id.toString());
+			const participants = args.participants.map((id) => id.toString());
+			validateParticipants(participants, ctx.oidc.sub);
 
-			if (!_participants.includes(ctx.oidc.sub)) {
-				_participants.push(ctx.oidc.sub);
-			}
+			if (args.type === 'DIRECT')
+				await checkDirectConversation(participants);
 
-			if (_participants.length < 2) {
-				throw new GraphQLError(
-					'A conversation must have at least 2 participants.',
-					{
-						extensions: {
-							code: 'CONVERSATION_MIN_PARTICIPANTS'
-						}
-					}
-				);
-			}
-
-			if (args.type === 'DIRECT') {
-				if (_participants.length > 2) {
-					throw new GraphQLError(
-						'A direct conversation can only have 2 participants.',
-						{
-							extensions: {
-								code: 'CONVERSATION_DIRECT_MAX_PARTICIPANTS'
-							}
-						}
-					);
-				} else {
-					const directConversations =
-						await db.query.userConversation.findMany({
-							where: (userConversation, { eq }) =>
-								eq(userConversation.type, 'DIRECT'),
-							with: {
-								participants: {
-									columns: {
-										userId: true
-									}
-								}
-							}
-						});
-
-					const existingConversation = directConversations.find(
-						(conversation) =>
-							conversation.participants.every((participant) =>
-								_participants.includes(participant.userId)
-							)
-					);
-
-					if (existingConversation) {
-						throw new GraphQLError(
-							'You are already in a direct conversation with one of the other participants.',
-							{
-								extensions: {
-									code: 'CONVERSATION_ALREADY_IN_DIRECT'
-								}
-							}
-						);
-					}
-				}
-			}
-
-			const conversation = await db
-				.insert(userConversation)
-				.values({
-					name: args.type === 'DIRECT' ? null : args.name,
-					type: args.type
-				})
-				.returning()
-				.then((res) => res[0]);
-
-			await db.insert(userConversationParticipant).values(
-				_participants.map((userId) => ({
-					conversationId: conversation.id,
-					userId: userId
-				}))
+			return createConversation(
+				args.type,
+				args.name ?? null,
+				participants
 			);
-
-			return db.query.userConversation.findFirst({
-				where: (userConversation, { eq }) =>
-					eq(userConversation.id, conversation.id)
-			});
 		}
 	})
 );
 
-builder.mutationField('createConversationMessage', (t) =>
+builder.mutationField('createUserConversationMessage', (t) =>
 	t.field({
 		type: UserConversationMessage,
 		args: {
 			content: t.arg.string({ required: true }),
 			conversationId: t.arg.string({ required: true })
 		},
-		resolve: async (_root, _args, ctx: Context) => {
-			const conversation = await db.query.userConversation.findFirst({
-				where: (userConversation, { eq }) =>
-					eq(userConversation.id, _args.conversationId)
-			});
-
-			if (!conversation) {
-				throw new GraphQLError('The conversation does not exist.', {
-					extensions: {
-						code: 'CONVERSATION_NOT_FOUND'
-					}
-				});
-			}
-
-			const participant =
-				await db.query.userConversationParticipant.findFirst({
-					where: (userConversationParticipant, { eq }) =>
-						eq(userConversationParticipant.userId, ctx.oidc.sub)
-				});
-
-			if (!participant) {
-				throw new GraphQLError(
-					'You must be a participant in this conversation to send a message.',
-					{
-						extensions: {
-							code: 'CONVERSATION_PARTICIPANT_REQUIRED'
-						}
-					}
-				);
-			}
+		resolve: async (_root, args, ctx: Context) => {
+			await checkPermissions(
+				['SEND_MESSAGES'],
+				args.conversationId,
+				ctx.oidc.sub
+			);
 
 			const message = await db
 				.insert(userConversationMessage)
 				.values({
-					content: _args.content,
-					conversationId: _args.conversationId,
+					content: args.content,
+					conversationId: args.conversationId,
 					senderId: ctx.oidc.sub
 				})
 				.returning()
 				.then((res) => res[0]);
 
 			pubsub.publish(
-				`userConversationMessages${_args.conversationId}`,
+				`userConversationMessages|${args.conversationId}`,
 				{}
 			);
 
 			return message;
+		}
+	})
+);
+
+builder.mutationField('addUserConversationParticipants', (t) =>
+	t.field({
+		type: [UserConversationParticipant],
+		args: {
+			conversationId: t.arg.string({ required: true }),
+			participants: t.arg.stringList({ required: true })
+		},
+		resolve: async (_root, args, ctx: Context) => {
+			const conversation = await getConversation(args.conversationId);
+			await getParticipant(ctx.oidc.sub, args.conversationId);
+
+			if (conversation?.type === 'DIRECT') {
+				throwError(
+					'You cannot add participants to a direct conversation.',
+					'CONVERSATION_DIRECT_CANNOT_ADD_PARTICIPANTS'
+				);
+			}
+
+			await checkPermissions(
+				['ADD_PARTICIPANTS'],
+				args.conversationId,
+				ctx.oidc.sub
+			);
+
+			return handleParticipants(
+				args.conversationId,
+				args.participants,
+				'add'
+			);
+		}
+	})
+);
+
+builder.mutationField('removeUserConversationParticipants', (t) =>
+	t.field({
+		type: 'Boolean',
+		args: {
+			conversationId: t.arg.string({ required: true }),
+			participants: t.arg.stringList({ required: true })
+		},
+		resolve: async (_root, args, ctx: Context) => {
+			const conversation = await getConversation(args.conversationId);
+			await getParticipant(ctx.oidc.sub, args.conversationId);
+
+			if (conversation?.type === 'DIRECT') {
+				throwError(
+					'You cannot remove participants from a direct conversation.',
+					'CONVERSATION_DIRECT_CANNOT_REMOVE_PARTICIPANTS'
+				);
+			}
+
+			await checkPermissions(
+				['REMOVE_PARTICIPANTS'],
+				args.conversationId,
+				ctx.oidc.sub
+			);
+
+			await handleParticipants(
+				args.conversationId,
+				args.participants,
+				'remove'
+			);
+
+			return true;
 		}
 	})
 );

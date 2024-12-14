@@ -68,7 +68,7 @@ test('Authenticated | General - It should check the me endpoint (Not Synced)', a
 
 	expectError(
 		data,
-		'The user has not been synced to the database yet.',
+		'This user has not been synced to the database yet.',
 		'USER_NOT_SYNCED'
 	);
 
