@@ -20,7 +20,7 @@ production, you understand the risks.
 ### Prerequisites
 
 -   [KeyDB](https://docs.keydb.dev/docs)
-    -   Or a Redis compatible client, we no longer recommend official Redis.
+    -   Or a Redis compatible server, we no longer recommend official Redis.
     -   If you would like to know why we don't suggest it, read the comments
         [here](https://github.com/redis/redis/pull/13157).
 -   [Authentik](https://goauthentik.io)
