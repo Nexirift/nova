@@ -122,8 +122,9 @@ async function mediaUploadEndpoint(req: Request) {
 				accessKeyId: Bun.env.AWS_ACCESS_KEY_ID!,
 				secretAccessKey: Bun.env.AWS_SECRET_ACCESS_KEY!
 			},
-			region: Bun.env.S3_REGION!,
-			endpoint: Bun.env.AWS_ENDPOINT!
+			region: Bun.env.S3_REGION! ?? 'us-east-1',
+			endpoint:
+				Bun.env.AWS_ENDPOINT! ?? 'https://s3.us-east-1.amazonaws.com'
 		});
 
 		isTestMode && mockClient(_client);
