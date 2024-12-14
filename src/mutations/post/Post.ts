@@ -1,10 +1,10 @@
 import { eq } from 'drizzle-orm';
-import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import { post, postEditHistory } from '../../drizzle/schema';
 import { Post } from '../../types';
+import { throwError } from '../../helpers/common';
 
 builder.mutationField('createPost', (t) =>
 	t.field({
@@ -46,9 +46,7 @@ builder.mutationField('updatePost', (t) =>
 			});
 
 			if (!originalPost) {
-				throw new GraphQLError('Post not found.', {
-					extensions: { code: 'POST_NOT_FOUND' }
-				});
+				return throwError('Post not found.', 'POST_NOT_FOUND');
 			}
 
 			const updatedPost = await db
@@ -85,9 +83,7 @@ builder.mutationField('deletePost', (t) =>
 			});
 
 			if (!originalPost) {
-				throw new GraphQLError('Post not found.', {
-					extensions: { code: 'POST_NOT_FOUND' }
-				});
+				return throwError('Post not found.', 'POST_NOT_FOUND');
 			}
 
 			await db

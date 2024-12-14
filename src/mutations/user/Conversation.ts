@@ -24,7 +24,7 @@ const validateParticipants = (
 ) => {
 	if (!participants.includes(currentUserId)) participants.push(currentUserId);
 	if (participants.length < 2) {
-		throwError(
+		return throwError(
 			'A conversation must have at least 2 participants.',
 			'CONVERSATION_MIN_PARTICIPANTS'
 		);
@@ -33,7 +33,7 @@ const validateParticipants = (
 
 const checkDirectConversation = async (participants: string[]) => {
 	if (participants.length > 2) {
-		throwError(
+		return throwError(
 			'A direct conversation can only have 2 participants.',
 			'CONVERSATION_DIRECT_MAX_PARTICIPANTS'
 		);
@@ -49,7 +49,7 @@ const checkDirectConversation = async (participants: string[]) => {
 		)
 	);
 	if (existingConversation) {
-		throwError(
+		return throwError(
 			'You are already in a direct conversation with one of the other participants.',
 			'CONVERSATION_ALREADY_IN_DIRECT'
 		);
@@ -99,12 +99,12 @@ const handleParticipants = async (
 			(p) => p.userId === participant
 		);
 		if (action === 'add' && isParticipant) {
-			throwError(
+			return throwError(
 				`User ${participant} is already in this conversation.`,
 				'CONVERSATION_PARTICIPANT_ALREADY_EXISTS'
 			);
 		} else if (action === 'remove' && !isParticipant) {
-			throwError(
+			return throwError(
 				`User ${participant} is not in this conversation.`,
 				'CONVERSATION_PARTICIPANT_NOT_FOUND'
 			);
@@ -215,7 +215,7 @@ builder.mutationField('addUserConversationParticipants', (t) =>
 			await getParticipant(ctx.oidc.sub, args.conversationId);
 
 			if (conversation?.type === 'DIRECT') {
-				throwError(
+				return throwError(
 					'You cannot add participants to a direct conversation.',
 					'CONVERSATION_DIRECT_CANNOT_ADD_PARTICIPANTS'
 				);
@@ -248,7 +248,7 @@ builder.mutationField('removeUserConversationParticipants', (t) =>
 			await getParticipant(ctx.oidc.sub, args.conversationId);
 
 			if (conversation?.type === 'DIRECT') {
-				throwError(
+				return throwError(
 					'You cannot remove participants from a direct conversation.',
 					'CONVERSATION_DIRECT_CANNOT_REMOVE_PARTICIPANTS'
 				);

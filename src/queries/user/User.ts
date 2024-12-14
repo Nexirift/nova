@@ -1,7 +1,7 @@
-import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
+import { throwError } from '../../helpers/common';
 import { User } from '../../types';
 
 builder.queryField('getUser', (t) =>
@@ -24,9 +24,7 @@ builder.queryField('getUser', (t) =>
 			});
 
 			if (!user) {
-				throw new GraphQLError('User not found.', {
-					extensions: { code: 'USER_NOT_FOUND' }
-				});
+				return throwError('User not found.', 'USER_NOT_FOUND');
 			}
 
 			return user;
@@ -46,11 +44,9 @@ builder.queryField('me', (t) =>
 			});
 
 			if (!user) {
-				throw new GraphQLError(
+				return throwError(
 					'This user has not been synced to the database yet.',
-					{
-						extensions: { code: 'USER_NOT_SYNCED' }
-					}
+					'USER_NOT_SYNCED'
 				);
 			}
 

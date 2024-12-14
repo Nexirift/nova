@@ -1,7 +1,7 @@
-import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
+import { throwError } from '../../helpers/common';
 import { PostCollection } from '../../types/post/collection/Collection';
 
 builder.queryField('getPostCollection', (t) =>
@@ -16,9 +16,10 @@ builder.queryField('getPostCollection', (t) =>
 			});
 
 			if (!postCollection) {
-				throw new GraphQLError('Post collection not found.', {
-					extensions: { code: 'POST_COLLECTION_NOT_FOUND' }
-				});
+				return throwError(
+					'Post collection not found.',
+					'POST_COLLECTION_NOT_FOUND'
+				);
 			}
 
 			return postCollection;

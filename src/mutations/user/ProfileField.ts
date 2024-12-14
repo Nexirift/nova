@@ -1,10 +1,10 @@
 import { and, eq } from 'drizzle-orm';
-import { GraphQLError } from 'graphql';
-import { Context } from 'vm';
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
 import { userProfileField } from '../../drizzle/schema';
 import { UserProfileField } from '../../types/user/ProfileField';
+import { Context } from '../../context';
+import { throwError } from '../../helpers/common';
 
 builder.mutationField('createProfileField', (t) =>
 	t.field({
@@ -23,13 +23,9 @@ builder.mutationField('createProfileField', (t) =>
 			});
 
 			if (existingField) {
-				throw new GraphQLError(
+				return throwError(
 					'Profile field with the same name already exists',
-					{
-						extensions: {
-							code: 'PROFILE_FIELD_ALREADY_EXISTS'
-						}
-					}
+					'PROFILE_FIELD_ALREADY_EXISTS'
 				);
 			}
 
@@ -65,24 +61,16 @@ builder.mutationField('updateProfileField', (t) =>
 			);
 
 			if (!existingField) {
-				throw new GraphQLError(
+				return throwError(
 					'There is no profile field with the given name',
-					{
-						extensions: {
-							code: 'PROFILE_FIELD_NOT_FOUND'
-						}
-					}
+					'PROFILE_FIELD_NOT_FOUND'
 				);
 			}
 
 			if (existingFields.find((field) => field.name === _args.newName)) {
-				throw new GraphQLError(
+				return throwError(
 					'Profile field with the same name already exists',
-					{
-						extensions: {
-							code: 'PROFILE_FIELD_ALREADY_EXISTS'
-						}
-					}
+					'PROFILE_FIELD_ALREADY_EXISTS'
 				);
 			}
 

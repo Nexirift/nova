@@ -8,7 +8,7 @@ import SchemaBuilder from '@pothos/core';
 import { Context } from './context';
 import { DateTimeResolver } from 'graphql-scalars';
 import { pubsub } from './pubsub';
-import { GraphQLError } from 'graphql';
+import { throwError } from './helpers/common';
 
 export const builder = new SchemaBuilder<{
 	Context: Context;
@@ -44,22 +44,14 @@ export const builder = new SchemaBuilder<{
 		}),
 		unauthorizedError: (parent, context, info, result) => {
 			if (context.oidc?.sub) {
-				return new GraphQLError(
+				return throwError(
 					'You do not have permission to access this resource.',
-					{
-						extensions: {
-							code: 'PERMISSION_DENIED'
-						}
-					}
+					'PERMISSION_DENIED'
 				);
 			} else {
-				return new GraphQLError(
+				return throwError(
 					'You must be logged in to access this resource.',
-					{
-						extensions: {
-							code: 'AUTHENTICATION_REQUIRED'
-						}
-					}
+					'AUTHENTICATION_REQUIRED'
 				);
 			}
 		}

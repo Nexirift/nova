@@ -1,11 +1,11 @@
 import { and, eq } from 'drizzle-orm';
-import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import { postCollection, postCollectionItem } from '../../drizzle/schema';
 import { PostCollection } from '../../types/post/collection/Collection';
 import { PostCollectionItem } from '../../types/post/collection/Item';
+import { throwError } from '../../helpers/common';
 
 const findPostCollectionById = async (id: string) => {
 	return db.query.postCollection.findFirst({
@@ -32,9 +32,10 @@ builder.mutationField('createPostCollection', (t) =>
 				});
 
 			if (originalPostCollection) {
-				throw new GraphQLError('Post collection already exists.', {
-					extensions: { code: 'POST_COLLECTION_ALREADY_EXISTS' }
-				});
+				return throwError(
+					'Post collection already exists.',
+					'POST_COLLECTION_ALREADY_EXISTS'
+				);
 			}
 
 			const newPostCollection = await db
@@ -68,9 +69,10 @@ builder.mutationField('updatePostCollection', (t) =>
 			);
 
 			if (!originalPostCollection) {
-				throw new GraphQLError('Post collection not found.', {
-					extensions: { code: 'POST_COLLECTION_NOT_FOUND' }
-				});
+				return throwError(
+					'Post collection not found.',
+					'POST_COLLECTION_NOT_FOUND'
+				);
 			}
 
 			const updatedPostCollection = await db
@@ -101,9 +103,10 @@ builder.mutationField('deletePostCollection', (t) =>
 			);
 
 			if (!originalPostCollection) {
-				throw new GraphQLError('Post collection not found.', {
-					extensions: { code: 'POST_COLLECTION_NOT_FOUND' }
-				});
+				return throwError(
+					'Post collection not found.',
+					'POST_COLLECTION_NOT_FOUND'
+				);
 			}
 
 			await db
@@ -129,9 +132,10 @@ builder.mutationField('addPostToCollection', (t) =>
 			);
 
 			if (!originalPostCollection) {
-				throw new GraphQLError('Post collection not found.', {
-					extensions: { code: 'POST_COLLECTION_NOT_FOUND' }
-				});
+				return throwError(
+					'Post collection not found.',
+					'POST_COLLECTION_NOT_FOUND'
+				);
 			}
 
 			const newPostCollectionItem = await db
@@ -161,9 +165,10 @@ builder.mutationField('removePostFromCollection', (t) =>
 			);
 
 			if (!originalPostCollection) {
-				throw new GraphQLError('Post collection not found.', {
-					extensions: { code: 'POST_COLLECTION_NOT_FOUND' }
-				});
+				return throwError(
+					'Post collection not found.',
+					'POST_COLLECTION_NOT_FOUND'
+				);
 			}
 
 			await db

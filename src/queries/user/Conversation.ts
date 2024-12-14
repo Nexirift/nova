@@ -1,4 +1,3 @@
-import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { db } from '../../drizzle/db';
 import { Context } from '../../context';

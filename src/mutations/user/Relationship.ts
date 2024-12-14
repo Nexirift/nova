@@ -1,5 +1,4 @@
 import { and, eq, or } from 'drizzle-orm';
-import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
@@ -8,6 +7,7 @@ import {
 	UserRelationshipSchemaType
 } from '../../drizzle/schema';
 import { UserRelationship } from '../../types';
+import { throwError } from '../../helpers/common';
 
 // Define the possible relationship types
 const relationshipTypes = [
@@ -54,11 +54,9 @@ builder.mutationField('acceptFollowRequest', (t) =>
 				});
 
 			if (!requestedRelationship) {
-				throw new GraphQLError(
+				return throwError(
 					'This user does not exist or has not sent a follow request.',
-					{
-						extensions: { code: 'FOLLOW_REQUEST_NOT_FOUND' }
-					}
+					'FOLLOW_REQUEST_NOT_FOUND'
 				);
 			}
 
@@ -97,11 +95,9 @@ builder.mutationField('denyFollowRequest', (t) =>
 				});
 
 			if (!requestedRelationship) {
-				throw new GraphQLError(
+				return throwError(
 					'This user does not exist or has not sent a follow request.',
-					{
-						extensions: { code: 'FOLLOW_REQUEST_NOT_FOUND' }
-					}
+					'FOLLOW_REQUEST_NOT_FOUND'
 				);
 			}
 
@@ -130,9 +126,10 @@ async function modifyRelationship(
 ): Promise<UserRelationshipSchemaType | null> {
 	// Prevent users from performing actions on themselves
 	if (ctx.oidc.sub === args.id) {
-		throw new GraphQLError(`You cannot ${type.toLowerCase()} yourself.`, {
-			extensions: { code: `CANNOT_${type.toUpperCase()}_SELF` }
-		});
+		return throwError(
+			`You cannot ${type.toLowerCase()} yourself.`,
+			`CANNOT_${type.toUpperCase()}_SELF`
+		);
 	}
 
 	// Check if the requested user exists
@@ -141,9 +138,7 @@ async function modifyRelationship(
 	});
 
 	if (!requestedUser) {
-		throw new GraphQLError('User not found.', {
-			extensions: { code: 'USER_NOT_FOUND' }
-		});
+		return throwError('User not found.', 'USER_NOT_FOUND');
 	}
 
 	// Map relationship types to their corresponding database values
@@ -206,9 +201,7 @@ async function modifyRelationship(
 	async function throwUserNotActionedError(
 		type: 'BLOCK' | 'UNBLOCK' | 'MUTE' | 'UNMUTE' | 'FOLLOW' | 'UNFOLLOW'
 	) {
-		return new GraphQLError(errorMap[type], {
-			extensions: { code: `USER_NOT_${type}ED` }
-		});
+		return throwError(errorMap[type], `USER_NOT_${type}ED`);
 	}
 
 	// Handle BLOCK, MUTE, and FOLLOW actions
@@ -219,9 +212,7 @@ async function modifyRelationship(
 			type
 		);
 		if (existingRelationship) {
-			throw new GraphQLError(errorMap[type], {
-				extensions: { code: `USER_ALREADY_${type}ED` }
-			});
+			return throwError(errorMap[type], `USER_ALREADY_${type}ED`);
 		}
 
 		// Handle follow requests for private users
@@ -236,9 +227,7 @@ async function modifyRelationship(
 			});
 
 			if (followRequest) {
-				throw new GraphQLError(errorMap[type], {
-					extensions: { code: `USER_ALREADY_${type}ED` }
-				});
+				return throwError(errorMap[type], `USER_ALREADY_${type}ED`);
 			}
 			return db
 				.insert(userRelationship)

@@ -1,5 +1,4 @@
 import { and, eq } from 'drizzle-orm';
-import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
@@ -9,6 +8,7 @@ import {
 } from '../../drizzle/schema';
 import { privacyGuardian } from '../../lib/guardian';
 import { PostInteraction } from '../../types/post/Interaction';
+import { throwError } from '../../helpers/common';
 
 // Define the possible interaction types
 const interactionTypes = ['LIKE', 'UNLIKE', 'REPOST', 'UNREPOST'] as const;
@@ -42,15 +42,14 @@ async function postInteract(
 	});
 
 	if (!post) {
-		throw new GraphQLError('Post not found.', {
-			extensions: { code: 'POST_NOT_FOUND' }
-		});
+		return throwError('Post not found.', 'POST_NOT_FOUND');
 	}
 
 	if ((await privacyGuardian(post.author, ctx.oidc)) === false) {
-		throw new GraphQLError('You cannot interact with this post.', {
-			extensions: { code: 'POST_PRIVACY' }
-		});
+		return throwError(
+			'You cannot interact with this post.',
+			'POST_PRIVACY'
+		);
 	}
 
 	// Map interaction types to their corresponding database values
@@ -86,9 +85,7 @@ async function postInteract(
 	// Handle LIKE & REPOST actions
 	if (['LIKE', 'REPOST'].includes(type)) {
 		if (existingInteraction) {
-			throw new GraphQLError(errorMap[type], {
-				extensions: { code: `POST_ALREADY_${type}ED` }
-			});
+			return throwError(errorMap[type], `POST_ALREADY_${type}ED`);
 		}
 		return db
 			.insert(postInteraction)
@@ -101,13 +98,12 @@ async function postInteract(
 			.then((res) => res[0]);
 	} else {
 		if (!existingInteraction) {
-			throw new GraphQLError(errorMap[type], {
-				extensions: {
-					code: `POST_NOT_${
-						type.startsWith('UN') ? type.replace('UN', '') : type
-					}ED`
-				}
-			});
+			return throwError(
+				errorMap[type],
+				`POST_NOT_${
+					type.startsWith('UN') ? type.replace('UN', '') : type
+				}ED`
+			);
 		}
 
 		return db

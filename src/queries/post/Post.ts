@@ -1,7 +1,7 @@
-import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
+import { throwError } from '../../helpers/common';
 import { Post } from '../../types';
 
 builder.queryField('getPost', (t) =>
@@ -16,9 +16,7 @@ builder.queryField('getPost', (t) =>
 			});
 
 			if (!post) {
-				throw new GraphQLError('Post not found.', {
-					extensions: { code: 'POST_NOT_FOUND' }
-				});
+				return throwError('Post not found.', 'POST_NOT_FOUND');
 			}
 
 			return post;

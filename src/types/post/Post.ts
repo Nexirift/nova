@@ -1,8 +1,8 @@
-import { GraphQLError } from 'graphql';
 import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import { type PostSchemaType } from '../../drizzle/schema';
+import { throwError } from '../../helpers/common';
 import { privacyGuardian } from '../../lib/guardian';
 import { redisClient } from '../../redis';
 import { User } from '../user';
@@ -16,9 +16,7 @@ export const Post = builder.objectRef<PostSchemaType>('Post');
 Post.implement({
 	authScopes: async (_parent, context) => {
 		if (!_parent.published && context.oidc?.sub === _parent.authorId) {
-			throw new GraphQLError('You cannot view this post.', {
-				extensions: { code: 'UNAUTHORIZED' }
-			});
+			return throwError('You cannot view this post.', 'UNAUTHORIZED');
 		}
 		return true;
 	},
@@ -279,9 +277,7 @@ async function getUser(id: string | null, username: string | null) {
 	});
 
 	if (!user) {
-		throw new GraphQLError('User not found.', {
-			extensions: { code: 'USER_NOT_FOUND' }
-		});
+		return throwError('User not found.', 'USER_NOT_FOUND');
 	}
 
 	// Cache user data for 5 seconds

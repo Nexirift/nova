@@ -6,7 +6,7 @@ const getConversation = async (id: string) => {
 		where: (userConversation, { eq }) => eq(userConversation.id, id)
 	});
 	if (!conversation)
-		throwError(
+		return throwError(
 			'The conversation does not exist.',
 			'CONVERSATION_NOT_FOUND'
 		);
@@ -34,7 +34,7 @@ const getParticipant = async (userId: string, conversationId: string) => {
 		}
 	});
 	if (!participant)
-		throwError(
+		return throwError(
 			'You must be a participant in this conversation to proceed with this action.',
 			'CONVERSATION_PARTICIPANT_REQUIRED'
 		);
@@ -61,7 +61,7 @@ const checkPermissions = async (
 	const missing = permissions.filter((p) => !_permissions.includes(p));
 
 	if (missing.length > 0) {
-		throwError(
+		return throwError(
 			`You do not have permission to proceed with this action. Missing permission(s): ${missing.join(
 				', '
 			)}`,
