@@ -14,8 +14,8 @@
 	},
 	"keywords": [],
 	"dependencies": {
-		"@aws-sdk/client-s3": "^3.709.0",
-		"@aws-sdk/lib-storage": "^3.709.0",
+		"@aws-sdk/client-s3": "^3.712.0",
+		"@aws-sdk/lib-storage": "^3.712.0",
 		"@nexirift/plugin-oidc": "^1.0.3",
 		"@pothos/core": "^4.3.0",
 		"@pothos/plugin-errors": "^4.2.0",
