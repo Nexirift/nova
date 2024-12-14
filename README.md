@@ -2,9 +2,9 @@
 <img src="https://raw.githubusercontent.com/Nexirift/.github/main/banner.svg" width="300" />
 </p>
 
-# Spark
+# Nova
 
-Spark: the API server for Nexirift. Please see the [Disclaimer](#disclaimer)
+Nova, the API server for Nexirift. Please see the [Disclaimer](#disclaimer)
 before using.
 
 ## Disclaimer
@@ -37,8 +37,7 @@ that [here](https://docs.nexirift.com).
 #### Standard (Development)
 
 0. Set up the prerequistes first.
-1. Clone the project by using Git:
-   `git clone https://github.com/Nexirift/spark`.
+1. Clone the project by using Git: `git clone https://github.com/Nexirift/nova`.
 2. Install packages using bun: `bun install`.
 3. Start the server using: `bun dev`.
 4. Configure the `.env` values to fit your needs.
@@ -49,8 +48,7 @@ that [here](https://docs.nexirift.com).
 _There is no public docker image (for now), so you have to build it yourself._
 
 0. Have docker and docker compose set up.
-1. Clone the project by using Git:
-   `git clone https://github.com/Nexirift/spark`.
+1. Clone the project by using Git: `git clone https://github.com/Nexirift/nova`.
 2. Run the stack by doing `docker compose up -d`.
     - This _should_ auto build the image.
 

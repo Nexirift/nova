@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '../drizzle/db';
 import { user } from '../drizzle/schema';
 import { tokenClient } from '../redis';
+import { config } from '../config';
 
 /**
  * Allows communication with the GraphQL API in testing mode.
@@ -50,7 +51,10 @@ export async function createUser(data: {
 		.returning()
 		.execute();
 
-	await tokenClient.set(`tokens:${data.sub}`, JSON.stringify(data));
+	await tokenClient.set(
+		`${config.openid.cachePrefix}:${data.sub}`,
+		JSON.stringify(data)
+	);
 
 	return userdb[0];
 }
@@ -63,5 +67,5 @@ export async function createUser(data: {
 export async function removeUser(sub: string) {
 	await db.delete(user).where(eq(user.id, sub));
 
-	return tokenClient.del(`tokens:${sub}`);
+	return tokenClient.del(`${config.openid.cachePrefix}:${sub}`);
 }

@@ -5,12 +5,13 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import mime from 'mime-types';
-import { Config } from '../config';
+import { config } from '../config';
 import { db } from '../drizzle/db';
 import { postMedia, user } from '../drizzle/schema';
 import { syncClient, tokenClient } from '../redis';
 import { authorize } from './authentication';
 import { convertModelToUser, getHashedPk, internalUsers } from './authentik';
+import { mockClient } from 'aws-sdk-client-mock';
 
 /**
  * "Legacy" endpoint for uploading media.
@@ -19,7 +20,7 @@ import { convertModelToUser, getHashedPk, internalUsers } from './authentik';
  */
 async function mediaUploadEndpoint(req: Request) {
 	// Get the token from the request headers.
-	const token = req.headers.get('Authorization')?.split(' ')[1]!;
+	const token = req.headers.get('Authorization')?.split(' ')[1];
 
 	// If the token is not present, return an error.
 	if (!token) {
@@ -33,10 +34,11 @@ async function mediaUploadEndpoint(req: Request) {
 	}
 
 	// Check if the token is valid.
-	const check = await authorize(Config.OpenID, token);
+	const check = await authorize(config.openid, token);
 
-	// If the token is invalid, return an error.
-	if (check)
+	try {
+		JSON.parse(check!);
+	} catch (e) {
 		return Response.json(
 			{
 				status: 'INVALID_TOKEN',
@@ -44,10 +46,11 @@ async function mediaUploadEndpoint(req: Request) {
 			},
 			{ status: 401 }
 		);
+	}
 
 	const formdata = await req.formData();
 	const media = formdata.get('media') as File;
-	if (!media)
+	if (!media) {
 		return Response.json(
 			{
 				status: 'FILE_MISSING',
@@ -55,6 +58,7 @@ async function mediaUploadEndpoint(req: Request) {
 			},
 			{ status: 400 }
 		);
+	}
 
 	// Generate a random UUID for the media.
 	const possibleUUID = crypto.randomUUID();
@@ -82,85 +86,88 @@ async function mediaUploadEndpoint(req: Request) {
 		);
 	}
 
-	if (media.type === 'image/gif' || media.type === 'image/apng') {
-		if (media.size > 15728640) {
-			// File size must be less than 15 MB
-			return Response.json(
-				{
-					status: 'FILE_SIZE_EXCEEDED',
-					message: 'File size must be less than 15 MB for GIFs.'
-				},
-				{ status: 413 }
-			);
-		}
-	} else if (media.type.includes('video/')) {
-		// File size must be less than 100 MB
-		if (media.size > 104857600) {
-			return Response.json(
-				{
-					status: 'FILE_SIZE_EXCEEDED',
-					message: 'File size must be less than 100 MB for videos.'
-				},
-				{ status: 413 }
-			);
-		}
-	} else if (media.size > 5242880) {
-		// File size must be less than 5 MB
+	const sizeLimits = {
+		'image/gif': 15728640,
+		'image/apng': 15728640,
+		'video/mp4': 104857600,
+		'video/webm': 104857600,
+		'video/ogg': 104857600,
+		default: 5242880
+	};
+
+	const maxSize =
+		sizeLimits[media.type as keyof typeof sizeLimits] ??
+		sizeLimits['default'];
+
+	if (media.size > maxSize) {
 		return Response.json(
 			{
 				status: 'FILE_SIZE_EXCEEDED',
-				message: 'File size must be less than 5 MB for images.'
+				message: `File size must be less than ${
+					maxSize / 1048576
+				} MB for ${media.type.split('/')[0]}s.`
 			},
 			{ status: 413 }
 		);
 	}
 
 	// Generate a predicted key for the S3 upload.
-	const s3PredictedKey =
-		Bun.env.S3_UPLOAD_DIR! +
-		'/' +
-		possibleUUID +
-		'.' +
-		mime.extension(media.type);
+	const s3PredictedKey = `${
+		Bun.env.S3_UPLOAD_DIR
+	}/${possibleUUID}.${mime.extension(media.type)}`;
 
-	new Upload({
-		client: new S3Client({
+	try {
+		const _client = new S3Client({
 			credentials: {
 				accessKeyId: Bun.env.AWS_ACCESS_KEY_ID!,
 				secretAccessKey: Bun.env.AWS_SECRET_ACCESS_KEY!
 			},
 			region: Bun.env.S3_REGION!,
 			endpoint: Bun.env.AWS_ENDPOINT!
-		}),
-		params: {
-			ACL: 'public-read',
-			Bucket: Bun.env.S3_BUCKET!,
-			Key: s3PredictedKey,
-			Body: media
-		}
-	})
-		.done()
-		.then((s3Upload: { Location?: string }) => {
-			console.log('S3 upload success:', s3Upload.Location);
 		});
 
-	// Insert the media into the database.
-	const dbMedia = await db
-		.insert(postMedia)
-		.values({
-			id: possibleUUID,
-			url: '/' + s3PredictedKey
-		})
-		.returning()
-		.execute();
+		isTestMode && mockClient(_client);
 
-	// TODO: Add a queue for 5 minutes to delete if not used.
+		const upload = new Upload({
+			client: _client,
+			params: {
+				ACL: 'public-read',
+				Bucket: Bun.env.S3_BUCKET!,
+				Key: s3PredictedKey,
+				Body: media
+			}
+		});
 
-	return Response.json({
-		status: 'QUEUED',
-		message: 'Media queued for upload.',
-		id: dbMedia[0].id
-	});
+		const s3Upload = await upload.done();
+		console.log('S3 upload success:', s3Upload.Location);
+
+		// Insert the media into the database.
+		const dbMedia = await db
+			.insert(postMedia)
+			.values({
+				id: possibleUUID,
+				url: `/${s3PredictedKey}`
+			})
+			.returning()
+			.execute();
+
+		// TODO: Add a queue for 5 minutes to delete if not used.
+
+		return Response.json({
+			status: 'QUEUED',
+			message: 'Media queued for upload.',
+			id: dbMedia[0].id
+		});
+	} catch (error) {
+		console.error('S3 upload error:', error);
+		return Response.json(
+			{
+				status: 'UPLOAD_FAILED',
+				message: 'Failed to upload media.'
+			},
+			{ status: 500 }
+		);
+	}
 }
 
 /**

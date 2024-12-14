@@ -1,7 +1,7 @@
 services:
-    spark:
+    nova:
         build: .
-        container_name: spark
+        container_name: nova
         ports:
             - '3005:3005'
         volumes:
@@ -25,8 +25,8 @@ services:
         image: postgres:latest
         container_name: postgres
         environment:
-            - POSTGRES_DB=spark
-            - POSTGRES_USER=spark
+            - POSTGRES_DB=nova
+            - POSTGRES_USER=nova
             - POSTGRES_PASSWORD=postgres
         volumes:
             - ./docker-data/postgres_data:/var/lib/postgresql/data

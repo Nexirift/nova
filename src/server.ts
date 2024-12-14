@@ -4,7 +4,7 @@ import { migrate } from 'drizzle-orm/pglite/migrator';
 import gradient from 'gradient-string';
 import { createYoga } from 'graphql-yoga';
 import { version } from '../package.json';
-import { Config } from './config';
+import { config } from './config';
 import { db, prodDbClient } from './drizzle/db';
 import getGitCommitHash from './git';
 import {
@@ -27,7 +27,7 @@ const yoga = createYoga({
 	schema: schema,
 	graphiql: false,
 	graphqlEndpoint: '/',
-	plugins: [useOIDC(Config.OpenID)]
+	plugins: [useOIDC(config.openid)]
 });
 
 export async function startServer() {
@@ -92,7 +92,7 @@ export async function startServer() {
 			context: async (ctx) => {
 				if (ctx.extra.socket.data) {
 					const checkAuth = await authorize(
-						Config.OpenID,
+						config.openid,
 						(ctx.extra.socket.data! as string).split(' ')[1]
 					);
 					try {
@@ -138,20 +138,19 @@ export async function startServer() {
 	// Log the server information to the console.
 	console.log('');
 	console.log(
-		gradient(['yellow', 'cyan']).multiline(
+		gradient(['orange', 'cyan']).multiline(
 			[
-				'███████╗██████╗  █████╗ ██████╗ ██╗  ██╗',
-				'██╔════╝██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝',
-				'███████╗██████╔╝███████║██████╔╝█████╔╝ ',
-				'╚════██║██╔═══╝ ██╔══██║██╔══██╗██╔═██╗ ',
-				'███████║██║     ██║  ██║██║  ██║██║  ██╗',
-				'╚══════╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝'
+				'███╗   ██╗ ██████╗ ██╗   ██╗ █████╗ ',
+				'████╗  ██║██╔═══██╗██║   ██║██╔══██╗',
+				'██╔██╗ ██║██║   ██║██║   ██║███████║',
+				'██║╚██╗██║██║   ██║╚██╗ ██╔╝██╔══██║',
+				'██║ ╚████║╚██████╔╝ ╚████╔╝ ██║  ██║',
+				'╚═╝  ╚═══╝ ╚═════╝   ╚═══╝  ╚═╝  ╚═╝'
 			].join('\n')
 		)
 	);
-	console.log('\x1b[32m');
-	console.log('⚡ Nexirift Spark API Server');
-	console.log(`📦 Version Information: v${version} | ${getGitCommitHash()}`);
+	console.log('\x1b[36m');
+	console.log(`🌌 Nexirift Nova API v${version} (${getGitCommitHash()})`);
 	if (!isTestMode) {
 		console.log(
 			`🔑 Authentication Server: ${
@@ -161,6 +160,7 @@ export async function startServer() {
 	} else {
 		console.log('🔑 Authentication Server: Test Mode');
 	}
+	console.log('🧰 Configuration File:', config.file);
 	console.log(
 		`🌐 Serving HTTP at ${new URL(
 			yoga.graphqlEndpoint,
@@ -173,6 +173,7 @@ export async function startServer() {
 			`ws://${server.hostname}:${server.port}`
 		)}`
 	);
+
 	if (isTestMode) {
 		enableAll();
 		console.log('🧪 Running in test mode');

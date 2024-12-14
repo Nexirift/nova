@@ -1,1 +1,1 @@
-echo "Welcome to the Spark container!"
+echo "Welcome to the Nexirift Nova container!"
