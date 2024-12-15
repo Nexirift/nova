@@ -70,4 +70,4 @@ const checkPermissions = async (
 	}
 };
 
-export { getConversation, getParticipant, getPermissions, checkPermissions };
+export { checkPermissions, getConversation, getParticipant, getPermissions };

@@ -1,5 +1,4 @@
 import { OIDCToken } from '@nexirift/plugin-oidc';
-import { Context } from '../context';
 import { db } from '../drizzle/db';
 import { redisClient } from '../redis';
 import { guardianLog } from './logger';

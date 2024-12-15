@@ -6,9 +6,9 @@ import {
 	postInteraction,
 	PostInteractionSchemaType
 } from '../../drizzle/schema';
+import { throwError } from '../../helpers/common';
 import { privacyGuardian } from '../../lib/guardian';
 import { PostInteraction } from '../../types/post/Interaction';
-import { throwError } from '../../helpers/common';
 
 // Define the possible interaction types
 const interactionTypes = ['LIKE', 'UNLIKE', 'REPOST', 'UNREPOST'] as const;

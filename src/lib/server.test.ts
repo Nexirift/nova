@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, expect, test } from 'bun:test';
-import { mediaUploadEndpoint, webhookEndpoint } from './server';
 import { fetch } from 'bun';
+import { afterEach, beforeEach, expect, test } from 'bun:test';
+import { webhookEndpoint } from './server';
 import { createUser, makeGQLRequest, removeUser } from './tests';
 
 const mockUserData = {

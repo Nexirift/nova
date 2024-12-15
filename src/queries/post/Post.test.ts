@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { expect, test, beforeEach, afterEach } from 'bun:test';
+import { afterEach, beforeEach, expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { db } from '../../drizzle/db';
 import { post } from '../../drizzle/schema';

@@ -2,10 +2,10 @@ import { InferSelectModel, relations, sql } from 'drizzle-orm';
 import { boolean, pgEnum, pgTable, timestamp } from 'drizzle-orm/pg-core';
 import {
 	citext,
-	userConversationParticipant,
 	post,
 	postCollection,
 	postInteraction,
+	userConversationParticipant,
 	userPlanet,
 	userPlanetMember,
 	userProfileField,

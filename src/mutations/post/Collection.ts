@@ -3,9 +3,9 @@ import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import { postCollection, postCollectionItem } from '../../drizzle/schema';
+import { throwError } from '../../helpers/common';
 import { PostCollection } from '../../types/post/collection/Collection';
 import { PostCollectionItem } from '../../types/post/collection/Item';
-import { throwError } from '../../helpers/common';
 
 const findPostCollectionById = async (id: string) => {
 	return db.query.postCollection.findFirst({

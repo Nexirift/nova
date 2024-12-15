@@ -1,26 +1,26 @@
 import { OIDCToken, useOIDC } from '@nexirift/plugin-oidc';
 import { beforeAll } from 'bun:test';
+import { sql } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import gradient from 'gradient-string';
+import { handleProtocols, makeHandler } from 'graphql-ws/lib/use/bun';
 import { createYoga } from 'graphql-yoga';
 import { version } from '../package.json';
 import { config } from './config';
+import { Context } from './context';
 import { db, prodDbClient } from './drizzle/db';
 import getGitCommitHash from './git';
+import { authorize } from './lib/authentication';
+import { enableAll } from './lib/logger';
 import {
 	createUsersFromRedisTokens,
+	isTestMode,
 	mediaUploadEndpoint,
 	webhookEndpoint
 } from './lib/server';
-import { isTestMode } from './lib/server';
+import { pubsub } from './pubsub';
 import { redisClient, syncClient, tokenClient } from './redis';
 import { schema } from './schema';
-import { enableAll } from './lib/logger';
-import { makeHandler, handleProtocols } from 'graphql-ws/lib/use/bun';
-import { pubsub } from './pubsub';
-import { sql } from 'drizzle-orm';
-import { authorize } from './lib/authentication';
-import { Context } from './context';
 
 // Create a new instance of GraphQL Yoga with the schema and plugins.
 const yoga = createYoga({

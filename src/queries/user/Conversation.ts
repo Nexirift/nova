@@ -1,12 +1,12 @@
 import { builder } from '../../builder';
-import { db } from '../../drizzle/db';
 import { Context } from '../../context';
-import { UserConversationMessage } from '../../types/user/conversation/Message';
-import { UserConversation } from '../../types';
+import { db } from '../../drizzle/db';
 import {
 	getConversation,
 	getParticipant
 } from '../../helpers/user/Conversation';
+import { UserConversation } from '../../types';
+import { UserConversationMessage } from '../../types/user/conversation/Message';
 
 builder.queryField('getUserConversation', (t) =>
 	t.field({

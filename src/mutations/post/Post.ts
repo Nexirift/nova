@@ -3,8 +3,8 @@ import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import { post, postEditHistory } from '../../drizzle/schema';
-import { Post } from '../../types';
 import { throwError } from '../../helpers/common';
+import { Post } from '../../types';
 
 builder.mutationField('createPost', (t) =>
 	t.field({

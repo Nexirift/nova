@@ -1,22 +1,22 @@
-import { Context } from '../../context';
+import { and, eq } from 'drizzle-orm';
 import { builder } from '../../builder';
+import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import {
 	userConversation,
 	userConversationMessage,
 	userConversationParticipant
 } from '../../drizzle/schema';
-import { UserConversationMessage } from '../../types/user/conversation/Message';
-import { pubsub } from '../../pubsub';
-import { UserConversation, UserConversationType } from '../../types';
-import { and, eq } from 'drizzle-orm';
-import { UserConversationParticipant } from '../../types/user/conversation/Participant';
+import { throwError } from '../../helpers/common';
 import {
 	checkPermissions,
 	getConversation,
 	getParticipant
 } from '../../helpers/user/Conversation';
-import { throwError } from '../../helpers/common';
+import { pubsub } from '../../pubsub';
+import { UserConversation, UserConversationType } from '../../types';
+import { UserConversationMessage } from '../../types/user/conversation/Message';
+import { UserConversationParticipant } from '../../types/user/conversation/Participant';
 
 const validateParticipants = (
 	participants: string[],

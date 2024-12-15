@@ -1,11 +1,11 @@
-import { expect, test } from 'bun:test';
-import { privacyGuardian } from './guardian';
-import { OIDCToken } from '@nexirift/plugin-oidc';
-import { redisClient } from '../redis';
 import { faker } from '@faker-js/faker';
-import { createUser } from './tests';
+import { OIDCToken } from '@nexirift/plugin-oidc';
+import { expect, test } from 'bun:test';
 import { db } from '../drizzle/db';
 import { userRelationship } from '../drizzle/schema';
+import { redisClient } from '../redis';
+import { privacyGuardian } from './guardian';
+import { createUser } from './tests';
 
 function createFakeToken(sub: string): OIDCToken {
 	return {

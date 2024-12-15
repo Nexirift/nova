@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker';
 import { eq } from 'drizzle-orm';
+import { config } from '../config';
 import { db } from '../drizzle/db';
 import { user } from '../drizzle/schema';
 import { tokenClient } from '../redis';
-import { config } from '../config';
 
 /**
  * Allows communication with the GraphQL API in testing mode.

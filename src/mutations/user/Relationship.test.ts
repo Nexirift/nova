@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
 import { expect, test } from 'bun:test';
-import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 import { db } from '../../drizzle/db';
 import { userRelationship } from '../../drizzle/schema';
+import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 const errorMap = {
 	BLOCK: 'You have already blocked this user.',

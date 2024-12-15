@@ -1,3 +1,3 @@
+export * from './Conversation';
 export * from './ProfileField';
 export * from './Relationship';
-export * from './Conversation';

@@ -4,6 +4,7 @@
 
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
+import { mockClient } from 'aws-sdk-client-mock';
 import mime from 'mime-types';
 import { config } from '../config';
 import { db } from '../drizzle/db';
@@ -11,7 +12,6 @@ import { postMedia, user } from '../drizzle/schema';
 import { syncClient, tokenClient } from '../redis';
 import { authorize } from './authentication';
 import { convertModelToUser, getHashedPk, internalUsers } from './authentik';
-import { mockClient } from 'aws-sdk-client-mock';
 
 /**
  * "Legacy" endpoint for uploading media.
@@ -376,7 +376,7 @@ const isTestMode = Bun.env.NODE_ENV === 'test';
 
 export {
 	createUsersFromRedisTokens,
+	isTestMode,
 	mediaUploadEndpoint,
-	webhookEndpoint,
-	isTestMode
+	webhookEndpoint
 };

@@ -6,8 +6,8 @@ import {
 	userRelationship,
 	UserRelationshipSchemaType
 } from '../../drizzle/schema';
-import { UserRelationship } from '../../types';
 import { throwError } from '../../helpers/common';
+import { UserRelationship } from '../../types';
 
 // Define the possible relationship types
 const relationshipTypes = [

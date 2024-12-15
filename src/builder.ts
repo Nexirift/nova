@@ -1,14 +1,14 @@
-import ValidationPlugin from '@pothos/plugin-validation';
-import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
+import SchemaBuilder from '@pothos/core';
 import ErrorsPlugin from '@pothos/plugin-errors';
+import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import SmartSubscriptionsPlugin, {
 	subscribeOptionsFromIterator
 } from '@pothos/plugin-smart-subscriptions';
-import SchemaBuilder from '@pothos/core';
-import { Context } from './context';
+import ValidationPlugin from '@pothos/plugin-validation';
 import { DateTimeResolver } from 'graphql-scalars';
-import { pubsub } from './pubsub';
+import { Context } from './context';
 import { throwError } from './helpers/common';
+import { pubsub } from './pubsub';
 
 export const builder = new SchemaBuilder<{
 	Context: Context;

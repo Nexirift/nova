@@ -15,7 +15,7 @@ export const redisClient = createClient({
 	url: !isTestMode ? (Bun.env.REDIS_URL as string) : 'redis://localhost:1234'
 });
 
-// Create a new  Redis client just for tokens using the duplicate method.
+// Create a new Redis client just for tokens using the duplicate method.
 export const tokenClient = redisClient.duplicate();
 
 // Create a new Redis client just for sync operations using the duplicate method.
