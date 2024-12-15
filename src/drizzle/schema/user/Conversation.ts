@@ -106,7 +106,7 @@ export const userConversationRole = pgTable(
 	{
 		id: uuid('id').defaultRandom().notNull(),
 		name: citext('name').notNull(),
-		description: citext('description').notNull(),
+		description: citext('description'),
 		conversationId: uuid('conversation_id').notNull(),
 		default: boolean('default').notNull().default(false),
 		permissions: citext('permissions')

@@ -1,6 +1,13 @@
 import { db } from '../../drizzle/db';
 import { throwError } from '../common';
 
+const validPermissions = [
+	'ADD_PARTICIPANTS',
+	'REMOVE_PARTICIPANTS',
+	'SEND_MESSAGES',
+	'CREATE_ROLES'
+];
+
 const getConversation = async (id: string) => {
 	const conversation = await db.query.userConversation.findFirst({
 		where: (userConversation, { eq }) => eq(userConversation.id, id)
@@ -70,4 +77,10 @@ const checkPermissions = async (
 	}
 };
 
-export { checkPermissions, getConversation, getParticipant, getPermissions };
+export {
+	checkPermissions,
+	getConversation,
+	getParticipant,
+	getPermissions,
+	validPermissions
+};
