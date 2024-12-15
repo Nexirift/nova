@@ -78,7 +78,7 @@ builder.mutationField('acceptFollowRequest', (t) =>
 
 builder.mutationField('denyFollowRequest', (t) =>
 	t.field({
-		type: 'Boolean',
+		type: UserRelationship,
 		args: {
 			id: t.arg.string({ required: true })
 		},
@@ -101,7 +101,7 @@ builder.mutationField('denyFollowRequest', (t) =>
 				);
 			}
 
-			await db
+			return db
 				.delete(userRelationship)
 				.where(
 					and(
@@ -112,8 +112,6 @@ builder.mutationField('denyFollowRequest', (t) =>
 				)
 				.returning()
 				.then((res) => res[0]);
-
-			return true;
 		}
 	})
 );

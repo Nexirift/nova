@@ -95,7 +95,7 @@ builder.mutationField('updatePostCollection', (t) =>
 
 builder.mutationField('deletePostCollection', (t) =>
 	t.field({
-		type: 'Boolean',
+		type: PostCollection,
 		args: {
 			id: t.arg.string({ required: true })
 		},
@@ -112,12 +112,11 @@ builder.mutationField('deletePostCollection', (t) =>
 				);
 			}
 
-			await db
+			return db
 				.delete(postCollection)
 				.where(eq(postCollection.id, args.id))
-				.execute();
-
-			return true;
+				.returning()
+				.then((res) => res[0]);
 		}
 	})
 );
