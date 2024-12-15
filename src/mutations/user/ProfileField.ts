@@ -13,6 +13,7 @@ builder.mutationField('createProfileField', (t) =>
 			name: t.arg.string({ required: true }),
 			value: t.arg.string({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, _args, ctx: Context) => {
 			const existingField = await db.query.userProfileField.findFirst({
 				where: (profileField, { eq, and }) =>
@@ -50,6 +51,7 @@ builder.mutationField('updateProfileField', (t) =>
 			newName: t.arg.string({ required: false }),
 			newValue: t.arg.string({ required: false })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, _args, ctx: Context) => {
 			const existingFields = await db.query.userProfileField.findMany({
 				where: (profileField, { eq }) =>

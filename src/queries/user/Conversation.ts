@@ -14,6 +14,7 @@ builder.queryField('getUserConversation', (t) =>
 		args: {
 			id: t.arg.string({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const conversation = await getConversation(args.id);
 			await getParticipant(ctx.oidc?.sub, args.id);

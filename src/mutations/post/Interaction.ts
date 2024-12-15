@@ -22,7 +22,7 @@ interactionTypes.forEach((type) => {
 				id: t.arg.string({ required: true }),
 				reason: t.arg.string()
 			},
-			// TODO: Add auth scope.
+			authScopes: { loggedIn: true },
 			resolve: async (_root, args, ctx: Context) =>
 				postInteract(ctx, args, type)
 		})

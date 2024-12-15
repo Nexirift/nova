@@ -153,6 +153,7 @@ builder.mutationField('createUserConversation', (t) =>
 			type: t.arg({ type: UserConversationType, required: true }),
 			participants: t.arg.stringList({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const participants = args.participants.map((id) => id.toString());
 			validateParticipants(participants, ctx.oidc.sub);
@@ -176,6 +177,7 @@ builder.mutationField('createUserConversationMessage', (t) =>
 			content: t.arg.string({ required: true }),
 			conversationId: t.arg.string({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			await checkPermissions(
 				['SEND_MESSAGES'],
@@ -210,6 +212,7 @@ builder.mutationField('addUserConversationParticipants', (t) =>
 			conversationId: t.arg.string({ required: true }),
 			participants: t.arg.stringList({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const conversation = await getConversation(args.conversationId);
 			await getParticipant(ctx.oidc.sub, args.conversationId);
@@ -243,6 +246,7 @@ builder.mutationField('removeUserConversationParticipants', (t) =>
 			conversationId: t.arg.string({ required: true }),
 			participants: t.arg.stringList({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const conversation = await getConversation(args.conversationId);
 			await getParticipant(ctx.oidc.sub, args.conversationId);

@@ -21,6 +21,7 @@ builder.mutationField('createPostCollection', (t) =>
 			description: t.arg.string(),
 			visibility: t.arg.string({ defaultValue: 'PUBLIC' })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const originalPostCollection =
 				await db.query.postCollection.findFirst({
@@ -63,6 +64,7 @@ builder.mutationField('updatePostCollection', (t) =>
 			description: t.arg.string(),
 			visibility: t.arg.string({ defaultValue: 'PUBLIC' })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const originalPostCollection = await findPostCollectionById(
 				args.id
@@ -97,6 +99,7 @@ builder.mutationField('deletePostCollection', (t) =>
 		args: {
 			id: t.arg.string({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const originalPostCollection = await findPostCollectionById(
 				args.id
@@ -126,6 +129,7 @@ builder.mutationField('addPostToCollection', (t) =>
 			id: t.arg.string({ required: true }),
 			postId: t.arg.string({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const originalPostCollection = await findPostCollectionById(
 				args.id
@@ -159,6 +163,7 @@ builder.mutationField('removePostFromCollection', (t) =>
 			id: t.arg.string({ required: true }),
 			postId: t.arg.string({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const originalPostCollection = await findPostCollectionById(
 				args.id

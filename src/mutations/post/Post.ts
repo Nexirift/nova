@@ -15,6 +15,7 @@ builder.mutationField('createPost', (t) =>
 			parent: t.arg.string(),
 			quote: t.arg.boolean({ defaultValue: false })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const createPost = await db
 				.insert(post)
@@ -40,6 +41,7 @@ builder.mutationField('updatePost', (t) =>
 			id: t.arg.string({ required: true }),
 			content: t.arg.string({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const originalPost = await db.query.post.findFirst({
 				where: (post, { eq }) => eq(post.id, args.id)
@@ -77,6 +79,7 @@ builder.mutationField('deletePost', (t) =>
 		args: {
 			id: t.arg.string({ required: true })
 		},
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const originalPost = await db.query.post.findFirst({
 				where: (post, { eq }) => eq(post.id, args.id)

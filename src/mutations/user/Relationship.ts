@@ -28,7 +28,7 @@ relationshipTypes.forEach((type) => {
 				id: t.arg.string({ required: true }),
 				reason: t.arg.string()
 			},
-			// TODO: Add auth scope.
+			authScopes: { loggedIn: true },
 			resolve: async (_root, args, ctx: Context) =>
 				modifyRelationship(ctx, args, type)
 		})
@@ -41,7 +41,7 @@ builder.mutationField('acceptFollowRequest', (t) =>
 		args: {
 			id: t.arg.string({ required: true })
 		},
-		// TODO: Add auth scope.
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const requestedRelationship =
 				await db.query.userRelationship.findFirst({
@@ -82,7 +82,7 @@ builder.mutationField('denyFollowRequest', (t) =>
 		args: {
 			id: t.arg.string({ required: true })
 		},
-		// TODO: Add auth scope.
+		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const requestedRelationship =
 				await db.query.userRelationship.findFirst({
