@@ -75,7 +75,7 @@ builder.mutationField('updatePost', (t) =>
 
 builder.mutationField('deletePost', (t) =>
 	t.field({
-		type: Post,
+		type: 'Boolean',
 		args: {
 			id: t.arg.string({ required: true })
 		},
@@ -89,12 +89,13 @@ builder.mutationField('deletePost', (t) =>
 				return throwError('Post not found.', 'POST_NOT_FOUND');
 			}
 
-			return db
+			await db
 				.update(post)
 				.set({ deleted: true })
 				.where(eq(post.id, args.id))
-				.returning()
-				.then((res) => res[0]);
+				.execute();
+
+			return true;
 		}
 	})
 );
