@@ -8,6 +8,15 @@
 			"enabled": false
 		},
 		"messaging": {
+			"direct": {
+				"enabled": true
+			},
+			"group": {
+				"enabled": true
+			}
+		},
+		"subscriptions": {
+			"_comment": "Subscriptions allow you to monetise your Nova instance.",
 			"enabled": true
 		}
 	}

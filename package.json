@@ -6,7 +6,7 @@
 	"license": "GPL-3.0-only",
 	"main": "server.ts",
 	"scripts": {
-		"dev": "bun --watch src/server.ts",
+		"dev": "NODE_ENV=dev bun --watch src/server.ts",
 		"start": "bun src/server.ts",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "bun drizzle/migrate.ts ./drizzle",
@@ -35,6 +35,7 @@
 		"mime-types": "^2.1.35",
 		"pg": "^8.13.1",
 		"redis": "^4.7.0",
+		"stripe": "^17.5.0",
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {

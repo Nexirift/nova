@@ -1,6 +1,7 @@
 import { OIDC, OIDCPluginOptionsBase } from '@nexirift/plugin-oidc';
 import { readFileSync } from 'fs';
 import { tokenClient } from './redis';
+import Stripe from 'stripe';
 
 const file = (Bun.env.CONFIG_FILE as string) ?? 'config.json';
 
@@ -12,6 +13,18 @@ type Config = {
 		};
 		age_verification: {
 			enabled: boolean;
+		};
+		messaging: {
+			direct: {
+				enabled: boolean;
+			};
+			group: {
+				enabled: boolean;
+			};
+		};
+		subscription: {
+			enabled: boolean;
+			tiers: string[];
 		};
 	};
 	openid: OIDCPluginOptionsBase;
@@ -43,3 +56,5 @@ export const config: Config = {
 	},
 	file
 };
+
+export const stripe = new Stripe(Bun.env.STRIPE_SECRET_KEY! || 'no_stripe_key');

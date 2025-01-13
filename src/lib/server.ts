@@ -6,12 +6,14 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { mockClient } from 'aws-sdk-client-mock';
 import mime from 'mime-types';
-import { config } from '../config';
+import { config, stripe } from '../config';
 import { db } from '../drizzle/db';
 import { postMedia, user } from '../drizzle/schema';
 import { syncClient, tokenClient } from '../redis';
 import { authorize } from './authentication';
 import { convertModelToUser, getHashedPk, internalUsers } from './authentik';
+import { enableAll, stripeLog } from './logger';
+import { eq } from 'drizzle-orm';
 
 /**
  * "Legacy" endpoint for uploading media.
@@ -179,7 +181,6 @@ async function mediaUploadEndpoint(req: Request) {
  */
 async function webhookEndpoint(req: Request) {
 	const url = new URL(req.url);
-	console.log(url.pathname, isTestMode);
 	switch (url.pathname) {
 		case `/webhook/${isTestMode ? 'TEST-AUTH' : Bun.env.WEBHOOK_AUTH}`:
 			if (
@@ -274,13 +275,66 @@ async function webhookEndpoint(req: Request) {
 				{ status: 404 }
 			);
 		case `/webhook/${isTestMode ? 'TEST-STRIPE' : Bun.env.WEBHOOK_STRIPE}`:
-			return Response.json(
-				{
-					status: 'WORK_IN_PROGRESS',
-					message: 'This webhook is not implemented yet'
-				},
-				{ status: 404 }
-			);
+			enableAll();
+
+			const body = await req.json();
+			switch (body.type) {
+				case 'customer.subscription.created':
+					console.log(body.type, body);
+
+					const customer = await stripe.customers.retrieve(
+						body.data.object.customer
+					);
+
+					const customerId =
+						'metadata' in customer
+							? (customer.metadata['id'] as string)
+							: '';
+
+					const customerEmail =
+						'email' in customer ? (customer.email as string) : '';
+
+					const userRecord = await db.query.user.findFirst({
+						where: (user, { eq, or }) =>
+							or(
+								eq(
+									user.stripe_customer_id,
+									body.data.object.customer
+								),
+								eq(user.id, customerId),
+								eq(user.email, customerEmail)
+							)
+					});
+
+					if (!userRecord) {
+						stripeLog(
+							`customer ${customer.id} has a subscription, but no user was found, bailing out...`
+						);
+						return Response.json({}, { status: 200 });
+					}
+
+					stripeLog(
+						`customer ${customer.id} associated with user ${userRecord.id} has been charged, setting subscription to ${body.id}...`
+					);
+
+					await db
+						.update(user)
+						.set({
+							stripe_customer_id: customer.id,
+							stripe_subscription_id: body.id
+						})
+						.where(eq(user.id, userRecord.id))
+						.execute();
+
+					return Response.json({}, { status: 200 });
+				case 'charge.refunded':
+					console.log('💳 User has been refunded, downgrading...');
+					// TODO: Update subscription status for user.
+					return Response.json({}, { status: 200 });
+				default:
+					//console.log('💳 Unknown webhook type');
+					return Response.json({}, { status: 200 });
+			}
 		default:
 			return Response.json(
 				{

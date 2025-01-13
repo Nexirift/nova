@@ -6,7 +6,7 @@ import gradient from 'gradient-string';
 import { handleProtocols, makeHandler } from 'graphql-ws/lib/use/bun';
 import { createYoga } from 'graphql-yoga';
 import { version } from '../package.json';
-import { config } from './config';
+import { config, stripe } from './config';
 import { Context } from './context';
 import { db, prodDbClient } from './drizzle/db';
 import getGitCommitHash from './git';
@@ -179,6 +179,25 @@ export async function startServer() {
 		console.log('🧪 Running in test mode');
 	}
 	console.log('\x1b[0m');
+
+	if (Bun.env.STRIPE_SECRET_KEY) {
+		if (
+			server.hostname === 'localhost' ||
+			server.hostname === '127.0.0.1'
+		) {
+			console.log(
+				`💳 Stripe requires CLI for webhooks due to the hostname being ${server.hostname}.`
+			);
+		} else {
+			const webhookEndpoint = await stripe.webhookEndpoints.create({
+				enabled_events: ['charge.succeeded', 'charge.failed'],
+				url: new URL(
+					`/webhook/${Bun.env.WEBHOOK_STRIPE}`,
+					`http://${server.hostname}:${server.port}`
+				).toString()
+			});
+		}
+	}
 }
 
 if (!isTestMode) {

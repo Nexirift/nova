@@ -33,6 +33,8 @@ export const user = pgTable('user', {
 	profession: citext('profession'),
 	location: citext('location'),
 	website: citext('website'),
+	stripe_customer_id: citext('stripe_customer_id'),
+	stripe_subscription_id: citext('stripe_subscription_id'),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	updatedAt: timestamp('updated_at')
 		.notNull()

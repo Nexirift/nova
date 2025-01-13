@@ -1,4 +1,5 @@
 import { builder } from '../../../builder';
+import { config } from '../../../config';
 import { db } from '../../../drizzle/db';
 import { type UserConversationSchemaType } from '../../../drizzle/schema';
 import { UserConversationParticipant } from './Participant';
@@ -12,6 +13,15 @@ export const UserConversation =
 	builder.objectRef<UserConversationSchemaType>('UserConversation');
 
 UserConversation.implement({
+	authScopes: (t) => {
+		if (t.type === 'DIRECT' && !config.features.messaging.direct.enabled) {
+			return false;
+		}
+		if (t.type === 'GROUP' && !config.features.messaging.group.enabled) {
+			return false;
+		}
+		return true;
+	},
 	fields: (t) => ({
 		id: t.exposeString('id', { nullable: false }),
 		name: t.exposeString('name', { nullable: true }),
