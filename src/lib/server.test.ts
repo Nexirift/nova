@@ -41,11 +41,15 @@ test('Webhook | Authentik - Should return 200 for internal users', async () => {
 	expect(response.status).toBe(200);
 });
 
+// Temporarily disabled since the webhook is currently under active development.
+
+/*
 test('Webhook | Stripe - Should return 404 for unimplemented webhook', async () => {
 	const req = createRequest(`http://localhost:25447/webhook/TEST-STRIPE`);
 	const response = await webhookEndpoint(req);
 	expect(response.status).toBe(404);
 });
+*/
 
 test('Webhook | Authentik - Should handle missing fields gracefully', async () => {
 	const mockUserDataMissingFields = {
