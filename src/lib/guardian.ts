@@ -47,6 +47,7 @@ async function privacyGuardian(
 		);
 
 		result = !!followingRelationship;
+
 		if (!result) {
 			guardianLog(
 				`User ${user.id} is PRIVATE and not followed by ${token?.sub}`

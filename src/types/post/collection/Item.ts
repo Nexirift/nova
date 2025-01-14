@@ -1,6 +1,7 @@
 import { builder } from '../../../builder';
 import { db } from '../../../drizzle/db';
 import { type PostCollectionItemSchemaType } from '../../../drizzle/schema';
+import { throwError } from '../../../helpers/common';
 import { Post } from '../Post';
 import { PostCollection } from './Collection';
 
@@ -8,6 +9,21 @@ export const PostCollectionItem =
 	builder.objectRef<PostCollectionItemSchemaType>('PostCollectionItem');
 
 PostCollectionItem.implement({
+	authScopes: async (_parent, context) => {
+		const collection = await db.query.postCollection.findFirst({
+			where: (postCollection, { eq }) =>
+				eq(postCollection.id, _parent.collectionId)
+		});
+
+		if (
+			collection?.visibility === 'PRIVATE' &&
+			context.oidc?.sub !== collection?.userId
+		) {
+			return throwError('You cannot view this post.', 'UNAUTHORIZED');
+		}
+		return true;
+	},
+	runScopesOnType: true,
 	fields: (t) => ({
 		collection: t.field({
 			type: PostCollection,

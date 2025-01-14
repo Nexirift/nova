@@ -2,6 +2,7 @@ import { User } from '../..';
 import { builder } from '../../../builder';
 import { db } from '../../../drizzle/db';
 import { type PostCollectionSchemaType } from '../../../drizzle/schema';
+import { throwError } from '../../../helpers/common';
 import { PostCollectionItem } from './Item';
 
 export const PostCollectionVisibilityType = builder.enumType(
@@ -15,6 +16,16 @@ export const PostCollection =
 	builder.objectRef<PostCollectionSchemaType>('PostCollection');
 
 PostCollection.implement({
+	authScopes: async (_parent, context) => {
+		if (
+			_parent.visibility === 'PRIVATE' &&
+			context.oidc?.sub !== _parent.userId
+		) {
+			return throwError('You cannot view this post.', 'UNAUTHORIZED');
+		}
+		return true;
+	},
+	runScopesOnType: true,
 	fields: (t) => ({
 		id: t.exposeString('id', { nullable: false }),
 		name: t.exposeString('name', { nullable: false }),

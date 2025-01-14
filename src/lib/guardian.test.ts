@@ -142,6 +142,7 @@ test('Authenticated | General - It should cache the result for 5 seconds', async
 	);
 	expect(cachedResult).toBe('true');
 });
+
 test('Authenticated | General - It should return false if user type is PUBLIC and blocked', async () => {
 	const user1 = faker.string.uuid();
 	const user2 = faker.string.uuid();
