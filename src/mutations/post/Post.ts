@@ -5,6 +5,7 @@ import { db } from '../../drizzle/db';
 import { post, postEditHistory } from '../../drizzle/schema';
 import { throwError } from '../../helpers/common';
 import { Post } from '../../types';
+import { config } from '../../config';
 
 builder.mutationField('createPost', (t) =>
 	t.field({
@@ -17,6 +18,8 @@ builder.mutationField('createPost', (t) =>
 		},
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
+			// TODO: Implement requireMedia check.
+
 			const createPost = await db
 				.insert(post)
 				.values({

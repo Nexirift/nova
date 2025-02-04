@@ -1,6 +1,8 @@
 import { builder } from '../../builder';
+import { config } from '../../config';
 import { db } from '../../drizzle/db';
 import { type UserVerificationSchemaType } from '../../drizzle/schema';
+import { throwFeatureDisabledError } from '../../helpers/common';
 import { User } from './User';
 
 export const UserVerificationType = builder.enumType('UserVerificationType', {
@@ -11,6 +13,12 @@ export const UserVerification =
 	builder.objectRef<UserVerificationSchemaType>('UserVerification');
 
 UserVerification.implement({
+	authScopes: async (_parent, context) => {
+		if (!config.features.verification.enabled)
+			return throwFeatureDisabledError();
+
+		return true;
+	},
 	fields: (t) => ({
 		user: t.field({
 			type: User,

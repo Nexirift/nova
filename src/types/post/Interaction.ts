@@ -1,7 +1,9 @@
 import { User } from '..';
 import { builder } from '../../builder';
+import { config } from '../../config';
 import { db } from '../../drizzle/db';
 import { type PostInteractionSchemaType } from '../../drizzle/schema';
+import { throwFeatureDisabledError } from '../../helpers/common';
 import { Post } from './Post';
 
 export const PostInteractionType = builder.enumType('PostInteractionType', {
@@ -12,6 +14,11 @@ export const PostInteraction =
 	builder.objectRef<PostInteractionSchemaType>('PostInteraction');
 
 PostInteraction.implement({
+	authScopes: async (_parent, context) => {
+		if (!config.features.posts.enabled) return throwFeatureDisabledError();
+
+		return true;
+	},
 	fields: (t) => ({
 		post: t.field({
 			type: Post,

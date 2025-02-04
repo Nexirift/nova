@@ -7,24 +7,40 @@ const file = (Bun.env.CONFIG_FILE as string) ?? 'config.json';
 
 type Config = {
 	features: {
+		posts: {
+			enabled: boolean;
+			requireMedia: boolean; // not implemented
+			pins: {
+				enabled: boolean; // not implemented
+				limit: number; // not implemented
+			};
+			collections: {
+				enabled: boolean;
+				collectionLimit: number; // not implemented
+				postLimit: number; // not implemented
+			};
+			polls: {
+				enabled: boolean;
+			};
+		};
 		verification: {
 			enabled: boolean;
-			types: string[];
+			types: string[]; // not implemented
 		};
 		age_verification: {
-			enabled: boolean;
+			enabled: boolean; // not implemented
 		};
 		messaging: {
 			direct: {
-				enabled: boolean;
+				enabled: boolean; // not implemented
 			};
 			group: {
-				enabled: boolean;
+				enabled: boolean; // not implemented
+				maxParticipants: number; // not implemented
 			};
 		};
-		subscription: {
-			enabled: boolean;
-			tiers: string[];
+		subscriptions: {
+			enabled: boolean; // not implemented
 		};
 	};
 	openid: OIDCPluginOptionsBase;

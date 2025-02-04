@@ -189,7 +189,7 @@ export async function startServer() {
 				`💳 Stripe requires CLI for webhooks due to the hostname being ${server.hostname}.`
 			);
 		} else {
-			const webhookEndpoint = await stripe.webhookEndpoints.create({
+			await stripe.webhookEndpoints.create({
 				enabled_events: ['charge.succeeded', 'charge.failed'],
 				url: new URL(
 					`/webhook/${Bun.env.WEBHOOK_STRIPE}`,

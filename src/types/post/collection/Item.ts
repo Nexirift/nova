@@ -1,7 +1,8 @@
 import { builder } from '../../../builder';
+import { config } from '../../../config';
 import { db } from '../../../drizzle/db';
 import { type PostCollectionItemSchemaType } from '../../../drizzle/schema';
-import { throwError } from '../../../helpers/common';
+import { throwError, throwFeatureDisabledError } from '../../../helpers/common';
 import { Post } from '../Post';
 import { PostCollection } from './Collection';
 
@@ -10,6 +11,12 @@ export const PostCollectionItem =
 
 PostCollectionItem.implement({
 	authScopes: async (_parent, context) => {
+		if (
+			!config.features.posts.collections.enabled ||
+			!config.features.posts.enabled
+		)
+			return throwFeatureDisabledError();
+
 		const collection = await db.query.postCollection.findFirst({
 			where: (postCollection, { eq }) =>
 				eq(postCollection.id, _parent.collectionId)

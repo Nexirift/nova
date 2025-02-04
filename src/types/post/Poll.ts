@@ -1,14 +1,25 @@
 import { builder } from '../../builder';
+import { config } from '../../config';
 import { db } from '../../drizzle/db';
 import {
 	type PostPollSchemaType,
 	type PostPollVoteSchemaType
 } from '../../drizzle/schema';
+import { throwFeatureDisabledError } from '../../helpers/common';
 import { Post } from './Post';
 
 export const PostPoll = builder.objectRef<PostPollSchemaType>('PostPoll');
 
 PostPoll.implement({
+	authScopes: async (_parent, context) => {
+		if (
+			!config.features.posts.polls.enabled ||
+			!config.features.posts.enabled
+		)
+			return throwFeatureDisabledError();
+
+		return true;
+	},
 	fields: (t) => ({
 		post: t.field({
 			type: Post,
@@ -33,6 +44,12 @@ export const PostPollVote =
 	builder.objectRef<PostPollVoteSchemaType>('PostPollVote');
 
 PostPollVote.implement({
+	authScopes: async (_parent, context) => {
+		if (!config.features.posts.polls.enabled)
+			return throwFeatureDisabledError();
+
+		return true;
+	},
 	fields: (t) => ({
 		post: t.field({
 			type: Post,

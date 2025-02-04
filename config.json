@@ -1,5 +1,21 @@
 {
 	"features": {
+		"posts": {
+			"enabled": true,
+			"requireMedia": true,
+			"pins": {
+				"enabled": true,
+				"limit": 3
+			},
+			"collections": {
+				"enabled": true,
+				"collectionLimit": -1,
+				"postLimit": -1
+			},
+			"polls": {
+				"enabled": true
+			}
+		},
 		"verification": {
 			"enabled": true,
 			"types": ["notable", "business", "tester", "official"]
@@ -12,11 +28,11 @@
 				"enabled": true
 			},
 			"group": {
-				"enabled": true
+				"enabled": true,
+				"maxParticipants": -1
 			}
 		},
 		"subscriptions": {
-			"_comment": "Subscriptions allow you to monetise your Nova instance.",
 			"enabled": true
 		}
 	}

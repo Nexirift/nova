@@ -1,8 +1,9 @@
 import { User } from '../..';
 import { builder } from '../../../builder';
+import { config } from '../../../config';
 import { db } from '../../../drizzle/db';
 import { type PostCollectionSchemaType } from '../../../drizzle/schema';
-import { throwError } from '../../../helpers/common';
+import { throwError, throwFeatureDisabledError } from '../../../helpers/common';
 import { PostCollectionItem } from './Item';
 
 export const PostCollectionVisibilityType = builder.enumType(
@@ -17,6 +18,12 @@ export const PostCollection =
 
 PostCollection.implement({
 	authScopes: async (_parent, context) => {
+		if (
+			!config.features.posts.collections.enabled ||
+			!config.features.posts.enabled
+		)
+			return throwFeatureDisabledError();
+
 		if (
 			_parent.visibility === 'PRIVATE' &&
 			context.oidc?.sub !== _parent.userId

@@ -1,12 +1,19 @@
 import { builder } from '../../builder';
+import { config } from '../../config';
 import { db } from '../../drizzle/db';
 import { type PostGiveawaySchemaType } from '../../drizzle/schema';
+import { throwFeatureDisabledError } from '../../helpers/common';
 import { Post } from './Post';
 
 export const PostGiveaway =
 	builder.objectRef<PostGiveawaySchemaType>('PostGiveaway');
 
 PostGiveaway.implement({
+	authScopes: async (_parent, context) => {
+		if (!config.features.posts.enabled) return throwFeatureDisabledError();
+
+		return true;
+	},
 	fields: (t) => ({
 		post: t.field({
 			type: Post,

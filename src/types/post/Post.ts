@@ -1,8 +1,9 @@
 import { builder } from '../../builder';
+import { config } from '../../config';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import { type PostSchemaType } from '../../drizzle/schema';
-import { throwError } from '../../helpers/common';
+import { throwError, throwFeatureDisabledError } from '../../helpers/common';
 import { privacyGuardian } from '../../lib/guardian';
 import { redisClient } from '../../redis';
 import { User } from '../user';
@@ -15,6 +16,8 @@ export const Post = builder.objectRef<PostSchemaType>('Post');
 
 Post.implement({
 	authScopes: async (_parent, context) => {
+		if (!config.features.posts.enabled) return throwFeatureDisabledError();
+
 		if (!_parent.published && context.oidc?.sub === _parent.authorId) {
 			return throwError('You cannot view this post.', 'UNAUTHORIZED');
 		}

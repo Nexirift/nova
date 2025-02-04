@@ -3,9 +3,10 @@ import { builder } from '../../builder';
 import { Context } from '../../context';
 import { db } from '../../drizzle/db';
 import { postCollection, postCollectionItem } from '../../drizzle/schema';
-import { throwError } from '../../helpers/common';
+import { throwError, throwFeatureDisabledError } from '../../helpers/common';
 import { PostCollection } from '../../types/post/collection/Collection';
 import { PostCollectionItem } from '../../types/post/collection/Item';
+import { config } from '../../config';
 
 const findPostCollectionById = async (id: string) => {
 	return db.query.postCollection.findFirst({
@@ -23,6 +24,9 @@ builder.mutationField('createPostCollection', (t) =>
 		},
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
+			if (!config.features.posts.collections.enabled)
+				return throwFeatureDisabledError();
+
 			const originalPostCollection =
 				await db.query.postCollection.findFirst({
 					where: (postCollection, { and, eq }) =>
@@ -66,6 +70,9 @@ builder.mutationField('updatePostCollection', (t) =>
 		},
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
+			if (!config.features.posts.collections.enabled)
+				return throwFeatureDisabledError();
+
 			const originalPostCollection = await findPostCollectionById(
 				args.id
 			);
@@ -101,6 +108,9 @@ builder.mutationField('deletePostCollection', (t) =>
 		},
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
+			if (!config.features.posts.collections.enabled)
+				return throwFeatureDisabledError();
+
 			const originalPostCollection = await findPostCollectionById(
 				args.id
 			);
@@ -131,6 +141,9 @@ builder.mutationField('addPostToCollection', (t) =>
 		},
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
+			if (!config.features.posts.collections.enabled)
+				return throwFeatureDisabledError();
+
 			const originalPostCollection = await findPostCollectionById(
 				args.id
 			);
@@ -165,6 +178,9 @@ builder.mutationField('removePostFromCollection', (t) =>
 		},
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
+			if (!config.features.posts.collections.enabled)
+				return throwFeatureDisabledError();
+
 			const originalPostCollection = await findPostCollectionById(
 				args.id
 			);
