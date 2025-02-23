@@ -1,6 +1,6 @@
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '../../drizzle/db';
+import { db } from '@nexirift/db';
 import {
 	getConversation,
 	getParticipant
@@ -17,7 +17,7 @@ builder.queryField('getUserConversation', (t) =>
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const conversation = await getConversation(args.id);
-			await getParticipant(ctx.oidc?.sub, args.id);
+			await getParticipant(ctx.auth?.user?.id, args.id);
 			return conversation;
 		}
 	})
@@ -36,7 +36,7 @@ builder.queryField('getUserConversationMessages', (t) =>
 		subscribe: (subscriptions, _root, args) =>
 			subscriptions.register(`userConversationMessages|${args.id}`),
 		resolve: async (_root, args, ctx: Context) => {
-			await getParticipant(ctx.oidc?.sub, args.id);
+			await getParticipant(ctx.auth?.user?.id, args.id);
 
 			return db.query.userConversationMessage.findMany({
 				where: (userConversationMessage, { eq }) =>
@@ -63,7 +63,7 @@ builder.queryField('getUserConversationParticipants', (t) =>
 		subscribe: (subscriptions, _root, args) =>
 			subscriptions.register(`userConversationParticipants|${args.id}`),
 		resolve: async (_root, args, ctx: Context) => {
-			await getParticipant(ctx.oidc?.sub, args.id);
+			await getParticipant(ctx.auth?.user?.id, args.id);
 
 			return db.query.userConversationParticipant.findMany({
 				where: (userConversationMessage, { eq }) =>

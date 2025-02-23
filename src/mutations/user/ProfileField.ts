@@ -1,8 +1,8 @@
 import { and, eq } from 'drizzle-orm';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '../../drizzle/db';
-import { userProfileField } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { userProfileField } from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import { UserProfileField } from '../../types/user/ProfileField';
 
@@ -18,7 +18,7 @@ builder.mutationField('createProfileField', (t) =>
 			const existingField = await db.query.userProfileField.findFirst({
 				where: (profileField, { eq, and }) =>
 					and(
-						eq(profileField.userId, ctx.oidc.sub),
+						eq(profileField.userId, ctx.auth?.user?.id),
 						eq(profileField.name, _args.name)
 					)
 			});
@@ -35,7 +35,7 @@ builder.mutationField('createProfileField', (t) =>
 				.values({
 					name: _args.name,
 					value: _args.value,
-					userId: ctx.oidc.sub
+					userId: ctx.auth?.user?.id
 				})
 				.returning()
 				.then((res) => res[0]);
@@ -55,7 +55,7 @@ builder.mutationField('updateProfileField', (t) =>
 		resolve: async (_root, _args, ctx: Context) => {
 			const existingFields = await db.query.userProfileField.findMany({
 				where: (profileField, { eq }) =>
-					eq(profileField.userId, ctx.oidc.sub)
+					eq(profileField.userId, ctx.auth?.user?.id)
 			});
 
 			const existingField = existingFields.find(
@@ -84,7 +84,7 @@ builder.mutationField('updateProfileField', (t) =>
 				})
 				.where(
 					and(
-						eq(userProfileField.userId, ctx.oidc.sub),
+						eq(userProfileField.userId, ctx.auth?.user?.id),
 						eq(userProfileField.name, _args.name)
 					)
 				)

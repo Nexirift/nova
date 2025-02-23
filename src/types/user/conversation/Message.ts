@@ -1,7 +1,7 @@
 import { UserConversation, UserConversationParticipant } from '../..';
 import { builder } from '../../../builder';
-import { db } from '../../../drizzle/db';
-import { type UserConversationMessageSchemaType } from '../../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { type UserConversationMessageSchemaType } from '@nexirift/db';
 
 export const UserConversationMessage =
 	builder.objectRef<UserConversationMessageSchemaType>(

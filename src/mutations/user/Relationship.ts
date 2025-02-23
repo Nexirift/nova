@@ -1,11 +1,8 @@
 import { and, eq, or } from 'drizzle-orm';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '../../drizzle/db';
-import {
-	userRelationship,
-	UserRelationshipSchemaType
-} from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { userRelationship, UserRelationshipSchemaType } from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import { UserRelationship } from '../../types';
 
@@ -48,7 +45,7 @@ builder.mutationField('acceptFollowRequest', (t) =>
 					where: (userRelationship, { and }) =>
 						and(
 							eq(userRelationship.fromId, args.id),
-							eq(userRelationship.toId, ctx.oidc.sub),
+							eq(userRelationship.toId, ctx.auth?.user?.id),
 							eq(userRelationship.type, 'REQUEST')
 						)
 				});
@@ -66,7 +63,7 @@ builder.mutationField('acceptFollowRequest', (t) =>
 				.where(
 					and(
 						eq(userRelationship.fromId, args.id),
-						eq(userRelationship.toId, ctx.oidc.sub),
+						eq(userRelationship.toId, ctx.auth?.user?.id),
 						eq(userRelationship.type, 'REQUEST')
 					)
 				)
@@ -89,7 +86,7 @@ builder.mutationField('denyFollowRequest', (t) =>
 					where: (userRelationship, { and }) =>
 						and(
 							eq(userRelationship.fromId, args.id),
-							eq(userRelationship.toId, ctx.oidc.sub),
+							eq(userRelationship.toId, ctx.auth?.user?.id),
 							eq(userRelationship.type, 'REQUEST')
 						)
 				});
@@ -106,7 +103,7 @@ builder.mutationField('denyFollowRequest', (t) =>
 				.where(
 					and(
 						eq(userRelationship.fromId, args.id),
-						eq(userRelationship.toId, ctx.oidc.sub),
+						eq(userRelationship.toId, ctx.auth?.user?.id),
 						eq(userRelationship.type, 'REQUEST')
 					)
 				)
@@ -125,7 +122,7 @@ async function modifyRelationship(
 	type: 'BLOCK' | 'UNBLOCK' | 'MUTE' | 'UNMUTE' | 'FOLLOW' | 'UNFOLLOW'
 ): Promise<UserRelationshipSchemaType | null> {
 	// Prevent users from performing actions on themselves
-	if (ctx.oidc.sub === args.id) {
+	if (ctx.auth?.user?.id === args.id) {
 		return throwError(
 			`You cannot ${type.toLowerCase()} yourself.`,
 			`CANNOT_${type.toUpperCase()}_SELF`
@@ -168,7 +165,7 @@ async function modifyRelationship(
 	const requestedRelationship = await db.query.userRelationship.findFirst({
 		where: (userRelationship, { and }) =>
 			and(
-				eq(userRelationship.fromId, ctx.oidc.sub),
+				eq(userRelationship.fromId, ctx.auth?.user?.id),
 				eq(userRelationship.toId, args.id),
 				eq(
 					userRelationship.type,
@@ -187,7 +184,7 @@ async function modifyRelationship(
 		return db.query.userRelationship.findFirst({
 			where: (userRelationship, { and }) =>
 				and(
-					eq(userRelationship.fromId, ctx.oidc.sub),
+					eq(userRelationship.fromId, ctx.auth?.user?.id),
 					eq(userRelationship.toId, args.id),
 					eq(
 						userRelationship.type,
@@ -220,7 +217,7 @@ async function modifyRelationship(
 			const followRequest = await db.query.userRelationship.findFirst({
 				where: (userRelationship, { and }) =>
 					and(
-						eq(userRelationship.fromId, ctx.oidc.sub),
+						eq(userRelationship.fromId, ctx.auth?.user?.id),
 						eq(userRelationship.toId, args.id),
 						eq(userRelationship.type, 'REQUEST')
 					)
@@ -232,7 +229,7 @@ async function modifyRelationship(
 			return db
 				.insert(userRelationship)
 				.values({
-					fromId: ctx.oidc.sub,
+					fromId: ctx.auth?.user?.id,
 					toId: args.id,
 					type: 'REQUEST',
 					reason: args.reason
@@ -249,12 +246,12 @@ async function modifyRelationship(
 					and(
 						or(
 							and(
-								eq(userRelationship.fromId, ctx.oidc.sub),
+								eq(userRelationship.fromId, ctx.auth?.user?.id),
 								eq(userRelationship.toId, args.id)
 							),
 							and(
 								eq(userRelationship.fromId, args.id),
-								eq(userRelationship.toId, ctx.oidc.sub)
+								eq(userRelationship.toId, ctx.auth?.user?.id)
 							)
 						),
 						or(
@@ -270,7 +267,7 @@ async function modifyRelationship(
 		return db
 			.insert(userRelationship)
 			.values({
-				fromId: ctx.oidc.sub,
+				fromId: ctx.auth?.user?.id,
 				toId: args.id,
 				type: type as 'BLOCK' | 'MUTE' | 'FOLLOW' | 'REQUEST',
 				reason: args.reason
@@ -283,7 +280,7 @@ async function modifyRelationship(
 			const followRequest = await db.query.userRelationship.findFirst({
 				where: (userRelationship, { and }) =>
 					and(
-						eq(userRelationship.fromId, ctx.oidc.sub),
+						eq(userRelationship.fromId, ctx.auth?.user?.id),
 						eq(userRelationship.toId, args.id),
 						eq(userRelationship.type, 'REQUEST')
 					)
@@ -297,7 +294,7 @@ async function modifyRelationship(
 				.delete(userRelationship)
 				.where(
 					and(
-						eq(userRelationship.fromId, ctx.oidc.sub),
+						eq(userRelationship.fromId, ctx.auth?.user?.id),
 						eq(userRelationship.toId, args.id),
 						eq(userRelationship.type, 'REQUEST')
 					)
@@ -311,7 +308,7 @@ async function modifyRelationship(
 			.delete(userRelationship)
 			.where(
 				and(
-					eq(userRelationship.fromId, ctx.oidc.sub),
+					eq(userRelationship.fromId, ctx.auth?.user?.id),
 					eq(userRelationship.toId, args.id)
 				)
 			)

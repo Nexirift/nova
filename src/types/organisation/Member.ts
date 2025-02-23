@@ -1,7 +1,7 @@
 import { Organisation, User } from '..';
 import { builder } from '../../builder';
-import { db } from '../../drizzle/db';
-import { type OrganisationMemberSchemaType } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { type OrganisationMemberSchemaType } from '@nexirift/db';
 
 export const OrganisationMember =
 	builder.objectRef<OrganisationMemberSchemaType>('OrganisationMember');

@@ -1,4 +1,4 @@
-import { db } from '../../drizzle/db';
+import { db } from '@nexirift/db';
 import { throwError } from '../common';
 
 const validPermissions = [

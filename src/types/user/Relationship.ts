@@ -1,6 +1,6 @@
 import { builder } from '../../builder';
-import { db } from '../../drizzle/db';
-import { type UserRelationshipSchemaType } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { type UserRelationshipSchemaType } from '@nexirift/db';
 import { User } from './User';
 
 export const UserRelationshipType = builder.enumType('UserRelationshipType', {

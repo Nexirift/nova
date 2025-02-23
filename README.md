@@ -1,70 +1,52 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/Nexirift/media-kit/main/nexirift/banner.svg" width="300" />
+<img src="https://raw.githubusercontent.com/Nexirift/media-kit/main/nexirift/banner.svg" width="600" />
 </p>
 
 # Nova
 
-Nova, the API server for Nexirift. Please see the [Disclaimer](#disclaimer)
-before using.
+Nova is the core API server for Nexirift.
 
-## Disclaimer
-
-This is a recode of the original internal Spark server. Even though this is a
-second revision, it is still not ideal for production use (but has less messy
-code than the first revision). Only use it once we deem that it is production
-ready (aka: when Nexirift publicly releases). By running this software in
-production, you understand the risks.
-
-## Installation
+## Getting Started (Development)
 
 ### Prerequisites
 
--   [KeyDB](https://docs.keydb.dev/docs)
-    -   Or a Redis compatible server, we no longer recommend official Redis.
-    -   If you would like to know why we don't suggest it, read the comments
-        [here](https://github.com/redis/redis/pull/13157).
--   [Authentik](https://goauthentik.io)
-    -   _support for more authentication providers is in the works!_
+- Redis compatible server
+- Node.js v22.13.0 or greater
+- Bun v1.2.2 or greater
+- Local NPM registry
 
-_psst: see our Authentik stuff [here](https://github.com/Nexirift/authentik)._
+#### For Database
 
-### Instructions
+- Docker v27.5.1 or greater
+- Docker Compose v2.32.4 or greater
 
-Our documentation website is still a work in progress, but you might find better
-success with guides on there as they should be updated regularly. You can visit
-that [here](https://docs.nexirift.com).
+*These prerequisites are based on the versions that we are using.*
 
-#### Standard (Development)
+### Local NPM Registry
 
-0. Set up the prerequistes first.
-1. Clone the project by using Git: `git clone https://github.com/Nexirift/nova`.
-2. Install packages using bun: `bun install`.
-3. Start the server using: `bun dev`.
-4. Configure the `.env` values to fit your needs.
-5. Use a tool like Insomnia to send a GQL request!
+Our internal packages are not hosted on the public NPM registry, such as `@nexirift/db`. To use our internal projects, you will need to set up a local NPM registry. During our testing, we noticed that Next.js and shadcn/ui don't like Bun's linked packages.
 
-#### Docker ("Production")
+1. Install Verdaccio: `bun i -g verdaccio`
+2. Start the Verdaccio server locally: `verdaccio`
+3. Create an account: `bunx npm adduser --registry http://localhost:4873`
+    - Example: `developer` | `P@ssw0rd` | `developer@nexirift.com`
+4. Clone any `@nexirift/*` packages using Git
+5. Run `bun publish` on the cloned repositories
 
-_There is no public docker image (for now), so you have to build it yourself._
+*More information: https://verdaccio.org/docs/setup-bun*
 
-0. Have docker and docker compose set up.
-1. Clone the project by using Git: `git clone https://github.com/Nexirift/nova`.
-2. Run the stack by doing `docker compose up -d`.
-    - This _should_ auto build the image.
+### Installation
 
-### OIDC Link
+1. Clone the repository: `git clone https://github.com/Nexirift/nova.git`
+2. Install dependencies with `bun install`
+3. Start the database using `bun db:start`
+4. Migrate the database using `bun db:all`
+5. You can start the dev server using `bun dev`
 
-You can fill in these values to login to an authentication provider, such as
-Authentik:
+## Disclaimer
 
-```
-http://authentik.local/application/o/authorize/?
-client_id=clientidgoeshere
-&redirect_uri= https://openidconnect.net/callback
-&scope=openid profile email
-&response_type=code
-```
+This software is currently in development and should not be used in production until the official Nexirift public release. By deploying this software in a production environment, you acknowledge and accept all associated risks. Please wait for production-ready status before implementation.
 
 ## License
 
-[GPL-3.0](/LICENSE)
+Nexirift's internal projects are licensed under the [GNU General Public License v3.0](LICENSE).

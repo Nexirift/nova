@@ -1,6 +1,6 @@
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '../../drizzle/db';
+import { db } from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import { Post } from '../../types';
 

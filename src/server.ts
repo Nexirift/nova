@@ -1,33 +1,39 @@
-import { OIDCToken, useOIDC } from '@nexirift/plugin-oidc';
 import { beforeAll } from 'bun:test';
-import { sql } from 'drizzle-orm';
-import { migrate } from 'drizzle-orm/pglite/migrator';
 import gradient from 'gradient-string';
 import { handleProtocols, makeHandler } from 'graphql-ws/lib/use/bun';
-import { createYoga } from 'graphql-yoga';
+import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import { version } from '../package.json';
 import { config, stripe } from './config';
-import { Context } from './context';
-import { db, prodDbClient } from './drizzle/db';
+import { type Context } from './context';
+import { db, migrator, prodDbClient, user } from '@nexirift/db';
 import getGitCommitHash from './git';
-import { authorize } from './lib/authentication';
 import { enableAll } from './lib/logger';
-import {
-	createUsersFromRedisTokens,
-	isTestMode,
-	mediaUploadEndpoint,
-	webhookEndpoint
-} from './lib/server';
+import { isTestMode, mediaUploadEndpoint, webhookEndpoint } from './lib/server';
 import { pubsub } from './pubsub';
-import { redisClient, syncClient, tokenClient } from './redis';
+import { redisClient, tokenClient } from './redis';
 import { schema } from './schema';
+import { authorize, useBetterAuth } from '@nexirift/plugin-better-auth';
 
 // Create a new instance of GraphQL Yoga with the schema and plugins.
 const yoga = createYoga({
 	schema: schema,
 	graphiql: false,
+	maskedErrors: false,
 	graphqlEndpoint: '/',
-	plugins: [useOIDC(config.openid)]
+	plugins: [
+		useBetterAuth(config.auth),
+		useReadinessCheck({
+			endpoint: '/ready',
+			check: async () => {
+				try {
+					return db.$count(user) != null;
+				} catch (err) {
+					console.error(err);
+					return false;
+				}
+			}
+		})
+	]
 });
 
 export async function startServer() {
@@ -78,9 +84,6 @@ export async function startServer() {
 				} else if (url.pathname.startsWith('/webhook/')) {
 					// Handle webhooks.
 					return webhookEndpoint(req);
-				} else if (url.pathname === '/health') {
-					// Health check endpoint.
-					return new Response('OK', { status: 200 });
 				} else {
 					// Let the GraphQL server handle the rest.
 					return yoga.fetch(req);
@@ -91,48 +94,44 @@ export async function startServer() {
 			schema,
 			context: async (ctx) => {
 				if (ctx.extra.socket.data) {
-					const checkAuth = await authorize(
-						config.openid,
+					const auth = await authorize(
+						config.auth,
 						(ctx.extra.socket.data! as string).split(' ')[1]
 					);
+					const authString = JSON.stringify(auth);
 					try {
 						return {
-							oidc: JSON.parse(checkAuth!) as OIDCToken,
+							auth,
 							pubsub
 						} as Context;
 					} catch (e) {
 						ctx.extra.socket.send(
 							JSON.stringify({
 								type: 'pong',
-								payload: { message: checkAuth! }
+								payload: { message: authString }
 							})
 						);
-						ctx.extra.socket.close(3003, checkAuth);
+						ctx.extra.socket.close(3003, authString);
 					}
 				} else {
 					return { pubsub } as Context;
 				}
 			}
 		}),
-		port: isTestMode ? 25447 : Bun.env.PORT ?? 3000,
+		port: isTestMode ? 25447 : (Bun.env.PORT ?? 3000),
 		development: !!(Bun.env.NODE_ENV === 'development') || isTestMode
 	});
 
 	// Connect to Redis.
 	await redisClient.connect();
 	await tokenClient.connect();
-	await syncClient.connect();
 
 	if (!isTestMode) {
 		// Connect to the database.
 		await prodDbClient.connect();
-
-		// Create users from Redis tokens.
-		await createUsersFromRedisTokens();
 	} else {
 		// Migrate the database.
-		await db.execute(sql`CREATE EXTENSION IF NOT EXISTS citext;`);
-		await migrate(db, { migrationsFolder: './drizzle' });
+		await migrator();
 	}
 
 	// Log the server information to the console.

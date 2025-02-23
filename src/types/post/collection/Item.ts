@@ -1,7 +1,7 @@
 import { builder } from '../../../builder';
 import { config } from '../../../config';
-import { db } from '../../../drizzle/db';
-import { type PostCollectionItemSchemaType } from '../../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { type PostCollectionItemSchemaType } from '@nexirift/db';
 import { throwError, throwFeatureDisabledError } from '../../../helpers/common';
 import { Post } from '../Post';
 import { PostCollection } from './Collection';
@@ -24,7 +24,7 @@ PostCollectionItem.implement({
 
 		if (
 			collection?.visibility === 'PRIVATE' &&
-			context.oidc?.sub !== collection?.userId
+			context.auth?.user.id !== collection?.userId
 		) {
 			return throwError('You cannot view this post.', 'UNAUTHORIZED');
 		}

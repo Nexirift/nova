@@ -47,7 +47,7 @@ test('Unauthenticated | General - It should get an existing user', async () => {
 	await removeUser(existingUser);
 });
 
-test('Authenticated | General - It should check the me endpoint (Synced)', async () => {
+test('Authenticated | General - It should check the me endpoint', async () => {
 	const me = faker.string.uuid();
 
 	await createUser({ sub: me });
@@ -55,22 +55,6 @@ test('Authenticated | General - It should check the me endpoint (Synced)', async
 	const data = await makeGQLRequest(meQuery, me);
 
 	expect(data).toHaveProperty('data.me.id', me);
-
-	await removeUser(me);
-});
-
-test('Authenticated | General - It should check the me endpoint (Not Synced)', async () => {
-	const me = faker.string.uuid();
-
-	await tokenClient.set(`tokens:${me}`, JSON.stringify({ sub: me }));
-
-	const data = await makeGQLRequest(meQuery, me);
-
-	expectError(
-		data,
-		'This user has not been synced to the database yet.',
-		'USER_NOT_SYNCED'
-	);
 
 	await removeUser(me);
 });

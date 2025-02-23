@@ -1,8 +1,8 @@
 import { Organisation, OrganisationMember } from '..';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '../../drizzle/db';
-import { type UserSchemaType } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { type UserSchemaType } from '@nexirift/db';
 import { privacyGuardian } from '../../lib/guardian';
 import { Post } from '../post';
 import { PostInteraction } from '../post/Interaction';
@@ -50,7 +50,7 @@ User.implement({
 			type: [UserProfileField],
 			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context.oidc),
+				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user) => {
 				const result = await db.query.userProfileField.findMany({
@@ -93,7 +93,7 @@ User.implement({
 				offset: t.arg({ type: 'Int' })
 			},
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context.oidc),
+				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args) => {
 				const result = await db.query.post.findMany({
@@ -118,7 +118,7 @@ User.implement({
 				offset: t.arg({ type: 'Int' })
 			},
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context.oidc),
+				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args) => {
 				const result = await db.query.post.findMany({
@@ -139,7 +139,7 @@ User.implement({
 			type: [PostMedia],
 			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context.oidc),
+				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user) => {
 				const result = await db.query.post.findMany({
@@ -165,7 +165,7 @@ User.implement({
 			type: [PostInteraction],
 			nullable: true,
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context.oidc),
+				privacyGuardian(parent, context.auth),
 			args: {
 				first: t.arg({ type: 'Int' }),
 				offset: t.arg({ type: 'Int' }),
@@ -177,15 +177,15 @@ User.implement({
 
 				const result = await db.query.postInteraction.findMany({
 					where: (postInteraction, { and, eq, ne }) =>
-						user.id === context.oidc?.sub
+						user.id === context.auth?.user.id
 							? and(
 									eq(postInteraction.userId, user.id),
 									type && eq(postInteraction.type, type)
-							  )
+								)
 							: and(
 									eq(postInteraction.userId, user.id),
 									type && eq(postInteraction.type, type)
-							  ),
+								),
 					with: {
 						post: true
 					},
@@ -203,18 +203,18 @@ User.implement({
 				after: t.arg({ type: 'Int' })
 			},
 			authScopes: (parent, _args, context, _info) =>
-				privacyGuardian(parent, context.oidc),
+				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args, context: Context) => {
 				const to = await db.query.userRelationship.findMany({
 					where: (userRelationship, { eq, and, or }) =>
 						and(
 							eq(userRelationship.toId, user.id),
-							user.id === context.oidc?.sub
+							user.id === context.auth?.user.id
 								? or(
 										eq(userRelationship.type, 'REQUEST'),
 										eq(userRelationship.type, 'FOLLOW')
-								  )
+									)
 								: eq(userRelationship.type, 'FOLLOW')
 						),
 					with: {
@@ -226,12 +226,12 @@ User.implement({
 
 				const from = await db.query.userRelationship.findMany({
 					where: (userRelationship, { eq, and }) =>
-						context.oidc?.sub === user.id
+						context.auth?.user.id === user.id
 							? eq(userRelationship.fromId, user.id)
 							: and(
 									eq(userRelationship.fromId, user.id),
 									eq(userRelationship.type, 'FOLLOW')
-							  ),
+								),
 					with: {
 						to: true
 					},
@@ -298,7 +298,7 @@ User.implement({
 					where: (userRelationship, { and, eq }) =>
 						and(
 							eq(userRelationship.toId, user.id),
-							eq(userRelationship.fromId, context.oidc?.sub),
+							eq(userRelationship.fromId, context.auth?.user.id),
 							eq(userRelationship.type, 'BLOCK')
 						)
 				});
@@ -313,7 +313,7 @@ User.implement({
 					where: (userRelationship, { and, eq }) =>
 						and(
 							eq(userRelationship.fromId, user.id),
-							eq(userRelationship.toId, context.oidc?.sub),
+							eq(userRelationship.toId, context.auth?.user.id),
 							eq(userRelationship.type, 'BLOCK')
 						)
 				});
@@ -328,7 +328,7 @@ User.implement({
 					where: (userRelationship, { and, eq }) =>
 						and(
 							eq(userRelationship.toId, user.id),
-							eq(userRelationship.fromId, context.oidc?.sub),
+							eq(userRelationship.fromId, context.auth?.user.id),
 							eq(userRelationship.type, 'FOLLOW')
 						)
 				});
@@ -343,7 +343,7 @@ User.implement({
 					where: (userRelationship, { and, eq }) =>
 						and(
 							eq(userRelationship.fromId, user.id),
-							eq(userRelationship.toId, context.oidc?.sub),
+							eq(userRelationship.toId, context.auth?.user.id),
 							eq(userRelationship.type, 'FOLLOW')
 						)
 				});
@@ -358,7 +358,7 @@ User.implement({
 					where: (userRelationship, { and, eq }) =>
 						and(
 							eq(userRelationship.toId, user.id),
-							eq(userRelationship.fromId, context.oidc?.sub),
+							eq(userRelationship.fromId, context.auth?.user.id),
 							eq(userRelationship.type, 'REQUEST')
 						)
 				});

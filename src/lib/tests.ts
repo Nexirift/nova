@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
 import { eq } from 'drizzle-orm';
 import { config } from '../config';
-import { db } from '../drizzle/db';
-import { user } from '../drizzle/schema';
+import { db } from '@nexirift/db';
+import { user } from '@nexirift/db';
 import { tokenClient } from '../redis';
 
 /**
@@ -46,14 +46,15 @@ export async function createUser(data: {
 			id: data.sub,
 			username: data.preferred_username ?? faker.internet.username(),
 			email: data.email! ?? faker.internet.email(),
+			emailVerified: true,
 			type: data.type ?? 'PUBLIC'
 		})
 		.returning()
 		.execute();
 
 	await tokenClient.set(
-		`${config.openid.cachePrefix}:${data.sub}`,
-		JSON.stringify(data)
+		`${config.auth.cachePrefix}:${data.sub}`,
+		JSON.stringify({ user: userdb[0] })
 	);
 
 	return userdb[0];
@@ -67,5 +68,5 @@ export async function createUser(data: {
 export async function removeUser(sub: string) {
 	await db.delete(user).where(eq(user.id, sub));
 
-	return tokenClient.del(`${config.openid.cachePrefix}:${sub}`);
+	return tokenClient.del(`${config.auth.cachePrefix}:${sub}`);
 }

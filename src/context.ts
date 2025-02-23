@@ -1,4 +1,4 @@
-import { OIDCToken } from '@nexirift/plugin-oidc';
+import { BetterAuth } from '@nexirift/plugin-better-auth';
 import { PubSub } from 'graphql-subscriptions';
 
 /**
@@ -8,15 +8,15 @@ export interface Context {
 	/**
 	 * The request object.
 	 */
-	req: Request;
+	request: Request;
 	/**
 	 * The response object.
 	 */
-	res: Response;
+	response: Response;
 	/**
-	 * The OIDC token content.
+	 * The Better Auth object.
 	 */
-	oidc: OIDCToken;
+	auth: BetterAuth;
 	/**
 	 * The subscription (pub/sub) object.
 	 */

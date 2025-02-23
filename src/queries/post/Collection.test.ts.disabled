@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
 import { expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import { db } from '../../drizzle/db';
-import { postCollection } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { postCollection } from '@nexirift/db';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 // Helper function to create a post collection in the database

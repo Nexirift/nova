@@ -39,11 +39,11 @@ export const builder = new SchemaBuilder<{
 		// Recommended when using subscriptions
 		// when this is not set, auth checks are run when event is resolved rather than when the subscription is created
 		authorizeOnSubscribe: true,
-		authScopes: async (context) => ({
-			loggedIn: !!context.oidc?.sub
+		authScopes: async (ctx) => ({
+			loggedIn: !!ctx.auth?.user?.id
 		}),
-		unauthorizedError: (parent, context, info, result) => {
-			if (context.oidc?.sub) {
+		unauthorizedError: (_, ctx) => {
+			if (ctx.auth?.user) {
 				return throwError(
 					'You do not have permission to access this resource.',
 					'PERMISSION_DENIED'

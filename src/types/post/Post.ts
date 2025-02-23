@@ -1,8 +1,8 @@
 import { builder } from '../../builder';
 import { config } from '../../config';
 import { Context } from '../../context';
-import { db } from '../../drizzle/db';
-import { type PostSchemaType } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { type PostSchemaType } from '@nexirift/db';
 import { throwError, throwFeatureDisabledError } from '../../helpers/common';
 import { privacyGuardian } from '../../lib/guardian';
 import { redisClient } from '../../redis';
@@ -18,7 +18,7 @@ Post.implement({
 	authScopes: async (_parent, context) => {
 		if (!config.features.posts.enabled) return throwFeatureDisabledError();
 
-		if (!_parent.published && context.oidc?.sub === _parent.authorId) {
+		if (!_parent.published && context.auth?.user.id === _parent.authorId) {
 			return throwError('You cannot view this post.', 'UNAUTHORIZED');
 		}
 		return true;
@@ -65,8 +65,11 @@ Post.implement({
 		}),
 		content: t.exposeString('content', {
 			authScopes: async (parent, _args, context, _info) => {
-				const user = await getUser(parent.authorId, context.oidc?.sub);
-				return privacyGuardian(user, context.oidc);
+				const user = await getUser(
+					parent.authorId,
+					context.auth?.user.id
+				);
+				return privacyGuardian(user, context.auth);
 			},
 			unauthorizedResolver: () => null
 		}),
@@ -92,8 +95,11 @@ Post.implement({
 				type: t.arg({ type: 'String' })
 			},
 			authScopes: async (parent, _args, context, _info) => {
-				const user = await getUser(parent.authorId, context.oidc?.sub);
-				return privacyGuardian(user, context.oidc);
+				const user = await getUser(
+					parent.authorId,
+					context.auth?.user.id
+				);
+				return privacyGuardian(user, context.auth);
 			},
 			unauthorizedResolver: () => [],
 			resolve: async (post, args, context: Context) => {
@@ -113,9 +119,9 @@ Post.implement({
 				for (const postInteraction of result) {
 					const user = await getUser(
 						postInteraction.userId,
-						context.oidc?.sub
+						context.auth?.user.id
 					);
-					const check = await privacyGuardian(user, context.oidc);
+					const check = await privacyGuardian(user, context.auth);
 
 					if (check) {
 						finalResult.push(postInteraction);
@@ -156,7 +162,7 @@ Post.implement({
 					where: (postInteraction, { and, eq }) =>
 						and(
 							eq(postInteraction.postId, parent.id),
-							eq(postInteraction.userId, context.oidc?.sub),
+							eq(postInteraction.userId, context.auth?.user.id),
 							eq(postInteraction.type, 'LIKE')
 						)
 				});
@@ -209,7 +215,7 @@ Post.implement({
 					where: (post, { and, eq }) =>
 						and(
 							eq(post.parentId, parent.id),
-							eq(post.authorId, context.oidc?.sub)
+							eq(post.authorId, context.auth?.user.id)
 						)
 				});
 				return result!.length > 0;
@@ -222,7 +228,7 @@ Post.implement({
 				const result = await db.query.postInteraction.findMany({
 					where: (post, { and, eq }) =>
 						and(
-							eq(post.userId, context.oidc?.sub),
+							eq(post.userId, context.auth?.user.id),
 							eq(post.postId, parent.id),
 							eq(post.type, 'REPOST')
 						)
@@ -258,7 +264,7 @@ Post.implement({
 				});
 
 				return result.some(
-					(item) => item.collection.user.id === context.oidc?.sub
+					(item) => item.collection.user.id === context.auth?.user.id
 				);
 			}
 		})

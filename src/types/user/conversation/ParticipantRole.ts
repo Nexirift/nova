@@ -1,6 +1,6 @@
 import { builder } from '../../../builder';
-import { db } from '../../../drizzle/db';
-import { type UserConversationParticipantRoleSchemaType } from '../../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { type UserConversationParticipantRoleSchemaType } from '@nexirift/db';
 import { UserConversationParticipant } from './Participant';
 import { UserConversationRole } from './Role';
 

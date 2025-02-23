@@ -7,13 +7,11 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { mockClient } from 'aws-sdk-client-mock';
 import mime from 'mime-types';
 import { config, stripe } from '../config';
-import { db } from '../drizzle/db';
-import { postMedia, user } from '../drizzle/schema';
-import { syncClient, tokenClient } from '../redis';
-import { authorize } from './authentication';
-import { convertModelToUser, getHashedPk, internalUsers } from './authentik';
+import { db } from '@nexirift/db';
+import { postMedia, user } from '@nexirift/db';
 import { enableAll, stripeLog } from './logger';
 import { eq } from 'drizzle-orm';
+import { authorize } from '@nexirift/plugin-better-auth';
 
 /**
  * "Legacy" endpoint for uploading media.
@@ -36,19 +34,7 @@ async function mediaUploadEndpoint(req: Request) {
 	}
 
 	// Check if the token is valid.
-	const check = await authorize(config.openid, token);
-
-	try {
-		JSON.parse(check!);
-	} catch (e) {
-		return Response.json(
-			{
-				status: 'INVALID_TOKEN',
-				message: check
-			},
-			{ status: 401 }
-		);
-	}
+	await authorize(config.auth, token);
 
 	const formdata = await req.formData();
 	const media = formdata.get('media') as File;
@@ -182,98 +168,6 @@ async function mediaUploadEndpoint(req: Request) {
 async function webhookEndpoint(req: Request) {
 	const url = new URL(req.url);
 	switch (url.pathname) {
-		case `/webhook/${isTestMode ? 'TEST-AUTH' : Bun.env.WEBHOOK_AUTH}`:
-			if (
-				isTestMode ||
-				(Bun.env.AUTH_INTROSPECT_URL?.endsWith(
-					'/application/o/introspect/'
-				) &&
-					isTestMode) ||
-				Bun.env.AUTH_USERINFO_URL?.endsWith('/application/o/userinfo/')
-			) {
-				// Convert the request body to JSON and sort it.
-				var json = await req.json();
-				var model = convertModelToUser(json);
-
-				// Assign the model data to variables.
-				const {
-					username = model?.data.username! ??
-						model?.data.diff?.username?.new_value!,
-					displayName = model?.data.name! ??
-						model?.data.diff?.name?.new_value!,
-					avatar = model?.data.attributes?.avatar! ??
-						model?.data.diff?.attributes?.new_value?.avatar!,
-					banner = model?.data.attributes?.banner! ??
-						model?.data.diff?.attributes?.new_value?.banner!,
-					background = model?.data.attributes?.background! ??
-						model?.data.diff?.attributes?.new_value?.background!,
-					email = model?.data.email! ??
-						model?.data.diff?.email?.new_value!
-				} = model?.data;
-
-				// Skip out on internal users.
-				if (new RegExp(internalUsers.join('|')).test(username)) {
-					return new Response(
-						'Nope, internal users are not allowed.',
-						{ status: 200 }
-					);
-				}
-
-				// Convert the ID to a hashed version.
-				const id = getHashedPk(model?.data?.model?.pk);
-
-				// Check if the user exists in the database
-				const userInDb = await db.query.user.findFirst({
-					where: (user, { eq }) => eq(user.id, id)
-				});
-
-				// Insert (or Update) the user in to the database.
-				await db
-					.insert(user)
-					.values({
-						id,
-						username,
-						displayName,
-						avatar,
-						banner,
-						background,
-						email
-					})
-					.onConflictDoUpdate({
-						target: user.id,
-						set: {
-							id,
-							username,
-							displayName,
-							avatar,
-							banner,
-							background,
-							email
-						}
-					});
-
-				// If the user does not exist, tell the console that we are creating data for the user
-				if (!userInDb) {
-					console.log(
-						`💾 Creating data for user: ${username ?? email ?? id}`
-					);
-				} else {
-					console.log(
-						`🔄 Syncing data for user: ${username ?? email ?? id}`
-					);
-				}
-
-				return Response.json({}, { status: 200 });
-			}
-
-			// If the user isn't using authentik, return a 404.
-			return Response.json(
-				{
-					status: 'WORK_IN_PROGRESS',
-					message: 'This webhook is not implemented yet'
-				},
-				{ status: 404 }
-			);
 		case `/webhook/${isTestMode ? 'TEST-STRIPE' : Bun.env.WEBHOOK_STRIPE}`:
 			enableAll();
 
@@ -346,91 +240,7 @@ async function webhookEndpoint(req: Request) {
 	}
 }
 
-/**
- * Grabs the token from Redis and converts it to JSON,
- * which is then used to update or add new users to the
- * database.
- */
-async function createUsersFromRedisTokens() {
-	// Ensure that sync client can listen to events.
-	// This is used to check for new tokens inserted into cache.
-	syncClient.configSet('notify-keyspace-events', 'KEA');
-
-	// Subscribe to the tokens channel.
-	await syncClient.pSubscribe(
-		'__keyspace@0__:tokens:*',
-		async (message, channel) => {
-			// Discard if the message is not 'set'.
-			if (message != 'set') {
-				return;
-			}
-
-			// Extract the token from the channel.
-			const token = channel.split('__:')[1];
-			// Parse the token from Redis using JSON.
-			const content = JSON.parse((await tokenClient.get(token)) || '{}');
-
-			// Discard if no username is present
-			if (!content?.preferred_username) {
-				return;
-			}
-
-			// Check if the user exists in the database
-			const userInDb = await db.query.user.findFirst({
-				where: (user, { eq }) => eq(user.id, content?.sub)
-			});
-
-			// If the user does not exist, tell the console that we are creating data for the user
-			if (!userInDb) {
-				console.log(
-					`💾 Creating data for user: ${content?.preferred_username}`
-				);
-			} else {
-				console.log(
-					`🔄 Syncing data for user: ${content?.preferred_username}`
-				);
-			}
-
-			// Insert (or Update) the user in to the database.
-			try {
-				await db
-					.insert(user)
-					.values({
-						id: content?.sub!,
-						username: content?.preferred_username!,
-						displayName: content?.name!,
-						avatar: content?.avatar!,
-						banner: content?.banner!,
-						background: content?.background!,
-						email: content?.email!,
-						createdAt: new Date()
-					})
-					.onConflictDoUpdate({
-						target: user.id,
-						set: {
-							id: content?.sub!,
-							username: content?.preferred_username!,
-							displayName: content?.name!,
-							avatar: content?.avatar!,
-							banner: content?.banner!,
-							background: content?.background!,
-							email: content?.email!
-						}
-					});
-			} catch (ex) {
-				// Log the error.
-				console.error(ex);
-			}
-		}
-	);
-}
-
 // Just a shortcut for checking if we are in test mode.
 const isTestMode = Bun.env.NODE_ENV === 'test';
 
-export {
-	createUsersFromRedisTokens,
-	isTestMode,
-	mediaUploadEndpoint,
-	webhookEndpoint
-};
+export { isTestMode, mediaUploadEndpoint, webhookEndpoint };

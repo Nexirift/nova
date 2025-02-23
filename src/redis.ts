@@ -18,8 +18,5 @@ export const redisClient = createClient({
 // Create a new Redis client just for tokens using the duplicate method.
 export const tokenClient = redisClient.duplicate();
 
-// Create a new Redis client just for sync operations using the duplicate method.
-export const syncClient = redisClient.duplicate();
-
 // Listen for any errors that occur in the Redis client.
 redisClient.on('error', (err) => console.log('Redis Client Error', err));

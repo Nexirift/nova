@@ -1,7 +1,7 @@
 import { builder } from '../../builder';
 import { config } from '../../config';
-import { db } from '../../drizzle/db';
-import { type UserVerificationSchemaType } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { type UserVerificationSchemaType } from '@nexirift/db';
 import { throwFeatureDisabledError } from '../../helpers/common';
 import { User } from './User';
 

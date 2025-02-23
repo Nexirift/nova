@@ -1,6 +1,6 @@
 import { builder } from '../../builder';
-import { db } from '../../drizzle/db';
-import { type PostMediaSchemaType } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { type PostMediaSchemaType } from '@nexirift/db';
 import { Post } from './Post';
 
 export const PostMedia = builder.objectRef<PostMediaSchemaType>('PostMedia');

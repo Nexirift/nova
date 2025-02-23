@@ -1,8 +1,8 @@
 import { and, eq } from 'drizzle-orm';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '../../drizzle/db';
-import { postCollection, postCollectionItem } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { postCollection, postCollectionItem } from '@nexirift/db';
 import { throwError, throwFeatureDisabledError } from '../../helpers/common';
 import { PostCollection } from '../../types/post/collection/Collection';
 import { PostCollectionItem } from '../../types/post/collection/Item';
@@ -32,7 +32,7 @@ builder.mutationField('createPostCollection', (t) =>
 					where: (postCollection, { and, eq }) =>
 						and(
 							eq(postCollection.name, args.name),
-							eq(postCollection.userId, ctx.oidc.sub)
+							eq(postCollection.userId, ctx.auth?.user?.id)
 						)
 				});
 
@@ -49,7 +49,7 @@ builder.mutationField('createPostCollection', (t) =>
 					name: args.name,
 					description: args.description,
 					visibility: args.visibility as 'PUBLIC' | 'PRIVATE',
-					userId: ctx.oidc.sub
+					userId: ctx.auth?.user?.id
 				})
 				.returning()
 				.execute();

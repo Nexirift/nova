@@ -1,7 +1,7 @@
-import { OIDCToken } from '@nexirift/plugin-oidc';
-import { db } from '../drizzle/db';
+import { db } from '@nexirift/db';
 import { redisClient } from '../redis';
 import { guardianLog } from './logger';
+import { BetterAuth } from '@nexirift/plugin-better-auth';
 
 /**
  * This function checks if a user is allowed to access a resource based on their privacy settings.
@@ -12,34 +12,36 @@ import { guardianLog } from './logger';
  */
 async function privacyGuardian(
 	user: { id: string | null; type: 'PUBLIC' | 'PRIVATE' | null },
-	token: OIDCToken
+	auth: BetterAuth
 ): Promise<boolean> {
 	if (user.id === null || user.type === null) {
 		return false;
 	}
 
 	// Generate a unique cache key
-	const cacheKey = `privacyGuardian:${user.id}:${token?.sub}`;
+	const cacheKey = `privacyGuardian:${user.id}:${auth?.user.id}`;
 
 	// Try to get the result from cache
 	const cachedResult = await redisClient.get(cacheKey);
 	if (cachedResult !== null) {
-		guardianLog(`Cache hit for user ${user.id} and token ${token?.sub}`);
+		guardianLog(`Cache hit for user ${user.id} and token ${auth?.user.id}`);
 		return cachedResult === 'true'; // Convert string back to boolean
 	}
 
 	let result = false; // Default result
 
-	guardianLog(`Checking privacy for user ${user.id} and token ${token?.sub}`);
+	guardianLog(
+		`Checking privacy for user ${user.id} and token ${auth?.user.id}`
+	);
 
-	if (token?.sub === user.id) {
+	if (auth?.user.id === user.id) {
 		result = true;
 	} else if (user.type === 'PRIVATE') {
 		const followingRelationship = await db.query.userRelationship.findFirst(
 			{
 				where: (userRelationship, { eq, and }) =>
 					and(
-						eq(userRelationship.fromId, token?.sub),
+						eq(userRelationship.fromId, auth?.user.id),
 						eq(userRelationship.toId, user.id!),
 						eq(userRelationship.type, 'FOLLOW')
 					)
@@ -50,7 +52,7 @@ async function privacyGuardian(
 
 		if (!result) {
 			guardianLog(
-				`User ${user.id} is PRIVATE and not followed by ${token?.sub}`
+				`User ${user.id} is PRIVATE and not followed by ${auth?.user.id}`
 			);
 		}
 	} else {
@@ -58,19 +60,19 @@ async function privacyGuardian(
 			where: (userRelationship, { eq, and }) =>
 				and(
 					eq(userRelationship.fromId, user.id!),
-					eq(userRelationship.toId, token?.sub),
+					eq(userRelationship.toId, auth?.user.id),
 					eq(userRelationship.type, 'BLOCK')
 				)
 		});
 
 		result = !blockedRelationship;
 		if (!result) {
-			guardianLog(`User ${user.id} has blocked ${token?.sub}`);
+			guardianLog(`User ${user.id} has blocked ${auth?.user.id}`);
 		}
 	}
 
 	guardianLog(
-		`Result for user ${user.id} and token ${token?.sub} is ${result}`
+		`Result for user ${user.id} and token ${auth?.user.id} is ${result}`
 	);
 
 	// Cache the result for 5 seconds

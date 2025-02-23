@@ -1,10 +1,10 @@
 import { builder } from '../../builder';
 import { config } from '../../config';
-import { db } from '../../drizzle/db';
+import { db } from '@nexirift/db';
 import {
 	type PostPollSchemaType,
 	type PostPollVoteSchemaType
-} from '../../drizzle/schema';
+} from '@nexirift/db';
 import { throwFeatureDisabledError } from '../../helpers/common';
 import { Post } from './Post';
 

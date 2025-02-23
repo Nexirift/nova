@@ -1,7 +1,12 @@
-import { OIDC, OIDCPluginOptionsBase } from '@nexirift/plugin-oidc';
+import type { BetterAuthPluginOptionsBase } from '@nexirift/plugin-better-auth';
+import {
+	adminClient,
+	passkeyClient,
+	usernameClient
+} from 'better-auth/client/plugins';
 import { readFileSync } from 'fs';
-import { tokenClient } from './redis';
 import Stripe from 'stripe';
+import { tokenClient } from './redis';
 
 const file = (Bun.env.CONFIG_FILE as string) ?? 'config.json';
 
@@ -43,20 +48,16 @@ type Config = {
 			enabled: boolean; // not implemented
 		};
 	};
-	openid: OIDCPluginOptionsBase;
+	auth: BetterAuthPluginOptionsBase;
 	file: string;
 };
 
 export const config: Config = {
 	...JSON.parse(readFileSync(file).toString()),
 	...{
-		openid: {
-			oidc: new OIDC({
-				introspect_url: Bun.env.AUTH_INTROSPECT_URL!,
-				userinfo_url: Bun.env.AUTH_USERINFO_URL,
-				client_id: Bun.env.AUTH_CLIENT_ID,
-				client_secret: Bun.env.AUTH_CLIENT_SECRET
-			}),
+		auth: {
+			baseURL: Bun.env.BETTER_AUTH_URL,
+			plugins: [adminClient(), usernameClient(), passkeyClient()],
 			redis: tokenClient,
 			cachePrefix: 'tokens',
 			messages: {

@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '../../drizzle/db';
-import { post, postEditHistory } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { post, postEditHistory } from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import { Post } from '../../types';
 import { config } from '../../config';
@@ -26,7 +26,7 @@ builder.mutationField('createPost', (t) =>
 					content: args.content,
 					published: args.published ?? false,
 					parentId: args.parent,
-					authorId: ctx.oidc.sub,
+					authorId: ctx.auth?.user?.id,
 					quoted: args.quote ?? false
 				})
 				.returning()

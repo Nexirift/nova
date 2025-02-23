@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { expect, test } from 'bun:test';
-import { db } from '../../drizzle/db';
-import { userRelationship } from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { userRelationship } from '@nexirift/db';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 const errorMap = {

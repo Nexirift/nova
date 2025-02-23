@@ -1,11 +1,8 @@
 import { and, eq } from 'drizzle-orm';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '../../drizzle/db';
-import {
-	postInteraction,
-	PostInteractionSchemaType
-} from '../../drizzle/schema';
+import { db } from '@nexirift/db';
+import { postInteraction, PostInteractionSchemaType } from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import { privacyGuardian } from '../../lib/guardian';
 import { PostInteraction } from '../../types/post/Interaction';
@@ -45,7 +42,7 @@ async function postInteract(
 		return throwError('Post not found.', 'POST_NOT_FOUND');
 	}
 
-	if ((await privacyGuardian(post.author, ctx.oidc)) === false) {
+	if ((await privacyGuardian(post.author, ctx.auth)) === false) {
 		return throwError(
 			'You cannot interact with this post.',
 			'POST_PRIVACY'
@@ -73,7 +70,7 @@ async function postInteract(
 	const existingInteraction = await db.query.postInteraction.findFirst({
 		where: (postInteraction, { and }) =>
 			and(
-				eq(postInteraction.userId, ctx.oidc.sub),
+				eq(postInteraction.userId, ctx.auth?.user?.id),
 				eq(postInteraction.postId, args.id),
 				eq(
 					postInteraction.type,
@@ -90,7 +87,7 @@ async function postInteract(
 		return db
 			.insert(postInteraction)
 			.values({
-				userId: ctx.oidc.sub,
+				userId: ctx.auth?.user?.id,
 				postId: args.id,
 				type: type as 'LIKE' | 'REPOST'
 			})
@@ -110,7 +107,7 @@ async function postInteract(
 			.delete(postInteraction)
 			.where(
 				and(
-					eq(postInteraction.userId, ctx.oidc.sub),
+					eq(postInteraction.userId, ctx.auth?.user?.id),
 					eq(postInteraction.postId, args.id),
 					eq(
 						postInteraction.type,

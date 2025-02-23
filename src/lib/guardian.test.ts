@@ -1,24 +1,20 @@
 import { faker } from '@faker-js/faker';
-import { OIDCToken } from '@nexirift/plugin-oidc';
 import { expect, test } from 'bun:test';
-import { db } from '../drizzle/db';
-import { userRelationship } from '../drizzle/schema';
+import { db } from '@nexirift/db';
+import { userRelationship } from '@nexirift/db';
 import { redisClient } from '../redis';
 import { privacyGuardian } from './guardian';
 import { createUser } from './tests';
+import { BetterAuth } from '@nexirift/plugin-better-auth';
 
-function createFakeToken(sub: string): OIDCToken {
-	return {
-		sub: sub,
-		iss: '',
-		aud: '',
-		exp: 0,
-		iat: 0,
-		scope: '',
-		hasScopes: function (scopes: string[]): boolean {
-			throw new Error('Function not implemented.');
-		}
-	};
+function createFakeToken(sub: string): BetterAuth {
+	return new BetterAuth({
+		client: {} as any,
+		session: {} as any,
+		user: {
+			id: sub
+		} as any
+	});
 }
 
 test('Authenticated | General - It should return false if user ID or type is null', async () => {

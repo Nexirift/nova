@@ -1,14 +1,14 @@
 import { and, eq } from 'drizzle-orm';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '../../drizzle/db';
+import { db } from '@nexirift/db';
 import {
 	userConversation,
 	userConversationMessage,
 	userConversationParticipant,
 	userConversationParticipantRole,
 	userConversationRole
-} from '../../drizzle/schema';
+} from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import {
 	checkPermissions,
@@ -99,7 +99,7 @@ builder.mutationField('createUserConversation', (t) =>
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const participants = args.participants.map((id) => id.toString());
-			validateParticipants(participants, ctx.oidc.sub);
+			validateParticipants(participants, ctx.auth?.user?.id);
 
 			if (args.type === 'DIRECT')
 				await checkDirectConversation(participants);
@@ -125,7 +125,7 @@ builder.mutationField('createUserConversationMessage', (t) =>
 			await checkPermissions(
 				['SEND_MESSAGES'],
 				args.conversationId,
-				ctx.oidc.sub
+				ctx.auth?.user?.id
 			);
 
 			const message = await db
@@ -133,7 +133,7 @@ builder.mutationField('createUserConversationMessage', (t) =>
 				.values({
 					content: args.content,
 					conversationId: args.conversationId,
-					senderId: ctx.oidc.sub
+					senderId: ctx.auth?.user?.id
 				})
 				.returning()
 				.then((res) => res[0]);
@@ -189,7 +189,7 @@ const handleParticipants = async (
 				where: (userRelationship, { and, eq }) =>
 					and(
 						eq(userRelationship.fromId, participant),
-						eq(userRelationship.toId, ctx.oidc.sub),
+						eq(userRelationship.toId, ctx.auth?.user?.id),
 						eq(userRelationship.type, 'FOLLOW')
 					)
 			});
@@ -250,7 +250,7 @@ builder.mutationField('addUserConversationParticipants', (t) =>
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const conversation = await getConversation(args.conversationId);
-			await getParticipant(ctx.oidc.sub, args.conversationId);
+			await getParticipant(ctx.auth?.user?.id, args.conversationId);
 
 			if (conversation?.type === 'DIRECT')
 				throwError(
@@ -261,7 +261,7 @@ builder.mutationField('addUserConversationParticipants', (t) =>
 			await checkPermissions(
 				['ADD_PARTICIPANTS'],
 				args.conversationId,
-				ctx.oidc.sub
+				ctx.auth?.user?.id
 			);
 
 			return handleParticipants(
@@ -284,7 +284,7 @@ builder.mutationField('removeUserConversationParticipants', (t) =>
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
 			const conversation = await getConversation(args.conversationId);
-			await getParticipant(ctx.oidc.sub, args.conversationId);
+			await getParticipant(ctx.auth?.user?.id, args.conversationId);
 
 			if (conversation?.type === 'DIRECT')
 				throwError(
@@ -295,7 +295,7 @@ builder.mutationField('removeUserConversationParticipants', (t) =>
 			await checkPermissions(
 				['REMOVE_PARTICIPANTS'],
 				args.conversationId,
-				ctx.oidc.sub
+				ctx.auth?.user?.id
 			);
 
 			return handleParticipants(
@@ -319,7 +319,7 @@ const handleRoles = async (
 	id?: string
 ) => {
 	const conversation = await getConversation(conversationId);
-	await getParticipant(ctx.oidc.sub, conversationId);
+	await getParticipant(ctx.auth?.user?.id, conversationId);
 
 	if (conversation?.type === 'DIRECT') {
 		throwError(
@@ -332,10 +332,10 @@ const handleRoles = async (
 		action === 'create'
 			? ['CREATE_ROLES']
 			: action === 'delete'
-			? ['DELETE_ROLES']
-			: ['UPDATE_ROLES'],
+				? ['DELETE_ROLES']
+				: ['UPDATE_ROLES'],
 		conversationId,
-		ctx.oidc.sub
+		ctx.auth?.user?.id
 	);
 
 	if (permissions) {
@@ -488,7 +488,7 @@ const handleParticipantRoles = async (
 	ctx: Context
 ) => {
 	const conversation = await getConversation(conversationId);
-	await getParticipant(ctx.oidc.sub, conversationId);
+	await getParticipant(ctx.auth?.user?.id, conversationId);
 
 	if (conversation?.type === 'DIRECT') {
 		throwError(
@@ -497,7 +497,11 @@ const handleParticipantRoles = async (
 		);
 	}
 
-	await checkPermissions(['MANAGE_ROLES'], conversationId, ctx.oidc.sub);
+	await checkPermissions(
+		['MANAGE_ROLES'],
+		conversationId,
+		ctx.auth?.user?.id
+	);
 
 	const results = [];
 	for (const participant of participants) {
