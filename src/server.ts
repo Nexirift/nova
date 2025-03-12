@@ -13,6 +13,7 @@ import { isTestMode, mediaUploadEndpoint } from './lib/server';
 import { pubsub } from './pubsub';
 import { redisClient, tokenClient } from './redis';
 import { schema } from './schema';
+import { env } from './env';
 
 // Create a new instance of GraphQL Yoga with the schema and plugins.
 const yoga = createYoga({
@@ -115,8 +116,8 @@ export async function startServer() {
 				}
 			}
 		}),
-		port: isTestMode ? 25447 : (Bun.env.PORT ?? 3000),
-		development: !!(Bun.env.NODE_ENV === 'development') || isTestMode
+		port: isTestMode ? 25447 : (env.PORT ?? 3000),
+		development: !!(env.NODE_ENV === 'development') || isTestMode
 	});
 
 	// Connect to Redis.
@@ -148,7 +149,7 @@ export async function startServer() {
 	console.log('\x1b[36m');
 	console.log(`🌌 Nexirift Nova API v${version} (${getGitCommitHash()})`);
 	if (!isTestMode) {
-		const authServer = new URL(Bun.env.BETTER_AUTH_URL!);
+		const authServer = new URL(env.BETTER_AUTH_URL!);
 		console.log(
 			`🔑 Authentication Server: ${authServer.hostname}${authServer.port && ':' + authServer.port}`
 		);

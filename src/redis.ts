@@ -1,5 +1,6 @@
 import { createClient } from 'redis';
 import { isTestMode } from './lib/server';
+import { env } from './env';
 
 if (isTestMode) {
 	import('redis-memory-server').then(({ default: RedisMemoryServer }) => {
@@ -12,7 +13,7 @@ if (isTestMode) {
 
 // Create a Redis client using the createClient function.
 export const redisClient = createClient({
-	url: !isTestMode ? (Bun.env.REDIS_URL as string) : 'redis://localhost:1234'
+	url: !isTestMode ? (env.REDIS_URL as string) : 'redis://localhost:1234'
 });
 
 // Create a new Redis client just for tokens using the duplicate method.

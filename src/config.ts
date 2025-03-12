@@ -6,8 +6,9 @@ import {
 } from 'better-auth/client/plugins';
 import { readFileSync } from 'fs';
 import { tokenClient } from './redis';
+import { env } from './env';
 
-const file = (Bun.env.CONFIG_FILE as string) ?? 'config.json';
+const file = (env.CONFIG_FILE as string) ?? 'config.json';
 
 type Config = {
 	features: {
@@ -55,7 +56,7 @@ export const config: Config = {
 	...JSON.parse(readFileSync(file).toString()),
 	...{
 		auth: {
-			baseURL: Bun.env.BETTER_AUTH_URL,
+			baseURL: env.BETTER_AUTH_URL,
 			plugins: [adminClient(), usernameClient(), passkeyClient()],
 			redis: tokenClient,
 			cachePrefix: 'tokens',

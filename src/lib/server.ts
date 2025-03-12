@@ -12,6 +12,7 @@ import { postMedia, user } from '@nexirift/db';
 import { enableAll } from './logger';
 import { eq } from 'drizzle-orm';
 import { authorize } from '@nexirift/plugin-better-auth';
+import { env } from '../env';
 
 /**
  * "Legacy" endpoint for uploading media.
@@ -101,18 +102,17 @@ async function mediaUploadEndpoint(req: Request) {
 
 	// Generate a predicted key for the S3 upload.
 	const s3PredictedKey = `${
-		Bun.env.S3_UPLOAD_DIR
+		env.S3_UPLOAD_DIR
 	}/${possibleUUID}.${mime.extension(media.type)}`;
 
 	try {
 		const _client = new S3Client({
 			credentials: {
-				accessKeyId: Bun.env.AWS_ACCESS_KEY_ID!,
-				secretAccessKey: Bun.env.AWS_SECRET_ACCESS_KEY!
+				accessKeyId: env.AWS_ACCESS_KEY_ID!,
+				secretAccessKey: env.AWS_SECRET_ACCESS_KEY!
 			},
-			region: Bun.env.S3_REGION! ?? 'us-east-1',
-			endpoint:
-				Bun.env.AWS_ENDPOINT! ?? 'https://s3.us-east-1.amazonaws.com'
+			region: env.S3_REGION! ?? 'us-east-1',
+			endpoint: env.AWS_ENDPOINT! ?? 'https://s3.us-east-1.amazonaws.com'
 		});
 
 		isTestMode && mockClient(_client);
@@ -121,7 +121,7 @@ async function mediaUploadEndpoint(req: Request) {
 			client: _client,
 			params: {
 				ACL: 'public-read',
-				Bucket: Bun.env.S3_BUCKET!,
+				Bucket: env.S3_BUCKET!,
 				Key: s3PredictedKey,
 				Body: media
 			}
@@ -160,6 +160,6 @@ async function mediaUploadEndpoint(req: Request) {
 }
 
 // Just a shortcut for checking if we are in test mode.
-const isTestMode = Bun.env.NODE_ENV === 'test';
+const isTestMode = env.NODE_ENV === 'test';
 
 export { isTestMode, mediaUploadEndpoint };
