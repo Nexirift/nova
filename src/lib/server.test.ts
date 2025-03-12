@@ -2,16 +2,6 @@ import { fetch } from 'bun';
 import { afterEach, beforeEach, expect, test } from 'bun:test';
 import { createUser, makeGQLRequest, removeUser } from './tests';
 
-// Temporarily disabled since the webhook is currently under active development.
-
-/*
-test('Webhook | Stripe - Should return 404 for unimplemented webhook', async () => {
-	const req = createRequest(`http://localhost:25447/webhook/TEST-STRIPE`);
-	const response = await webhookEndpoint(req);
-	expect(response.status).toBe(404);
-});
-*/
-
 test('Server | Readiness Check - Should return 200 for /ready endpoint', async () => {
 	const req = await fetch('http://localhost:25447/ready');
 	expect(req.status).toBe(200);

@@ -5,7 +5,6 @@ import {
 	usernameClient
 } from 'better-auth/client/plugins';
 import { readFileSync } from 'fs';
-import Stripe from 'stripe';
 import { tokenClient } from './redis';
 
 const file = (Bun.env.CONFIG_FILE as string) ?? 'config.json';
@@ -73,5 +72,3 @@ export const config: Config = {
 	},
 	file
 };
-
-export const stripe = new Stripe(Bun.env.STRIPE_SECRET_KEY! || 'no_stripe_key');

@@ -1,18 +1,18 @@
+import { db, migrator, prodDbClient, user } from '@nexirift/db';
+import { authorize, useBetterAuth } from '@nexirift/plugin-better-auth';
 import { beforeAll } from 'bun:test';
 import gradient from 'gradient-string';
 import { handleProtocols, makeHandler } from 'graphql-ws/lib/use/bun';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import { version } from '../package.json';
-import { config, stripe } from './config';
+import { config } from './config';
 import { type Context } from './context';
-import { db, migrator, prodDbClient, user } from '@nexirift/db';
 import getGitCommitHash from './git';
 import { enableAll } from './lib/logger';
-import { isTestMode, mediaUploadEndpoint, webhookEndpoint } from './lib/server';
+import { isTestMode, mediaUploadEndpoint } from './lib/server';
 import { pubsub } from './pubsub';
 import { redisClient, tokenClient } from './redis';
 import { schema } from './schema';
-import { authorize, useBetterAuth } from '@nexirift/plugin-better-auth';
 
 // Create a new instance of GraphQL Yoga with the schema and plugins.
 const yoga = createYoga({
@@ -81,9 +81,6 @@ export async function startServer() {
 					// TODO: Remove this and use event notifications instead.
 					// We are waiting on the Backblaze B2 team to allow us.
 					return mediaUploadEndpoint(req);
-				} else if (url.pathname.startsWith('/webhook/')) {
-					// Handle webhooks.
-					return webhookEndpoint(req);
 				} else {
 					// Let the GraphQL server handle the rest.
 					return yoga.fetch(req);
@@ -151,10 +148,9 @@ export async function startServer() {
 	console.log('\x1b[36m');
 	console.log(`🌌 Nexirift Nova API v${version} (${getGitCommitHash()})`);
 	if (!isTestMode) {
+		const authServer = new URL(Bun.env.BETTER_AUTH_URL!);
 		console.log(
-			`🔑 Authentication Server: ${
-				new URL(Bun.env.AUTH_INTROSPECT_URL!).hostname
-			}`
+			`🔑 Authentication Server: ${authServer.hostname}${authServer.port && ':' + authServer.port}`
 		);
 	} else {
 		console.log('🔑 Authentication Server: Test Mode');
@@ -178,25 +174,6 @@ export async function startServer() {
 		console.log('🧪 Running in test mode');
 	}
 	console.log('\x1b[0m');
-
-	if (Bun.env.STRIPE_SECRET_KEY) {
-		if (
-			server.hostname === 'localhost' ||
-			server.hostname === '127.0.0.1'
-		) {
-			console.log(
-				`💳 Stripe requires CLI for webhooks due to the hostname being ${server.hostname}.`
-			);
-		} else {
-			await stripe.webhookEndpoints.create({
-				enabled_events: ['charge.succeeded', 'charge.failed'],
-				url: new URL(
-					`/webhook/${Bun.env.WEBHOOK_STRIPE}`,
-					`http://${server.hostname}:${server.port}`
-				).toString()
-			});
-		}
-	}
 }
 
 if (!isTestMode) {
