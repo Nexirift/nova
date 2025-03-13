@@ -1,6 +1,6 @@
 import { Organisation, OrganisationMember } from '..';
 import { builder } from '../../builder';
-import { Context } from '../../context';
+import { type Context } from '../../context';
 import { db } from '@nexirift/db';
 import { type UserSchemaType } from '@nexirift/db';
 import { privacyGuardian } from '../../lib/guardian';
@@ -22,9 +22,7 @@ User.implement({
 		id: t.exposeString('id', {
 			nullable: false
 		}),
-		username: t.exposeString('username', {
-			nullable: false
-		}),
+		username: t.exposeString('displayUsername'),
 		displayName: t.exposeString('displayName', { nullable: true }),
 		bio: t.exposeString('bio', { nullable: true }),
 		extendedBio: t.exposeString('extendedBio', { nullable: true }),
