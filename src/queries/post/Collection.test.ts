@@ -62,7 +62,8 @@ for (const type of types) {
 		);
 
 		// Make the GraphQL request to the getPost endpoint.
-		const data = await makeGQLRequest(`
+		const data = await makeGQLRequest(
+			`
 			query {
 				getPostCollection(id: "${existingPostCollection}") {
 					id
@@ -71,21 +72,26 @@ for (const type of types) {
 					visibility
 				}
 			}
-		`);
+		`,
+			user1
+		);
 
 		// Expect the ID to be the same as what was created in the database.
 		expect(data).toHaveProperty(
 			'data.getPostCollection.id',
 			existingPostCollection
 		);
+
 		expect(data).toHaveProperty(
 			'data.getPostCollection.name',
 			'Test Collection'
 		);
+
 		expect(data).toHaveProperty(
 			'data.getPostCollection.description',
 			'This is a collection for testing purposes.'
 		);
+
 		expect(data).toHaveProperty('data.getPostCollection.visibility', type);
 
 		// Remove that test post from the database for future tests.
@@ -93,5 +99,53 @@ for (const type of types) {
 
 		// Remove that test user from the database for future tests.
 		await removeUser(user1);
+	});
+}
+
+const authTypes = ['Authenticated', 'Unauthenticated'];
+
+for (const type of authTypes) {
+	test(`${type} | Collections - It should not be able to get a PRIVATE post collection`, async () => {
+		const existingPostCollection = faker.string.uuid();
+		const user1 = faker.string.uuid();
+		const user2 = faker.string.uuid();
+
+		// Insert our fake user into the database.
+		await createUser({ sub: user1 });
+		if (type === 'Authenticated') await createUser({ sub: user2 });
+
+		// Insert our fake post into the database.
+		await createPostCollection(existingPostCollection, user1, 'PRIVATE');
+
+		// Make the GraphQL request to the getPost endpoint.
+		const data = await makeGQLRequest(
+			`
+		query {
+			getPostCollection(id: "${existingPostCollection}") {
+				id
+				name
+				description
+				visibility
+			}
+		}
+	`,
+			type === 'Authenticated' ? user2 : undefined
+		);
+
+		// Expect the result to have errors and null data for the post collection
+		expect(data).toHaveProperty('errors');
+		expect(data.errors[0]).toHaveProperty(
+			'message',
+			'You cannot view this post.'
+		);
+		expect(data.errors[0]).toHaveProperty('path', ['getPostCollection']);
+		expect(data).toHaveProperty('data.getPostCollection', null);
+
+		// Remove that test post from the database for future tests.
+		await removePostCollection(existingPostCollection);
+
+		// Remove that test user from the database for future tests.
+		await removeUser(user1);
+		if (type === 'Authenticated') await removeUser(user2);
 	});
 }
