@@ -6,14 +6,14 @@ import { handleProtocols, makeHandler } from 'graphql-ws/lib/use/bun';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import { version } from '../package.json';
 import { config } from './config';
-import { type Context } from './context';
+import type {Context} from './context';
+import { env } from './env';
 import getGitCommitHash from './git';
 import { enableAll } from './lib/logger';
 import { isTestMode, mediaUploadEndpoint } from './lib/server';
 import { pubsub } from './pubsub';
 import { redisClient, tokenClient } from './redis';
 import { schema } from './schema';
-import { env } from './env';
 
 // Create a new instance of GraphQL Yoga with the schema and plugins.
 const yoga = createYoga({
@@ -102,7 +102,7 @@ export async function startServer() {
 							auth,
 							pubsub
 						} as Context;
-					} catch (e) {
+					} catch {
 						ctx.extra.socket.send(
 							JSON.stringify({
 								type: 'pong',

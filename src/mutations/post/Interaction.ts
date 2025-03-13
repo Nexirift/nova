@@ -1,8 +1,7 @@
 import { and, eq } from 'drizzle-orm';
+import { PostInteractionSchemaType , db, postInteraction } from '@nexirift/db';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '@nexirift/db';
-import { postInteraction, PostInteractionSchemaType } from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import { privacyGuardian } from '../../lib/guardian';
 import { PostInteraction } from '../../types/post/Interaction';

@@ -1,6 +1,6 @@
-import { builder } from '../../../builder';
 import { db } from '@nexirift/db';
-import { type UserConversationParticipantRoleSchemaType } from '@nexirift/db';
+import type {UserConversationParticipantRoleSchemaType} from '@nexirift/db';
+import { builder } from '../../../builder';
 import { UserConversationParticipant } from './Participant';
 import { UserConversationRole } from './Role';
 

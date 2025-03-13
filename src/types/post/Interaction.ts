@@ -1,8 +1,8 @@
+import { db } from '@nexirift/db';
+import type {PostInteractionSchemaType} from '@nexirift/db';
 import { User } from '..';
 import { builder } from '../../builder';
 import { config } from '../../config';
-import { db } from '@nexirift/db';
-import { type PostInteractionSchemaType } from '@nexirift/db';
 import { throwFeatureDisabledError } from '../../helpers/common';
 import { Post } from './Post';
 
@@ -14,7 +14,7 @@ export const PostInteraction =
 	builder.objectRef<PostInteractionSchemaType>('PostInteraction');
 
 PostInteraction.implement({
-	authScopes: async (_parent, context) => {
+	authScopes: async ( ) => {
 		if (!config.features.posts.enabled) return throwFeatureDisabledError();
 
 		return true;

@@ -1,8 +1,7 @@
 import { and, eq, or } from 'drizzle-orm';
+import { UserRelationshipSchemaType , db, userRelationship } from '@nexirift/db';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '@nexirift/db';
-import { userRelationship, UserRelationshipSchemaType } from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import { UserRelationship } from '../../types';
 

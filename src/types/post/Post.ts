@@ -1,8 +1,8 @@
+import { db } from '@nexirift/db';
+import type {PostSchemaType} from '@nexirift/db';
 import { builder } from '../../builder';
 import { config } from '../../config';
 import { Context } from '../../context';
-import { db } from '@nexirift/db';
-import { type PostSchemaType } from '@nexirift/db';
 import { throwError, throwFeatureDisabledError } from '../../helpers/common';
 import { privacyGuardian } from '../../lib/guardian';
 import { redisClient } from '../../redis';
@@ -64,7 +64,7 @@ Post.implement({
 			}
 		}),
 		content: t.exposeString('content', {
-			authScopes: async (parent, _args, context, _info) => {
+			authScopes: async (parent, _args, context ) => {
 				const user = await getUser(
 					parent.authorId,
 					context.auth?.user.id
@@ -94,7 +94,7 @@ Post.implement({
 				offset: t.arg({ type: 'Int' }),
 				type: t.arg({ type: 'String' })
 			},
-			authScopes: async (parent, _args, context, _info) => {
+			authScopes: async (parent, _args, context ) => {
 				const user = await getUser(
 					parent.authorId,
 					context.auth?.user.id

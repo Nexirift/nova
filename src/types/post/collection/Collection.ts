@@ -1,8 +1,8 @@
+import { db } from '@nexirift/db';
+import type {PostCollectionSchemaType} from '@nexirift/db';
 import { User } from '../..';
 import { builder } from '../../../builder';
 import { config } from '../../../config';
-import { db } from '@nexirift/db';
-import { type PostCollectionSchemaType } from '@nexirift/db';
 import { throwError, throwFeatureDisabledError } from '../../../helpers/common';
 import { PostCollectionItem } from './Item';
 

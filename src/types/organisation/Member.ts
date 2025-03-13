@@ -1,7 +1,7 @@
+import { db } from '@nexirift/db';
+import type {OrganisationMemberSchemaType} from '@nexirift/db';
 import { Organisation, User } from '..';
 import { builder } from '../../builder';
-import { db } from '@nexirift/db';
-import { type OrganisationMemberSchemaType } from '@nexirift/db';
 
 export const OrganisationMember =
 	builder.objectRef<OrganisationMemberSchemaType>('OrganisationMember');

@@ -1,8 +1,7 @@
 import { and, eq } from 'drizzle-orm';
+import { db , postCollection, postCollectionItem } from '@nexirift/db';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '@nexirift/db';
-import { postCollection, postCollectionItem } from '@nexirift/db';
 import { throwError, throwFeatureDisabledError } from '../../helpers/common';
 import { PostCollection } from '../../types/post/collection/Collection';
 import { PostCollectionItem } from '../../types/post/collection/Item';
@@ -69,7 +68,7 @@ builder.mutationField('updatePostCollection', (t) =>
 			visibility: t.arg.string({ defaultValue: 'PUBLIC' })
 		},
 		authScopes: { loggedIn: true },
-		resolve: async (_root, args, ctx: Context) => {
+		resolve: async (_root, args) => {
 			if (!config.features.posts.collections.enabled)
 				return throwFeatureDisabledError();
 
@@ -107,7 +106,7 @@ builder.mutationField('deletePostCollection', (t) =>
 			id: t.arg.string({ required: true })
 		},
 		authScopes: { loggedIn: true },
-		resolve: async (_root, args, ctx: Context) => {
+		resolve: async (_root, args) => {
 			if (!config.features.posts.collections.enabled)
 				return throwFeatureDisabledError();
 
@@ -140,7 +139,7 @@ builder.mutationField('addPostToCollection', (t) =>
 			postId: t.arg.string({ required: true })
 		},
 		authScopes: { loggedIn: true },
-		resolve: async (_root, args, ctx: Context) => {
+		resolve: async (_root, args) => {
 			if (!config.features.posts.collections.enabled)
 				return throwFeatureDisabledError();
 
@@ -177,7 +176,7 @@ builder.mutationField('removePostFromCollection', (t) =>
 			postId: t.arg.string({ required: true })
 		},
 		authScopes: { loggedIn: true },
-		resolve: async (_root, args, ctx: Context) => {
+		resolve: async (_root, args ) => {
 			if (!config.features.posts.collections.enabled)
 				return throwFeatureDisabledError();
 

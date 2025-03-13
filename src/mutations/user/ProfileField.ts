@@ -1,8 +1,7 @@
 import { and, eq } from 'drizzle-orm';
+import { db , userProfileField } from '@nexirift/db';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '@nexirift/db';
-import { userProfileField } from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import { UserProfileField } from '../../types/user/ProfileField';
 

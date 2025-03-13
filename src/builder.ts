@@ -30,7 +30,7 @@ export const builder = new SchemaBuilder<{
 	],
 	validationOptions: {
 		// optionally customize how errors are formatted
-		validationError: (zodError, args, context, info) => {
+		validationError: (zodError   ) => {
 			// the default behavior is to just throw the zod error directly
 			return zodError;
 		}

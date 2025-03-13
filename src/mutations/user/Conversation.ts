@@ -1,14 +1,13 @@
 import { and, eq } from 'drizzle-orm';
-import { builder } from '../../builder';
-import { Context } from '../../context';
-import { db } from '@nexirift/db';
-import {
+import { db ,
 	userConversation,
 	userConversationMessage,
 	userConversationParticipant,
 	userConversationParticipantRole,
 	userConversationRole
 } from '@nexirift/db';
+import { builder } from '../../builder';
+import { Context } from '../../context';
 import { throwError } from '../../helpers/common';
 import {
 	checkPermissions,

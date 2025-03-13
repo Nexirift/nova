@@ -1,6 +1,6 @@
-import { builder } from '../../builder';
-import { Context } from '../../context';
 import { db } from '@nexirift/db';
+import { builder } from '../../builder';
+
 import { throwError } from '../../helpers/common';
 import { Post } from '../../types';
 
@@ -10,7 +10,7 @@ builder.queryField('getPost', (t) =>
 		args: {
 			id: t.arg.string({ required: true })
 		},
-		resolve: async (_root, { id }, ctx: Context) => {
+		resolve: async (_root, { id } ) => {
 			const post = await db.query.post.findFirst({
 				where: (post, { eq }) => eq(post.id, id!)
 			});

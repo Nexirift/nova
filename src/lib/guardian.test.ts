@@ -1,13 +1,13 @@
 import { faker } from '@faker-js/faker';
 import { expect, test } from 'bun:test';
-import { db } from '@nexirift/db';
-import { userRelationship } from '@nexirift/db';
+import { db , userRelationship } from '@nexirift/db';
+import { BetterAuth } from '@nexirift/plugin-better-auth';
 import { redisClient } from '../redis';
 import { privacyGuardian } from './guardian';
 import { createUser } from './tests';
-import { BetterAuth } from '@nexirift/plugin-better-auth';
 
 function createFakeToken(sub: string): BetterAuth {
+	/* eslint-disable  @typescript-eslint/no-explicit-any */
 	return new BetterAuth({
 		client: {} as any,
 		session: {} as any,

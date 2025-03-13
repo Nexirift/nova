@@ -1,10 +1,10 @@
+import { readFileSync } from 'fs';
 import type { BetterAuthPluginOptionsBase } from '@nexirift/plugin-better-auth';
 import {
 	adminClient,
 	passkeyClient,
 	usernameClient
 } from 'better-auth/client/plugins';
-import { readFileSync } from 'fs';
 import { tokenClient } from './redis';
 import { env } from './env';
 

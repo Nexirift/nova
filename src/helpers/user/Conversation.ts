@@ -50,7 +50,7 @@ const getParticipant = async (userId: string, conversationId: string) => {
 
 const getPermissions = async (conversationId: string, userId: string) => {
 	const participant = await getParticipant(userId, conversationId);
-	var perms = [];
+	const perms = [];
 	for (const role of participant?.roles ?? []) {
 		for (const permission of JSON.parse(role.role.permissions)) {
 			perms.push(permission);

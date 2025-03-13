@@ -1,11 +1,9 @@
 import { eq } from 'drizzle-orm';
+import { db , post, postEditHistory } from '@nexirift/db';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '@nexirift/db';
-import { post, postEditHistory } from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import { Post } from '../../types';
-import { config } from '../../config';
 
 builder.mutationField('createPost', (t) =>
 	t.field({
@@ -45,7 +43,7 @@ builder.mutationField('updatePost', (t) =>
 			content: t.arg.string({ required: true })
 		},
 		authScopes: { loggedIn: true },
-		resolve: async (_root, args, ctx: Context) => {
+		resolve: async (_root, args ) => {
 			const originalPost = await db.query.post.findFirst({
 				where: (post, { eq }) => eq(post.id, args.id)
 			});
@@ -83,7 +81,7 @@ builder.mutationField('deletePost', (t) =>
 			id: t.arg.string({ required: true })
 		},
 		authScopes: { loggedIn: true },
-		resolve: async (_root, args, ctx: Context) => {
+		resolve: async (_root, args ) => {
 			const originalPost = await db.query.post.findFirst({
 				where: (post, { eq }) => eq(post.id, args.id)
 			});

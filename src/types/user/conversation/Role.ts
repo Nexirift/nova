@@ -1,7 +1,7 @@
+import { db } from '@nexirift/db';
+import type {UserConversationRoleSchemaType} from '@nexirift/db';
 import { UserConversation } from '../..';
 import { builder } from '../../../builder';
-import { db } from '@nexirift/db';
-import { type UserConversationRoleSchemaType } from '@nexirift/db';
 import { UserConversationParticipantRole } from './ParticipantRole';
 
 export const UserConversationRole =

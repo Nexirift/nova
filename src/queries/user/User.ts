@@ -1,6 +1,6 @@
+import { db } from '@nexirift/db';
 import { builder } from '../../builder';
 import { Context } from '../../context';
-import { db } from '@nexirift/db';
 import { throwError } from '../../helpers/common';
 import { User } from '../../types';
 
@@ -17,7 +17,7 @@ builder.queryField('getUser', (t) =>
 				message: 'You must provide an ID or username.'
 			}
 		],
-		resolve: async (_root, { id, username }, ctx: Context) => {
+		resolve: async (_root, { id, username }) => {
 			const user = await db.query.user.findFirst({
 				where: (user, { eq }) =>
 					id ? eq(user.id, id!) : eq(user.username, username!)
@@ -40,7 +40,7 @@ builder.queryField('me', (t) =>
 		},
 		resolve: async (_root, _args, ctx: Context) => {
 			const user = await db.query.user.findFirst({
-				where: (user, { eq }) => eq(user.id, ctx.auth?.user?.id!)
+				where: (user, { eq }) => eq(user.id, ctx.auth.user.id!)
 			});
 
 			if (!user) {

@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { expect, test } from 'bun:test';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
-import { tokenClient } from '../../redis';
 
 const getUserQuery = (id: string) => `
 	query {
@@ -21,9 +20,13 @@ const meQuery = `
 	}
 `;
 
-const expectError = (data: any, message: string, code: string) => {
+const expectError = (
+	data: { errors: { message: string; extensions: { code: string } }[] },
+	message: string,
+	code: string
+) => {
 	expect(data.errors[0]).toHaveProperty('message', message);
-	expect(data.errors[0].extensions).toHaveProperty('code', code);
+	expect(data.errors[0]?.extensions).toHaveProperty('code', code);
 };
 
 test('Unauthenticated | General - It should get a non-existing user', async () => {

@@ -1,6 +1,6 @@
-import { builder } from '../../builder';
 import { db } from '@nexirift/db';
-import { type UserRelationshipSchemaType } from '@nexirift/db';
+import type {UserRelationshipSchemaType} from '@nexirift/db';
+import { builder } from '../../builder';
 import { User } from './User';
 
 export const UserRelationshipType = builder.enumType('UserRelationshipType', {

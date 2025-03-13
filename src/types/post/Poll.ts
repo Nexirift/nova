@@ -1,17 +1,14 @@
+import { db } from '@nexirift/db';
+import type {PostPollSchemaType, PostPollVoteSchemaType} from '@nexirift/db';
 import { builder } from '../../builder';
 import { config } from '../../config';
-import { db } from '@nexirift/db';
-import {
-	type PostPollSchemaType,
-	type PostPollVoteSchemaType
-} from '@nexirift/db';
 import { throwFeatureDisabledError } from '../../helpers/common';
 import { Post } from './Post';
 
 export const PostPoll = builder.objectRef<PostPollSchemaType>('PostPoll');
 
 PostPoll.implement({
-	authScopes: async (_parent, context) => {
+	authScopes: async ( ) => {
 		if (
 			!config.features.posts.polls.enabled ||
 			!config.features.posts.enabled
@@ -44,7 +41,7 @@ export const PostPollVote =
 	builder.objectRef<PostPollVoteSchemaType>('PostPollVote');
 
 PostPollVote.implement({
-	authScopes: async (_parent, context) => {
+	authScopes: async ( ) => {
 		if (!config.features.posts.polls.enabled)
 			return throwFeatureDisabledError();
 

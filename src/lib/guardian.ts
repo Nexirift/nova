@@ -1,7 +1,7 @@
 import { db } from '@nexirift/db';
+import { BetterAuth } from '@nexirift/plugin-better-auth';
 import { redisClient } from '../redis';
 import { guardianLog } from './logger';
-import { BetterAuth } from '@nexirift/plugin-better-auth';
 
 /**
  * This function checks if a user is allowed to access a resource based on their privacy settings.

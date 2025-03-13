@@ -6,12 +6,9 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { mockClient } from 'aws-sdk-client-mock';
 import mime from 'mime-types';
-import { config } from '../config';
-import { db } from '@nexirift/db';
-import { postMedia, user } from '@nexirift/db';
-import { enableAll } from './logger';
-import { eq } from 'drizzle-orm';
+import { db , postMedia } from '@nexirift/db';
 import { authorize } from '@nexirift/plugin-better-auth';
+import { config } from '../config';
 import { env } from '../env';
 
 /**
@@ -115,7 +112,9 @@ async function mediaUploadEndpoint(req: Request) {
 			endpoint: env.AWS_ENDPOINT! ?? 'https://s3.us-east-1.amazonaws.com'
 		});
 
-		isTestMode && mockClient(_client);
+		if (isTestMode) {
+			mockClient(_client);
+		}
 
 		const upload = new Upload({
 			client: _client,
@@ -145,7 +144,7 @@ async function mediaUploadEndpoint(req: Request) {
 		return Response.json({
 			status: 'QUEUED',
 			message: 'Media queued for upload.',
-			id: dbMedia[0].id
+			id: dbMedia[0]?.id
 		});
 	} catch (error) {
 		console.error('S3 upload error:', error);
