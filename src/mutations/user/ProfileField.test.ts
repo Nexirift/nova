@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
+import { db, userProfileField } from '@nexirift/db';
 import { expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import { db , userProfileField } from '@nexirift/db';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 const createProfileFieldMutation = (name: string, value: string) => `

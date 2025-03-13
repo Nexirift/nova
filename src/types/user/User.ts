@@ -1,8 +1,8 @@
+import type { UserSchemaType } from '@nexirift/db';
 import { db } from '@nexirift/db';
-import type {UserSchemaType} from '@nexirift/db';
 import { Organisation, OrganisationMember } from '..';
 import { builder } from '../../builder';
-import type {Context} from '../../context';
+import type { Context } from '../../context';
 import { privacyGuardian } from '../../lib/guardian';
 import { Post } from '../post';
 import { PostInteraction } from '../post/Interaction';
@@ -47,7 +47,7 @@ User.implement({
 		profileFields: t.field({
 			type: [UserProfileField],
 			nullable: true,
-			authScopes: (parent, _args, context ) =>
+			authScopes: (parent, _args, context) =>
 				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user) => {
@@ -90,7 +90,7 @@ User.implement({
 				first: t.arg({ type: 'Int' }),
 				offset: t.arg({ type: 'Int' })
 			},
-			authScopes: (parent, _args, context ) =>
+			authScopes: (parent, _args, context) =>
 				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args) => {
@@ -115,7 +115,7 @@ User.implement({
 				first: t.arg({ type: 'Int' }),
 				offset: t.arg({ type: 'Int' })
 			},
-			authScopes: (parent, _args, context ) =>
+			authScopes: (parent, _args, context) =>
 				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args) => {
@@ -136,7 +136,7 @@ User.implement({
 		media: t.field({
 			type: [PostMedia],
 			nullable: true,
-			authScopes: (parent, _args, context ) =>
+			authScopes: (parent, _args, context) =>
 				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user) => {
@@ -162,7 +162,7 @@ User.implement({
 		interactions: t.field({
 			type: [PostInteraction],
 			nullable: true,
-			authScopes: (parent, _args, context ) =>
+			authScopes: (parent, _args, context) =>
 				privacyGuardian(parent, context.auth),
 			args: {
 				first: t.arg({ type: 'Int' }),
@@ -174,7 +174,7 @@ User.implement({
 				const type = args.type! as 'LIKE' | 'REPOST';
 
 				const result = await db.query.postInteraction.findMany({
-					where: (postInteraction, { and, eq  }) =>
+					where: (postInteraction, { and, eq }) =>
 						user.id === context.auth?.user.id
 							? and(
 									eq(postInteraction.userId, user.id),
@@ -200,7 +200,7 @@ User.implement({
 				first: t.arg({ type: 'Int' }),
 				after: t.arg({ type: 'Int' })
 			},
-			authScopes: (parent, _args, context ) =>
+			authScopes: (parent, _args, context) =>
 				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args, context: Context) => {

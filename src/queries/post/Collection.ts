@@ -1,6 +1,5 @@
 import { db } from '@nexirift/db';
 import { builder } from '../../builder';
-
 import { throwError } from '../../helpers/common';
 import { PostCollection } from '../../types/post/collection/Collection';
 
@@ -10,7 +9,7 @@ builder.queryField('getPostCollection', (t) =>
 		args: {
 			id: t.arg.string({ required: true })
 		},
-		resolve: async (_root, { id } ) => {
+		resolve: async (_root, { id }) => {
 			const postCollection = await db.query.postCollection.findFirst({
 				where: (postCollection, { eq }) => eq(postCollection.id, id!)
 			});

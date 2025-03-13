@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
+import { db, post, postInteraction } from '@nexirift/db';
 import { expect, test } from 'bun:test';
 import { and, eq, or } from 'drizzle-orm';
-import { db , post, postInteraction } from '@nexirift/db';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 const types = ['like', 'repost'];

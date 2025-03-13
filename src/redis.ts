@@ -1,6 +1,6 @@
 import { createClient } from 'redis';
-import { isTestMode } from './lib/server';
 import { env } from './env';
+import { isTestMode } from './lib/server';
 
 if (isTestMode) {
 	import('redis-memory-server').then(({ default: RedisMemoryServer }) => {

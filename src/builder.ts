@@ -6,7 +6,7 @@ import SmartSubscriptionsPlugin, {
 } from '@pothos/plugin-smart-subscriptions';
 import ValidationPlugin from '@pothos/plugin-validation';
 import { DateTimeResolver } from 'graphql-scalars';
-import { Context } from './context';
+import type { Context } from './context';
 import { throwError } from './helpers/common';
 import { pubsub } from './pubsub';
 
@@ -30,7 +30,7 @@ export const builder = new SchemaBuilder<{
 	],
 	validationOptions: {
 		// optionally customize how errors are formatted
-		validationError: (zodError   ) => {
+		validationError: (zodError) => {
 			// the default behavior is to just throw the zod error directly
 			return zodError;
 		}

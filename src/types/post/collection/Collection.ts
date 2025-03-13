@@ -1,5 +1,5 @@
+import type { PostCollectionSchemaType } from '@nexirift/db';
 import { db } from '@nexirift/db';
-import type {PostCollectionSchemaType} from '@nexirift/db';
 import { User } from '../..';
 import { builder } from '../../../builder';
 import { config } from '../../../config';

@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
-import { expect, test } from 'bun:test';
-import { db , userRelationship } from '@nexirift/db';
+import { db, userRelationship } from '@nexirift/db';
 import { BetterAuth } from '@nexirift/plugin-better-auth';
+import { expect, test } from 'bun:test';
 import { redisClient } from '../redis';
 import { privacyGuardian } from './guardian';
 import { createUser } from './tests';

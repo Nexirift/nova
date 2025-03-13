@@ -1,5 +1,5 @@
+import type { PostMediaSchemaType } from '@nexirift/db';
 import { db } from '@nexirift/db';
-import type {PostMediaSchemaType} from '@nexirift/db';
 import { builder } from '../../builder';
 import { Post } from './Post';
 

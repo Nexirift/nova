@@ -1,12 +1,12 @@
-import { readFileSync } from 'fs';
 import type { BetterAuthPluginOptionsBase } from '@nexirift/plugin-better-auth';
 import {
 	adminClient,
 	passkeyClient,
 	usernameClient
 } from 'better-auth/client/plugins';
-import { tokenClient } from './redis';
+import { readFileSync } from 'fs';
 import { env } from './env';
+import { tokenClient } from './redis';
 
 const file = (env.CONFIG_FILE as string) ?? 'config.json';
 

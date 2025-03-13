@@ -1,5 +1,5 @@
+import type { UserConversationRoleSchemaType } from '@nexirift/db';
 import { db } from '@nexirift/db';
-import type {UserConversationRoleSchemaType} from '@nexirift/db';
 import { UserConversation } from '../..';
 import { builder } from '../../../builder';
 import { UserConversationParticipantRole } from './ParticipantRole';

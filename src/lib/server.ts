@@ -4,10 +4,10 @@
 
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
+import { db, postMedia } from '@nexirift/db';
+import { authorize } from '@nexirift/plugin-better-auth';
 import { mockClient } from 'aws-sdk-client-mock';
 import mime from 'mime-types';
-import { db , postMedia } from '@nexirift/db';
-import { authorize } from '@nexirift/plugin-better-auth';
 import { config } from '../config';
 import { env } from '../env';
 

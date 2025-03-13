@@ -1,5 +1,5 @@
+import type { PostGiveawaySchemaType } from '@nexirift/db';
 import { db } from '@nexirift/db';
-import type {PostGiveawaySchemaType} from '@nexirift/db';
 import { builder } from '../../builder';
 import { config } from '../../config';
 import { throwFeatureDisabledError } from '../../helpers/common';
@@ -9,7 +9,7 @@ export const PostGiveaway =
 	builder.objectRef<PostGiveawaySchemaType>('PostGiveaway');
 
 PostGiveaway.implement({
-	authScopes: async ( ) => {
+	authScopes: async () => {
 		if (!config.features.posts.enabled) return throwFeatureDisabledError();
 
 		return true;

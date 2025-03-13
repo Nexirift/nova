@@ -1,11 +1,11 @@
+import { db, postCollection, postCollectionItem } from '@nexirift/db';
 import { and, eq } from 'drizzle-orm';
-import { db , postCollection, postCollectionItem } from '@nexirift/db';
 import { builder } from '../../builder';
-import { Context } from '../../context';
+import { config } from '../../config';
+import type { Context } from '../../context';
 import { throwError, throwFeatureDisabledError } from '../../helpers/common';
 import { PostCollection } from '../../types/post/collection/Collection';
 import { PostCollectionItem } from '../../types/post/collection/Item';
-import { config } from '../../config';
 
 const findPostCollectionById = async (id: string) => {
 	return db.query.postCollection.findFirst({
@@ -176,7 +176,7 @@ builder.mutationField('removePostFromCollection', (t) =>
 			postId: t.arg.string({ required: true })
 		},
 		authScopes: { loggedIn: true },
-		resolve: async (_root, args ) => {
+		resolve: async (_root, args) => {
 			if (!config.features.posts.collections.enabled)
 				return throwFeatureDisabledError();
 

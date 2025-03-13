@@ -1,5 +1,5 @@
+import type { OrganisationMemberSchemaType } from '@nexirift/db';
 import { db } from '@nexirift/db';
-import type {OrganisationMemberSchemaType} from '@nexirift/db';
 import { Organisation, User } from '..';
 import { builder } from '../../builder';
 

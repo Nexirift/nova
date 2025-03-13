@@ -6,7 +6,7 @@ import { handleProtocols, makeHandler } from 'graphql-ws/lib/use/bun';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import { version } from '../package.json';
 import { config } from './config';
-import type {Context} from './context';
+import type { Context } from './context';
 import { env } from './env';
 import getGitCommitHash from './git';
 import { enableAll } from './lib/logger';

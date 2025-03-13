@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
+import { db, post } from '@nexirift/db';
 import { expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
-import { db , post } from '@nexirift/db';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 test('Authenticated | General - It should create a new post', async () => {

@@ -1,5 +1,5 @@
+import type { UserProfileFieldSchemaType } from '@nexirift/db';
 import { db } from '@nexirift/db';
-import type {UserProfileFieldSchemaType} from '@nexirift/db';
 import { builder } from '../../builder';
 import { User } from './User';
 

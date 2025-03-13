@@ -1,7 +1,8 @@
+import type { PostInteractionSchemaType } from '@nexirift/db';
+import { db, postInteraction } from '@nexirift/db';
 import { and, eq } from 'drizzle-orm';
-import { PostInteractionSchemaType , db, postInteraction } from '@nexirift/db';
 import { builder } from '../../builder';
-import { Context } from '../../context';
+import type { Context } from '../../context';
 import { throwError } from '../../helpers/common';
 import { privacyGuardian } from '../../lib/guardian';
 import { PostInteraction } from '../../types/post/Interaction';
@@ -83,15 +84,15 @@ async function postInteract(
 		if (existingInteraction) {
 			return throwError(errorMap[type], `POST_ALREADY_${type}ED`);
 		}
-		return db
+		const result = await db
 			.insert(postInteraction)
 			.values({
 				userId: ctx.auth?.user?.id,
 				postId: args.id,
 				type: type as 'LIKE' | 'REPOST'
 			})
-			.returning()
-			.then((res) => res[0]);
+			.returning();
+		return result[0] || null;
 	} else {
 		if (!existingInteraction) {
 			return throwError(
@@ -102,7 +103,7 @@ async function postInteract(
 			);
 		}
 
-		return db
+		const result = await db
 			.delete(postInteraction)
 			.where(
 				and(
@@ -114,7 +115,7 @@ async function postInteract(
 					)
 				)
 			)
-			.returning()
-			.then((res) => res[0]);
+			.returning();
+		return result[0] || null;
 	}
 }

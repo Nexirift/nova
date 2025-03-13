@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
+import { db, userRelationship } from '@nexirift/db';
 import { expect, test } from 'bun:test';
-import { db , userRelationship } from '@nexirift/db';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 
 const errorMap = {

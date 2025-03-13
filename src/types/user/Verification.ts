@@ -1,5 +1,5 @@
+import type { UserVerificationSchemaType } from '@nexirift/db';
 import { db } from '@nexirift/db';
-import type {UserVerificationSchemaType} from '@nexirift/db';
 import { builder } from '../../builder';
 import { config } from '../../config';
 import { throwFeatureDisabledError } from '../../helpers/common';
@@ -13,7 +13,7 @@ export const UserVerification =
 	builder.objectRef<UserVerificationSchemaType>('UserVerification');
 
 UserVerification.implement({
-	authScopes: async ( ) => {
+	authScopes: async () => {
 		if (!config.features.verification.enabled)
 			return throwFeatureDisabledError();
 
