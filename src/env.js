@@ -16,9 +16,7 @@ export const env = createEnv({
 		S3_REGION: z.string().optional(),
 		S3_BUCKET: z.string().optional(),
 		S3_UPLOAD_DIR: z.string().optional(),
-		UPLOAD_LOCATION: z.string().optional(),
-		POLAR_ACCESS_TOKEN: z.string().optional(),
-		POLAR_WEBHOOK_SECRET: z.string().optional()
+		UPLOAD_LOCATION: z.string().optional()
 	},
 	runtimeEnv: {
 		NODE_ENV: process.env.NODE_ENV,
@@ -34,9 +32,7 @@ export const env = createEnv({
 		S3_REGION: process.env.S3_REGION,
 		S3_BUCKET: process.env.S3_BUCKET,
 		S3_UPLOAD_DIR: process.env.S3_UPLOAD_DIR,
-		UPLOAD_LOCATION: process.env.UPLOAD_LOCATION,
-		POLAR_ACCESS_TOKEN: process.env.POLAR_ACCESS_TOKEN,
-		POLAR_WEBHOOK_SECRET: process.env.POLAR_WEBHOOK_SECRET
+		UPLOAD_LOCATION: process.env.UPLOAD_LOCATION
 	},
 	skipValidation:
 		!!process.env.SKIP_ENV_VALIDATION || process.env.NODE_ENV === 'test'

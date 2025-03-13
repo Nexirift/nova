@@ -40,7 +40,7 @@ jobs:
             - name: Install dependencies for db package
               run:
                   cd .db_publishing && bun install --frozen-lockfile && bun run
-                  build
+                  build && rm -rf ~/.bun/install/cache/@nexirift/db*
             - name: Publish db package to the registry
               run: >
                   cd .db_publishing && npm publish --registry
