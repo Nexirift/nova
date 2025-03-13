@@ -1,3 +1,4 @@
+import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { db, migrator, prodDbClient, user } from '@nexirift/db';
 import { authorize, useBetterAuth } from '@nexirift/plugin-better-auth';
 import { beforeAll } from 'bun:test';
@@ -20,6 +21,7 @@ const yoga = createYoga({
 	schema: schema,
 	graphiql: false,
 	maskedErrors: false,
+	logging: 'debug',
 	graphqlEndpoint: '/',
 	plugins: [
 		useBetterAuth(config.auth),
@@ -32,6 +34,13 @@ const yoga = createYoga({
 					console.error(err);
 					return false;
 				}
+			}
+		}),
+		useResponseCache({
+			session: (request) => request.headers.get('authentication'),
+			ttl: 2_000,
+			scopePerSchemaCoordinate: {
+				'Query.me': 'PRIVATE'
 			}
 		})
 	]
@@ -121,8 +130,12 @@ export async function startServer() {
 	});
 
 	// Connect to Redis.
-	await redisClient.connect();
-	await tokenClient.connect();
+	try {
+		await redisClient.connect();
+		await tokenClient.connect();
+	} catch (err) {
+		console.error(err);
+	}
 
 	if (!isTestMode) {
 		// Connect to the database.
