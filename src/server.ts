@@ -94,7 +94,7 @@ export async function startServer() {
 				if (ctx.extra.socket.data) {
 					const auth = await authorize(
 						config.auth,
-						(ctx.extra.socket.data! as string).split(' ')[1]
+						(ctx.extra.socket.data! as string).split(' ')[1]!
 					);
 					const authString = JSON.stringify(auth);
 					try {

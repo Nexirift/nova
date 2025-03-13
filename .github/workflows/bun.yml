@@ -13,9 +13,41 @@ jobs:
               uses: actions/checkout@v4
             - name: Set up Bun
               uses: oven-sh/setup-bun@v2
+            - name: Cache Bun install cache
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.bun/install/cache
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+            - name: Start local npm registry
+              run: bunx verdaccio --listen 0.0.0.0:4873 &
+            - name: Install expect
+              run:
+                  sudo apt-add-repository universe && sudo apt-get install
+                  expect
+            - name: Add 'developer' user to the registry
+              run: >
+                  /usr/bin/expect -c "spawn bunx npm adduser --registry
+                  http://localhost:4873; expect \"Username:\"; send
+                  \"developer\r\"; expect \"Password:\"; send \"P@ssw0rd\r\";
+                  expect \"Email: (this IS public)\"; send
+                  \"developer@nexirift.com\r\"; expect eof"
+            - name: Clone db package repository
+              uses: actions/checkout@master
+              with:
+                  repository: Nexirift/db
+                  path: ./.db_publishing
+            - name: Install dependencies for db package
+              run:
+                  cd .db_publishing && bun install --frozen-lockfile && bun run
+                  build
+            - name: Publish db package to the registry
+              run: >
+                  cd .db_publishing && npm publish --registry
+                  http://localhost:4873
             - name: Install dependencies
-              run: bun install --frozen-lockfile
-            - name: Generate migrations
+              run: rm bun.lock && bun install
+            - name: Generate the database schema
               run: bun run db:generate
             - name: Run tests
               run: bun test --preload ./src/server.ts
@@ -30,9 +62,35 @@ jobs:
               uses: actions/checkout@v4
             - name: Set up Bun
               uses: oven-sh/setup-bun@v2
+            - name: Start local npm registry
+              run: bunx verdaccio --listen 0.0.0.0:4873 &
+            - name: Install expect
+              run:
+                  sudo apt-add-repository universe && sudo apt-get install
+                  expect
+            - name: Add 'developer' user to the registry
+              run: >
+                  /usr/bin/expect -c "spawn bunx npm adduser --registry
+                  http://localhost:4873; expect \"Username:\"; send
+                  \"developer\r\"; expect \"Password:\"; send \"P@ssw0rd\r\";
+                  expect \"Email: (this IS public)\"; send
+                  \"developer@nexirift.com\r\"; expect eof"
+            - name: Clone db package repository
+              uses: actions/checkout@master
+              with:
+                  repository: Nexirift/db
+                  path: ./.db_publishing
+            - name: Install dependencies for db package
+              run:
+                  cd .db_publishing && bun install --frozen-lockfile && bun run
+                  build
+            - name: Publish db package to the registry
+              run: >
+                  cd .db_publishing && npm publish --registry
+                  http://localhost:4873
             - name: Install dependencies
-              run: bun install --frozen-lockfile
-            - name: Generate migrations
+              run: rm bun.lock && bun install
+            - name: Generate the database schema
               run: bun run db:generate
             - name: Run tests
               run: bun test --preload ./src/server.ts --coverage

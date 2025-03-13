@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker';
-import { eq } from 'drizzle-orm';
 import { config } from '../config';
 import { db } from '@nexirift/db';
 import { user } from '@nexirift/db';
 import { tokenClient } from '../redis';
+import { eq } from 'drizzle-orm';
 
 /**
  * Allows communication with the GraphQL API in testing mode.
@@ -40,14 +40,19 @@ export async function createUser(data: {
 	preferred_username?: string;
 	type?: 'PUBLIC' | 'PRIVATE';
 }) {
+	const generatedUsername =
+		data.preferred_username ?? faker.internet.username();
+
 	const userdb = await db
 		.insert(user)
 		.values({
 			id: data.sub,
-			username: data.preferred_username ?? faker.internet.username(),
-			email: data.email! ?? faker.internet.email(),
+			username: generatedUsername.toLowerCase(),
+			displayUsername: generatedUsername,
+			email: data.email ?? faker.internet.email(),
 			emailVerified: true,
-			type: data.type ?? 'PUBLIC'
+			type: data.type ?? 'PUBLIC',
+			birthday: faker.date.birthdate().toISOString()
 		})
 		.returning()
 		.execute();
