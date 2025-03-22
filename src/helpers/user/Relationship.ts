@@ -6,35 +6,35 @@ import { builder } from '../../builder';
 const UserRelationshipStats = builder.simpleObject('UserRelationshipStats', {
 	fields: (t) => ({
 		// Counters for relationship metrics
-		followersCount: t.int({
+		followers: t.int({
 			nullable: false,
 			description: 'Number of users following this user'
 		}),
-		followingCount: t.int({
+		following: t.int({
 			nullable: false,
 			description: 'Number of users this user follows'
 		}),
-		blockedCount: t.int({
+		blocked: t.int({
 			nullable: false,
 			description: 'Number of users blocked by this user'
 		}),
-		blockersCount: t.int({
+		blockers: t.int({
 			nullable: false,
 			description: 'Number of users that have blocked this user'
 		}),
-		mutingCount: t.int({
+		muting: t.int({
 			nullable: false,
 			description: 'Number of users muted by this user'
 		}),
-		mutersCount: t.int({
+		muters: t.int({
 			nullable: false,
 			description: 'Number of users that have muted this user'
 		}),
-		requestsCount: t.int({
+		requests: t.int({
 			nullable: false,
 			description: 'Number of pending follow requests received'
 		}),
-		mutualsCount: t.int({
+		mutuals: t.int({
 			nullable: false,
 			description: 'Number of mutual followers'
 		}),
@@ -135,25 +135,25 @@ async function calculateMutualsCount(userId: string): Promise<number> {
  * @param userId The user ID to get counts for
  */
 async function getUserRelationshipCounts(userId: string): Promise<{
-	followersCount: number;
-	followingCount: number;
-	blockedCount: number;
-	blockersCount: number;
-	mutingCount: number;
-	mutersCount: number;
-	requestsCount: number;
-	mutualsCount: number;
+	followers: number;
+	following: number;
+	blocked: number;
+	blockers: number;
+	muting: number;
+	muters: number;
+	requests: number;
+	mutuals: number;
 }> {
 	// Batch fetch all relationship counts in parallel
 	const [
-		followersCount,
-		followingCount,
-		blockedCount,
-		blockersCount,
-		mutingCount,
-		mutersCount,
-		requestsCount,
-		mutualsCount
+		followers,
+		following,
+		blocked,
+		blockers,
+		muting,
+		muters,
+		requests,
+		mutuals
 	] = await Promise.all([
 		getRelationshipCount(userId, 'FOLLOW', true),
 		getRelationshipCount(userId, 'FOLLOW', false),
@@ -166,14 +166,14 @@ async function getUserRelationshipCounts(userId: string): Promise<{
 	]);
 
 	return {
-		followersCount,
-		followingCount,
-		blockedCount,
-		blockersCount,
-		mutingCount,
-		mutersCount,
-		requestsCount,
-		mutualsCount
+		followers,
+		following,
+		blocked,
+		blockers,
+		muting,
+		muters,
+		requests,
+		mutuals
 	};
 }
 
@@ -258,14 +258,14 @@ async function getCompleteRelationshipStats(
 	userId: string,
 	currentUserId: string | undefined
 ): Promise<{
-	followersCount: number;
-	followingCount: number;
-	blockedCount: number;
-	blockersCount: number;
-	mutingCount: number;
-	mutersCount: number;
-	requestsCount: number;
-	mutualsCount: number;
+	followers: number;
+	following: number;
+	blocked: number;
+	blockers: number;
+	muting: number;
+	muters: number;
+	requests: number;
+	mutuals: number;
 	isFollowing: boolean;
 	isFollower: boolean;
 	isBlocking: boolean;
