@@ -7,6 +7,13 @@ export const UserRelationshipType = builder.enumType('UserRelationshipType', {
 	values: ['FOLLOW', 'REQUEST', 'BLOCK', 'MUTE']
 });
 
+export const UserRelatonshipDirection = builder.enumType(
+	'UserRelatonshipDirection',
+	{
+		values: ['INCOMING', 'OUTGOING']
+	}
+);
+
 export const UserRelationship =
 	builder.objectRef<UserRelationshipSchemaType>('UserRelationship');
 

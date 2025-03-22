@@ -37,8 +37,8 @@ const yoga = createYoga({
 			}
 		}),
 		useResponseCache({
-			session: (request) => request.headers.get('authentication'),
-			ttl: 2_000,
+			session: (request) => request.headers.get('authorization'),
+			ttl: 5_000,
 			scopePerSchemaCoordinate: {
 				'Query.me': 'PRIVATE'
 			}

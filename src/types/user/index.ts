@@ -1,5 +1,5 @@
 export * from './conversation';
-export * from './ProfileField';
+export * from './profile';
 export * from './Relationship';
 export * from './User';
 export * from './Verification';

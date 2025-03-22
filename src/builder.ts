@@ -1,6 +1,7 @@
 import SchemaBuilder from '@pothos/core';
 import ErrorsPlugin from '@pothos/plugin-errors';
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
+import SimpleObjectsPlugin from '@pothos/plugin-simple-objects';
 import SmartSubscriptionsPlugin, {
 	subscribeOptionsFromIterator
 } from '@pothos/plugin-smart-subscriptions';
@@ -26,7 +27,8 @@ export const builder = new SchemaBuilder<{
 		ScopeAuthPlugin,
 		ValidationPlugin,
 		ErrorsPlugin,
-		SmartSubscriptionsPlugin
+		SmartSubscriptionsPlugin,
+		SimpleObjectsPlugin
 	],
 	validationOptions: {
 		// optionally customize how errors are formatted

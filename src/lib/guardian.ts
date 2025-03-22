@@ -4,53 +4,76 @@ import { redisClient } from '../redis';
 import { guardianLog } from './logger';
 
 /**
- * This function checks if a user is allowed to access a resource based on their privacy settings.
- * It's a little complicated but basically, it makes sure users can't access other users if not allowed.
- * @param user The user object contains the user's ID and type.
- * @param context The context object contains the user's ID and type.
- * @returns A boolean value indicating whether the user is allowed to access the resource.
+ * Checks if a user is allowed to access another user based on privacy settings.
+ * Handles three cases:
+ * 1. Users can always access their own profiles
+ * 2. Private users are only accessible by their followers
+ * 3. Public users are accessible by anyone who isn't blocked
+ *
+ * @param user The target user object containing ID and privacy type
+ * @param auth Authentication context of the requesting user
+ * @returns Boolean indicating access permission
  */
 async function privacyGuardian(
 	user:
 		| {
 				id: string | null | undefined;
-				type: 'PUBLIC' | 'PRIVATE' | null | undefined;
+				type?: 'PUBLIC' | 'PRIVATE' | null | undefined;
 		  }
 		| undefined,
 	auth: BetterAuth
 ): Promise<boolean> {
-	if (user?.id === null || user?.type === null) {
+	// Handle undefined user cases
+	const targetUserId = user?.id;
+	if (!targetUserId) {
 		return false;
 	}
 
-	// Generate a unique cache key
-	const cacheKey = `privacyGuardian:${user?.id}:${auth?.user.id}`;
+	// Self-access is always allowed
+	if (auth?.user.id === targetUserId) {
+		return true;
+	}
 
-	// Try to get the result from cache
+	// Check cache first
+	const cacheKey = `privacyGuardian:${targetUserId}:${auth?.user.id}`;
 	const cachedResult = await redisClient.get(cacheKey);
 	if (cachedResult !== null) {
 		guardianLog(
-			`Cache hit for user ${user?.id} and token ${auth?.user.id}`
+			`Cache hit for user ${targetUserId} and requester ${auth?.user.id}`
 		);
-		return cachedResult === 'true'; // Convert string back to boolean
+		return cachedResult === 'true';
 	}
 
-	let result = false; // Default result
-
 	guardianLog(
-		`Checking privacy for user ${user?.id} and token ${auth?.user.id}`
+		`Checking privacy for user ${targetUserId} and requester ${auth?.user.id}`
 	);
 
-	if (auth?.user.id === user?.id) {
-		result = true;
-	} else if (user?.type === 'PRIVATE') {
+	// Fetch complete user data if privacy type is missing
+	let privacyType = user?.type;
+	if (privacyType === null || privacyType === undefined) {
+		const userData = await db.query.user.findFirst({
+			where: (user, { eq }) => eq(user.id, targetUserId)
+		});
+
+		if (!userData || userData.type === null) {
+			return false;
+		}
+
+		privacyType = userData.type;
+	}
+
+	// Determine access based on privacy settings
+	let result: boolean;
+
+	if (privacyType === 'PRIVATE') {
+		// For private users, check if requester follows them
 		const followingRelationship = await db.query.userRelationship.findFirst(
 			{
-				where: (userRelationship, { eq, and }) =>
+				where: (rel, { eq, and }) =>
 					and(
-						eq(userRelationship.fromId, auth?.user.id),
-						eq(userRelationship.toId, user?.id ?? ''),
-						eq(userRelationship.type, 'FOLLOW')
+						eq(rel.fromId, auth?.user.id),
+						eq(rel.toId, targetUserId),
+						eq(rel.type, 'FOLLOW')
 					)
 			}
 		);
@@ -59,27 +82,29 @@ async function privacyGuardian(
 
 		if (!result) {
 			guardianLog(
-				`User ${user?.id} is PRIVATE and not followed by ${auth?.user.id}`
+				`User ${targetUserId} is PRIVATE and not followed by ${auth?.user.id}`
 			);
 		}
 	} else {
+		// For public users, check if requester is blocked
 		const blockedRelationship = await db.query.userRelationship.findFirst({
-			where: (userRelationship, { eq, and }) =>
+			where: (rel, { eq, and }) =>
 				and(
-					eq(userRelationship.fromId, user?.id ?? ''),
-					eq(userRelationship.toId, auth?.user.id),
-					eq(userRelationship.type, 'BLOCK')
+					eq(rel.fromId, targetUserId),
+					eq(rel.toId, auth?.user.id),
+					eq(rel.type, 'BLOCK')
 				)
 		});
 
 		result = !blockedRelationship;
+
 		if (!result) {
-			guardianLog(`User ${user?.id} has blocked ${auth?.user.id}`);
+			guardianLog(`User ${targetUserId} has blocked ${auth?.user.id}`);
 		}
 	}
 
 	guardianLog(
-		`Result for user ${user?.id} and token ${auth?.user.id} is ${result}`
+		`Result for user ${targetUserId} and requester ${auth?.user.id} is ${result}`
 	);
 
 	// Cache the result for 5 seconds

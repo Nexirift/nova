@@ -3,7 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import { builder } from '../../builder';
 import type { Context } from '../../context';
 import { throwError } from '../../helpers/common';
-import { UserProfileField } from '../../types/user/ProfileField';
+import { UserProfileField } from '../../types/user';
 
 builder.mutationField('createProfileField', (t) =>
 	t.field({

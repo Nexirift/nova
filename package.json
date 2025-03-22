@@ -27,6 +27,7 @@
 		"@pothos/core": "^4.5.0",
 		"@pothos/plugin-errors": "^4.2.0",
 		"@pothos/plugin-scope-auth": "^4.1.1",
+		"@pothos/plugin-simple-objects": "^4.1.0",
 		"@pothos/plugin-smart-subscriptions": "^4.1.1",
 		"@pothos/plugin-validation": "^3.10.2",
 		"@t3-oss/env-core": "^0.12.0",

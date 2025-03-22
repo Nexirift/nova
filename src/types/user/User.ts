@@ -1,14 +1,22 @@
 import type { UserSchemaType } from '@nexirift/db';
-import { db } from '@nexirift/db';
-import { Organisation, OrganisationMember } from '..';
+import { db, post, postInteraction, userRelationship } from '@nexirift/db';
+import { and, count, eq } from 'drizzle-orm';
+import { Organization, OrganizationMember, UserProfile } from '..';
 import { builder } from '../../builder';
 import type { Context } from '../../context';
+import {
+	getCompleteRelationshipStats,
+	UserRelationshipStats
+} from '../../helpers/user/Relationship';
 import { privacyGuardian } from '../../lib/guardian';
 import { Post } from '../post';
 import { PostInteraction } from '../post/Interaction';
 import { PostMedia } from '../post/Media';
-import { UserProfileField } from './ProfileField';
-import { UserRelationship } from './Relationship';
+import {
+	UserRelationship,
+	UserRelationshipType,
+	UserRelatonshipDirection
+} from './Relationship';
 import { UserVerification } from './Verification';
 
 export const UserType = builder.enumType('UserType', {
@@ -24,63 +32,61 @@ User.implement({
 		}),
 		username: t.exposeString('displayUsername'),
 		displayName: t.exposeString('displayName', { nullable: true }),
-		bio: t.exposeString('bio', { nullable: true }),
-		extendedBio: t.exposeString('extendedBio', { nullable: true }),
 		avatar: t.exposeString('avatar', { nullable: true }),
-		banner: t.exposeString('banner', { nullable: true }),
-		background: t.exposeString('background', { nullable: true }),
 		type: t.expose('type', { type: UserType, nullable: true }),
 		verification: t.field({
 			type: UserVerification,
 			nullable: true,
 			resolve: async (user) => {
-				const result = await db.query.userVerification.findFirst({
+				return await db.query.userVerification.findFirst({
 					where: (userVerification, { eq }) =>
 						eq(userVerification.userId, user.id)
 				});
-				return result!;
 			}
 		}),
-		profession: t.exposeString('profession', { nullable: true }),
-		location: t.exposeString('location', { nullable: true }),
-		website: t.exposeString('website', { nullable: true }),
-		profileFields: t.field({
-			type: [UserProfileField],
+		profile: t.field({
+			type: UserProfile,
 			nullable: true,
 			authScopes: (parent, _args, context) =>
-				privacyGuardian(parent, context.auth),
-			unauthorizedResolver: () => [],
+				privacyGuardian({ id: parent.id }, context.auth),
+			unauthorizedResolver: () => null,
 			resolve: async (user) => {
-				const result = await db.query.userProfileField.findMany({
-					where: (userProfileField, { eq }) =>
-						eq(userProfileField.userId, user.id),
-					orderBy: (userProfileField, { asc }) => [
-						asc(userProfileField.createdAt)
-					]
+				return await db.query.userProfile.findFirst({
+					where: (userProfile, { eq }) =>
+						eq(userProfile.userId, user.id)
 				});
-				return result!;
 			}
 		}),
-		organisations: t.field({
-			type: [OrganisationMember],
+		organizations: t.field({
+			type: [OrganizationMember],
 			nullable: true,
 			resolve: async (user) => {
-				const result = await db.query.organisationMember.findMany({
-					where: (organisation, { eq }) =>
-						eq(organisation.userId, user.id)
+				return await db.query.organizationMember.findMany({
+					where: (organization, { eq }) =>
+						eq(organization.userId, user.id)
 				});
-				return result!;
 			}
 		}),
-		organisation: t.field({
-			type: Organisation,
+		organization: t.field({
+			type: Organization,
 			nullable: true,
 			resolve: async (user) => {
-				const result = await db.query.organisation.findFirst({
-					where: (organisation, { eq }) =>
-						eq(organisation.accountId, user.id)
+				const member = await db.query.organizationMember.findFirst({
+					where: (organizationMember, { and, eq }) =>
+						and(
+							eq(organizationMember.userId, user.id),
+							eq(organizationMember.role, 'owner')
+						)
 				});
-				return result!;
+
+				if (!member) return null;
+
+				const org = await db.query.organization.findFirst({
+					where: (organization, { eq }) =>
+						eq(organization.id, member.organizationId)
+				});
+
+				return org;
 			}
 		}),
 		posts: t.field({
@@ -94,7 +100,8 @@ User.implement({
 				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args) => {
-				const result = await db.query.post.findMany({
+				const { first = 10, offset = 0 } = args;
+				return await db.query.post.findMany({
 					where: (post, { and, eq, isNull }) =>
 						and(
 							eq(post.authorId, user.id),
@@ -102,10 +109,9 @@ User.implement({
 							eq(post.deleted, false),
 							eq(post.published, true)
 						),
-					limit: args.first!,
-					offset: args.offset!
+					limit: first ?? 10,
+					offset: offset ?? 0
 				});
-				return result!;
 			}
 		}),
 		replies: t.field({
@@ -119,7 +125,8 @@ User.implement({
 				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args) => {
-				const result = await db.query.post.findMany({
+				const { first = 10, offset = 0 } = args;
+				return await db.query.post.findMany({
 					where: (post, { and, eq, isNotNull }) =>
 						and(
 							eq(post.authorId, user.id),
@@ -127,10 +134,9 @@ User.implement({
 							eq(post.deleted, false),
 							eq(post.published, true)
 						),
-					limit: args.first!,
-					offset: args.offset!
+					limit: first ?? 10,
+					offset: offset ?? 0
 				});
-				return result!;
 			}
 		}),
 		media: t.field({
@@ -140,23 +146,14 @@ User.implement({
 				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user) => {
-				const result = await db.query.post.findMany({
+				const posts = await db.query.post.findMany({
 					where: (post, { eq }) => eq(post.authorId, user.id),
 					with: {
 						media: true
 					}
 				});
 
-				const filteredResult: (typeof PostMedia.$inferType)[] = [];
-
-				result.forEach((post) => {
-					if (post?.media) {
-						for (const media of post.media) {
-							filteredResult.push(media);
-						}
-					}
-				});
-				return filteredResult;
+				return posts.flatMap((post) => post.media || []);
 			}
 		}),
 		interactions: t.field({
@@ -170,27 +167,30 @@ User.implement({
 				type: t.arg({ type: 'String' })
 			},
 			unauthorizedResolver: () => [],
-			resolve: async (user, args, context: Context) => {
-				const type = args.type! as 'LIKE' | 'REPOST';
+			resolve: async (user, args) => {
+				const { first = 10, offset = 0, type } = args;
+				const interactionType = type as 'LIKE' | 'REPOST' | undefined;
 
-				const result = await db.query.postInteraction.findMany({
-					where: (postInteraction, { and, eq }) =>
-						user.id === context.auth?.user.id
-							? and(
-									eq(postInteraction.userId, user.id),
-									type && eq(postInteraction.type, type)
-								)
-							: and(
-									eq(postInteraction.userId, user.id),
-									type && eq(postInteraction.type, type)
-								),
+				return await db.query.postInteraction.findMany({
+					where: (postInteraction, { and, eq }) => {
+						const conditions = [
+							eq(postInteraction.userId, user.id)
+						];
+
+						if (interactionType) {
+							conditions.push(
+								eq(postInteraction.type, interactionType)
+							);
+						}
+
+						return and(...conditions);
+					},
 					with: {
 						post: true
 					},
-					limit: args.first!,
-					offset: args.offset!
+					limit: first ?? 10,
+					offset: offset ?? 0
 				});
-				return result;
 			}
 		}),
 		relationships: t.field({
@@ -198,47 +198,58 @@ User.implement({
 			nullable: true,
 			args: {
 				first: t.arg({ type: 'Int' }),
-				after: t.arg({ type: 'Int' })
+				after: t.arg({ type: 'Int' }),
+				type: t.arg({ type: UserRelationshipType }),
+				direction: t.arg({
+					type: UserRelatonshipDirection
+				})
 			},
 			authScopes: (parent, _args, context) =>
 				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args, context: Context) => {
-				const to = await db.query.userRelationship.findMany({
-					where: (userRelationship, { eq, and, or }) =>
-						and(
-							eq(userRelationship.toId, user.id),
-							user.id === context.auth?.user.id
-								? or(
-										eq(userRelationship.type, 'REQUEST'),
-										eq(userRelationship.type, 'FOLLOW')
-									)
-								: eq(userRelationship.type, 'FOLLOW')
-						),
-					with: {
-						from: true
-					},
-					limit: args.first!,
-					offset: args.after!
-				});
+				// Privacy check was already done via authScopes
+				const { type, direction, first = 10, after = 0 } = args;
+				const isIncoming = direction === 'INCOMING';
+				const isAuthenticatedUser = user.id === context.auth?.user?.id;
 
-				const from = await db.query.userRelationship.findMany({
-					where: (userRelationship, { eq, and }) =>
-						context.auth?.user.id === user.id
-							? eq(userRelationship.fromId, user.id)
-							: and(
-									eq(userRelationship.fromId, user.id),
-									eq(userRelationship.type, 'FOLLOW')
-								),
-					with: {
-						to: true
-					},
-					limit: args.first!,
-					offset: args.after!
-				});
+				// Security check for sensitive relationship types
+				const isSensitiveType = type === 'BLOCK' || type === 'MUTE';
+				if (
+					(isSensitiveType && (isIncoming || !isAuthenticatedUser)) ||
+					(type === 'REQUEST' && !isAuthenticatedUser)
+				) {
+					return [];
+				}
 
-				return [...to, ...from].slice(args.after!, args.first!);
+				// Determine which ID to use in the query based on direction
+				const directionCondition = isIncoming
+					? eq(userRelationship.toId, user.id)
+					: eq(userRelationship.fromId, user.id);
+
+				return await db.query.userRelationship.findMany({
+					where: (userRelationship, { eq, and }) => {
+						return type
+							? and(
+									directionCondition,
+									eq(userRelationship.type, type)
+								)
+							: directionCondition;
+					},
+					with: {
+						// Only load the needed relationship direction
+						from: isIncoming ? true : undefined,
+						to: !isIncoming ? true : undefined
+					},
+					limit: first ?? 10,
+					offset: after ?? 0
+				});
 			}
+		}),
+		relationshipStats: t.field({
+			type: UserRelationshipStats,
+			resolve: async (user, _, ctx) =>
+				await getCompleteRelationshipStats(user.id, ctx.auth?.user?.id)
 		}),
 		createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),
 		updatedAt: t.expose('updatedAt', { type: 'Date', nullable: false }),
@@ -246,122 +257,38 @@ User.implement({
 			type: 'Int',
 			nullable: false,
 			resolve: async (user) => {
-				const result = await db.query.postInteraction.findMany({
-					where: (postInteraction, { and, eq }) =>
+				const result = await db
+					.select({ count: count() })
+					.from(postInteraction)
+					.where(
 						and(
 							eq(postInteraction.userId, user.id),
 							eq(postInteraction.type, 'LIKE')
 						)
-				});
-				return result!.length ?? 0;
+					);
+				return result[0]?.count ?? 0;
 			}
 		}),
 		postsCount: t.field({
 			type: 'Int',
 			nullable: false,
 			resolve: async (user) => {
-				const result = await db.query.post.findMany({
-					where: (post, { eq }) => eq(post.authorId, user.id)
-				});
-				return result!.length ?? 0;
+				const result = await db
+					.select({ count: count() })
+					.from(post)
+					.where(eq(post.authorId, user.id));
+				return result[0]?.count ?? 0;
 			}
 		}),
-		followingCount: t.field({
-			type: 'Int',
-			nullable: false,
-			resolve: async (user) => {
-				const result = await db.query.userRelationship.findMany({
-					where: (userRelationship, { eq }) =>
-						eq(userRelationship.fromId, user.id)
-				});
-				return result!.length ?? 0;
-			}
-		}),
-		followersCount: t.field({
-			type: 'Int',
-			nullable: false,
-			resolve: async (user) => {
-				const result = await db.query.userRelationship.findMany({
-					where: (userRelationship, { eq }) =>
-						eq(userRelationship.toId, user.id)
-				});
-				return result!.length ?? 0;
-			}
-		}),
-		isBlocking: t.field({
-			type: 'Boolean',
-			nullable: false,
-			resolve: async (user, _args, context: Context) => {
-				const result = await db.query.userRelationship.findMany({
-					where: (userRelationship, { and, eq }) =>
-						and(
-							eq(userRelationship.toId, user.id),
-							eq(userRelationship.fromId, context.auth?.user.id),
-							eq(userRelationship.type, 'BLOCK')
-						)
-				});
-				return result!.length > 0;
-			}
-		}),
-		isBlocked: t.field({
-			type: 'Boolean',
-			nullable: false,
-			resolve: async (user, _args, context: Context) => {
-				const result = await db.query.userRelationship.findMany({
-					where: (userRelationship, { and, eq }) =>
-						and(
-							eq(userRelationship.fromId, user.id),
-							eq(userRelationship.toId, context.auth?.user.id),
-							eq(userRelationship.type, 'BLOCK')
-						)
-				});
-				return result!.length > 0;
-			}
-		}),
-		isFollowing: t.field({
-			type: 'Boolean',
-			nullable: false,
-			resolve: async (user, _args, context: Context) => {
-				const result = await db.query.userRelationship.findMany({
-					where: (userRelationship, { and, eq }) =>
-						and(
-							eq(userRelationship.toId, user.id),
-							eq(userRelationship.fromId, context.auth?.user.id),
-							eq(userRelationship.type, 'FOLLOW')
-						)
-				});
-				return result!.length > 0;
-			}
-		}),
-		isFollower: t.field({
-			type: 'Boolean',
-			nullable: false,
-			resolve: async (user, _args, context: Context) => {
-				const result = await db.query.userRelationship.findMany({
-					where: (userRelationship, { and, eq }) =>
-						and(
-							eq(userRelationship.fromId, user.id),
-							eq(userRelationship.toId, context.auth?.user.id),
-							eq(userRelationship.type, 'FOLLOW')
-						)
-				});
-				return result!.length > 0;
-			}
-		}),
-		hasSentFollowRequest: t.field({
-			type: 'Boolean',
-			nullable: false,
-			resolve: async (user, _args, context: Context) => {
-				const result = await db.query.userRelationship.findMany({
-					where: (userRelationship, { and, eq }) =>
-						and(
-							eq(userRelationship.toId, user.id),
-							eq(userRelationship.fromId, context.auth?.user.id),
-							eq(userRelationship.type, 'REQUEST')
-						)
-				});
-				return result!.length > 0;
-			}
+		attributes: t.stringList({
+			resolve: (p) => {
+				try {
+					return JSON.parse(p.attributes ?? '[]') ?? [];
+				} catch {
+					return [];
+				}
+			},
+			nullable: false
 		})
 	})
 });

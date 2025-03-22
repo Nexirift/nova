@@ -1,7 +1,7 @@
 import type { UserProfileFieldSchemaType } from '@nexirift/db';
 import { db } from '@nexirift/db';
-import { builder } from '../../builder';
-import { User } from './User';
+import { builder } from '../../../builder';
+import { User } from '../User';
 
 export const UserProfileField =
 	builder.objectRef<UserProfileFieldSchemaType>('UserProfileField');

@@ -136,3 +136,4 @@ drizzle/meta/
 .env
 
 artillery.yml
+schema.graphql
