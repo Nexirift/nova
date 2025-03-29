@@ -135,5 +135,8 @@ drizzle/meta/
 # ignore secrets
 .env
 
+# Project specific
 artillery.yml
 schema.graphql
+.npmrc
+bunfig.toml

@@ -8,6 +8,7 @@
 	"scripts": {
 		"dev": "NODE_ENV=development bun --watch src/server.ts",
 		"start": "bun src/server.ts",
+		"switch-registry": "chmod +x ./npm-scripts/switch-registry.sh && ./npm-scripts/switch-registry.sh",
 		"db:generate": "cd node_modules/@nexirift/db && bun db:generate",
 		"db:migrate": "set -a && source .env && set +a && cd node_modules/@nexirift/db && bun db:migrate",
 		"db:studio": "set -a && source .env && set +a && cd node_modules/@nexirift/db && bun db:studio",

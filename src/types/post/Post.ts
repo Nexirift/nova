@@ -6,6 +6,7 @@ import type { Context } from '../../context';
 import { throwError, throwFeatureDisabledError } from '../../helpers/common';
 import { privacyGuardian } from '../../lib/guardian';
 import { redisClient } from '../../redis';
+import { TopicPost } from '../topic';
 import { User } from '../user';
 import { PostGiveaway } from './Giveaway';
 import { PostInteraction } from './Interaction';
@@ -79,6 +80,16 @@ Post.implement({
 			resolve: async (post) => {
 				const result = await db.query.postMedia.findMany({
 					where: (media, { eq }) => eq(media.postId, post.id)
+				});
+				return result!;
+			}
+		}),
+		topics: t.field({
+			type: [TopicPost],
+			nullable: true,
+			resolve: async (post) => {
+				const result = await db.query.topicPost.findMany({
+					where: (topic, { eq }) => eq(topic.postId, post.id)
 				});
 				return result!;
 			}

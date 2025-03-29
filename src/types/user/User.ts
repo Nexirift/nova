@@ -1,7 +1,7 @@
 import type { UserSchemaType } from '@nexirift/db';
 import { db, post, postInteraction, userRelationship } from '@nexirift/db';
 import { and, count, eq } from 'drizzle-orm';
-import { Organization, OrganizationMember, UserProfile } from '..';
+import { Organization, OrganizationMember, TopicUser, UserProfile } from '..';
 import { builder } from '../../builder';
 import type { Context } from '../../context';
 import {
@@ -289,6 +289,16 @@ User.implement({
 				}
 			},
 			nullable: false
+		}),
+		topics: t.field({
+			type: [TopicUser],
+			nullable: true,
+			resolve: async (user) => {
+				const result = await db.query.topicUser.findMany({
+					where: (topic, { eq }) => eq(topic.userId, user.id)
+				});
+				return result!;
+			}
 		})
 	})
 });

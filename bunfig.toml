@@ -1,5 +1,0 @@
-[install.scopes]
-"@nexirift" = { url = "http://localhost:4873/" }
-
-[test]
-preload = ['./src/server.ts']

@@ -1,0 +1,3 @@
+[submodule "npm-scripts"]
+	path = npm-scripts
+	url = https://github.com/Nexirift/npm-scripts.git
