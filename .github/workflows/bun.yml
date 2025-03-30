@@ -11,6 +11,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  submodules: recursive
             - name: Set up Bun
               uses: oven-sh/setup-bun@v2
             - name: Start local npm registry
@@ -29,6 +31,7 @@ jobs:
             - name: Clone db package repository
               uses: actions/checkout@master
               with:
+                  submodules: recursive
                   repository: Nexirift/db
                   path: ./.db_publishing
             - name: Install dependencies for db package
@@ -39,6 +42,8 @@ jobs:
               run: >
                   cd .db_publishing && npm publish --registry
                   http://localhost:4873
+            - name: Switch registry
+              run: bun switch-registry && bun switch-registry
             - name: Install dependencies
               run: rm bun.lock && bun install
             - name: Generate the database schema
