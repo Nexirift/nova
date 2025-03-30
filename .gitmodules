@@ -1,3 +1,3 @@
-[submodule "npm-scripts"]
-	path = npm-scripts
-	url = https://github.com/Nexirift/npm-scripts.git
+[submodule "utility-scripts"]
+	path = utility-scripts
+	url = https://github.com/Nexirift/utility-scripts

@@ -7,7 +7,7 @@
         "@aws-sdk/client-s3": "^3.758.0",
         "@aws-sdk/lib-storage": "^3.758.0",
         "@graphql-yoga/plugin-response-cache": "^3.15.2",
-        "@nexirift/db": "0.0.1",
+        "@nexirift/db": "^0.0.1-main.a1f0b067c547f2d372465029261199e17b05474a",
         "@nexirift/plugin-better-auth": "^1.0.1",
         "@pothos/core": "^4.5.0",
         "@pothos/plugin-errors": "^4.2.0",
@@ -247,7 +247,7 @@
 
     "@levischuck/tiny-cbor": ["@levischuck/tiny-cbor@0.2.11", "", {}, "sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow=="],
 
-    "@nexirift/db": ["@nexirift/db@0.0.1", "http://localhost:4873/@nexirift/db/-/db-0.0.1.tgz", { "peerDependencies": { "@electric-sql/pglite": "^0.2.17", "drizzle-orm": "^0.40.0", "pg": "^8.13.3", "typescript": "^5.7.3" } }, "sha512-zO3M/MsfRc7tSjQo4HpTZfrOI1tLZ6xd+BLk25fCcFmSSgHpXbb7Edkp2Ge43P7aOeK65o10XRCuKcbpLUACdw=="],
+    "@nexirift/db": ["@nexirift/db@0.0.1-main.a1f0b067c547f2d372465029261199e17b05474a", "https://code.nexirift.com/dev/~npm/@nexirift%2Fdb/-/0.0.1-main.a1f0b067c547f2d372465029261199e17b05474a/@nexirift%2Fdb-0.0.1-main.a1f0b067c547f2d372465029261199e17b05474a.tgz", { "peerDependencies": { "@electric-sql/pglite": "^0.2.17", "drizzle-orm": "^0.40.0", "pg": "^8.13.3", "typescript": "^5.7.3" } }, "sha512-ywGAPTU2TiDeL4wcz8Fi2wYBJMKZraANRGzTfr4l8Md2Q5F9u2c7peHpaKYO+WF7YE5NuqHzvVX0ENWVTbt4Qg=="],
 
     "@nexirift/plugin-better-auth": ["@nexirift/plugin-better-auth@1.0.1", "http://localhost:4873/@nexirift/plugin-better-auth/-/plugin-better-auth-1.0.1.tgz", { "dependencies": { "better-auth": "^1.1.18", "graphql-yoga": "^5.11.0", "redis": "^4.7.0" } }, "sha512-Vi/U6p/By5Irgq1jzPqOOfrpnoas/ftBuRU7PDacQss8ybCBoIQRpSJUb3318ZQIgSmE+s8eGCNNiuXC1j++yA=="],
 

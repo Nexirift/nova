@@ -8,22 +8,22 @@
 	"scripts": {
 		"dev": "NODE_ENV=development bun --watch src/server.ts",
 		"start": "bun src/server.ts",
-		"switch-registry": "chmod +x ./npm-scripts/switch-registry.sh && ./npm-scripts/switch-registry.sh",
+		"switch-registry": "chmod +x ./utility-scripts/switch-registry.sh && ./utility-scripts/switch-registry.sh",
 		"db:generate": "cd node_modules/@nexirift/db && bun db:generate",
 		"db:migrate": "set -a && source .env && set +a && cd node_modules/@nexirift/db && bun db:migrate",
 		"db:studio": "set -a && source .env && set +a && cd node_modules/@nexirift/db && bun db:studio",
 		"db:all": "cd node_modules/@nexirift/db && bun db:all",
-		"db:start": "cd node_modules/@nexirift/db && bun db:start",
-		"db:reset": "cd node_modules/@nexirift/db && bun db:reset",
-		"kv:start": "cd node_modules/@nexirift/db && bun kv:start",
-		"kv:reset": "cd node_modules/@nexirift/db && bun kv:reset"
+		"db:start": "./utility-scripts/db/start.sh",
+		"db:reset": "./utility-scripts/db/reset.sh",
+		"kv:start": "./utility-scripts/kv/start.sh",
+		"kv:reset": "./utility-scripts/kv/reset.sh"
 	},
 	"keywords": [],
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.758.0",
 		"@aws-sdk/lib-storage": "^3.758.0",
 		"@graphql-yoga/plugin-response-cache": "^3.15.2",
-		"@nexirift/db": "0.0.1",
+		"@nexirift/db": "^0.0.1-main.a1f0b067c547f2d372465029261199e17b05474a",
 		"@nexirift/plugin-better-auth": "^1.0.1",
 		"@pothos/core": "^4.5.0",
 		"@pothos/plugin-errors": "^4.2.0",
