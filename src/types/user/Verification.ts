@@ -1,12 +1,12 @@
 import type { UserVerificationSchemaType } from '@nexirift/db';
-import { db } from '@nexirift/db';
+import { db, userVerificationType } from '@nexirift/db';
 import { builder } from '../../builder';
 import { config } from '../../config';
 import { throwFeatureDisabledError } from '../../helpers/common';
 import { User } from './User';
 
 export const UserVerificationType = builder.enumType('UserVerificationType', {
-	values: ['NOTABLE', 'BUSINESS', 'OFFICIAL', 'TESTER']
+	values: userVerificationType.enumValues
 });
 
 export const UserVerification =
