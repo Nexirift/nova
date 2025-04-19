@@ -3,7 +3,7 @@ import { db, migrator, prodDbClient, user } from '@nexirift/db';
 import { authorize, useBetterAuth } from '@nexirift/plugin-better-auth';
 import { beforeAll } from 'bun:test';
 import gradient from 'gradient-string';
-import { handleProtocols, makeHandler } from 'graphql-ws/lib/use/bun';
+import { handleProtocols, makeHandler } from 'graphql-ws/use/bun';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import { version } from '../package.json';
 import { config } from './config';
