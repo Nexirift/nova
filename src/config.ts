@@ -1,10 +1,10 @@
+import { readFileSync } from 'fs';
 import type { BetterAuthPluginOptionsBase } from '@nexirift/plugin-better-auth';
 import {
 	adminClient,
 	passkeyClient,
 	usernameClient
 } from 'better-auth/client/plugins';
-import { readFileSync } from 'fs';
 import { env } from './env';
 import { tokenClient } from './redis';
 
@@ -52,24 +52,24 @@ type Config = {
 	file: string;
 };
 
+// First read the JSON configuration
+const fileConfig = JSON.parse(readFileSync(file).toString());
+
+// Export the config without the auth part that needs Redis initialized
 export const config: Config = {
-	...JSON.parse(readFileSync(file).toString()),
-	...{
-		auth: {
-			baseURL: env.BETTER_AUTH_URL,
-			plugins: [adminClient(), usernameClient(), passkeyClient()],
-			redis: tokenClient,
-			cachePrefix: 'tokens',
-			messages: {
-				invalidToken: 'The provided access token is invalid.',
-				expiredToken:
-					'An invalid or expired access token was provided.',
-				invalidPermissions:
-					'You do not have the necessary permissions to access this resource.',
-				authRequired:
-					'Authentication is required to access this resource.'
-			}
+	...fileConfig,
+	file,
+	auth: {
+		baseURL: env.BETTER_AUTH_URL,
+		plugins: [adminClient(), usernameClient(), passkeyClient()],
+		redis: tokenClient, // Use the Redis client without connecting yet
+		cachePrefix: 'tokens',
+		messages: {
+			invalidToken: 'The provided access token is invalid.',
+			expiredToken: 'An invalid or expired access token was provided.',
+			invalidPermissions:
+				'You do not have the necessary permissions to access this resource.',
+			authRequired: 'Authentication is required to access this resource.'
 		}
-	},
-	file
+	}
 };

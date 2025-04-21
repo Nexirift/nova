@@ -21,3 +21,12 @@ redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
 // Create a new Redis client just for tokens using the duplicate method.
 export const tokenClient = redisClient.duplicate();
+
+export async function connectRedis(): Promise<void> {
+	if (!redisClient.isOpen) {
+		await redisClient.connect();
+	}
+	if (!tokenClient.isOpen) {
+		await tokenClient.connect();
+	}
+}
