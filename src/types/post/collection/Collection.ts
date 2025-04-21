@@ -6,12 +6,9 @@ import { config } from '../../../config';
 import { throwError, throwFeatureDisabledError } from '../../../helpers/common';
 import { PostCollectionItem } from './Item';
 
-export const PostCollectionVisibilityType = builder.enumType(
-	'PostCollectionVisibilityType',
-	{
-		values: ['PUBLIC', 'PRIVATE']
-	}
-);
+export const PostCollectionType = builder.enumType('PostCollectionType', {
+	values: ['PUBLIC', 'PRIVATE']
+});
 
 export const PostCollection =
 	builder.objectRef<PostCollectionSchemaType>('PostCollection');
@@ -25,7 +22,7 @@ PostCollection.implement({
 			return throwFeatureDisabledError();
 
 		if (
-			_parent.visibility === 'PRIVATE' &&
+			_parent.type === 'PRIVATE' &&
 			context.auth?.user.id !== _parent.userId
 		) {
 			return throwError('You cannot view this post.', 'UNAUTHORIZED');
@@ -37,8 +34,8 @@ PostCollection.implement({
 		id: t.exposeString('id', { nullable: false }),
 		name: t.exposeString('name', { nullable: false }),
 		description: t.exposeString('description', { nullable: true }),
-		visibility: t.expose('visibility', {
-			type: PostCollectionVisibilityType,
+		type: t.expose('type', {
+			type: PostCollectionType,
 			nullable: false
 		}),
 		user: t.field({

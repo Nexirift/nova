@@ -12,7 +12,6 @@ export const Topic = builder.objectRef<TopicSchemaType>('Topic');
 
 Topic.implement({
 	fields: (t) => ({
-		id: t.exposeString('id', { nullable: false }),
 		name: t.exposeString('name', { nullable: false }),
 		description: t.exposeString('description', { nullable: true }),
 		createdAt: t.expose('createdAt', { type: 'Date', nullable: false }),

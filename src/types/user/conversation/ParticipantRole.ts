@@ -19,7 +19,7 @@ UserConversationParticipantRole.implement({
 					.findFirst({
 						where: (participant, { eq }) =>
 							eq(
-								participant.id,
+								participant.userId,
 								userConversationParticipant.participantId
 							)
 					})

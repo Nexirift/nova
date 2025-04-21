@@ -11,7 +11,6 @@ export const UserConversationParticipant =
 
 UserConversationParticipant.implement({
 	fields: (t) => ({
-		id: t.expose('id', { type: 'String', nullable: false }),
 		user: t.field({
 			type: User,
 			nullable: false,
@@ -36,9 +35,10 @@ UserConversationParticipant.implement({
 		roles: t.field({
 			type: [UserConversationParticipantRole],
 			nullable: false,
-			resolve: async ({ id }) =>
+			resolve: async ({ conversationId }) =>
 				await db.query.userConversationParticipantRole.findMany({
-					where: (role, { eq }) => eq(role.participantId, id)
+					where: (role, { eq }) =>
+						eq(role.participantId, conversationId)
 				})
 		}),
 		joinedAt: t.expose('joinedAt', { type: 'Date', nullable: false })

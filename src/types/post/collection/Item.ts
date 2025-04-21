@@ -23,7 +23,7 @@ PostCollectionItem.implement({
 		});
 
 		if (
-			collection?.visibility === 'PRIVATE' &&
+			collection?.type === 'PRIVATE' &&
 			context.auth?.user.id !== collection?.userId
 		) {
 			return throwError('You cannot view this post.', 'UNAUTHORIZED');

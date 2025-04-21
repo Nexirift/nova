@@ -18,6 +18,7 @@ PostMedia.implement({
 			}
 		}),
 		url: t.exposeString('url'),
+		alt: t.exposeString('alt'),
 		createdAt: t.expose('createdAt', { type: 'Date' })
 	})
 });
