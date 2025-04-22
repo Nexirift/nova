@@ -219,7 +219,8 @@ const handleParticipants = async (
 				.then((res) => res[0]);
 		} else {
 			return db
-				.delete(userConversationParticipant)
+				.update(userConversationParticipant)
+				.set({ active: false })
 				.where(
 					and(
 						eq(
@@ -233,15 +234,9 @@ const handleParticipants = async (
 				.then((res) => res[0]);
 		}
 	});
-
 	const result = (await Promise.all(participantActions)).filter(
 		(participant) => participant !== null
-	) as {
-		id: string;
-		userId: string;
-		conversationId: string;
-		joinedAt: Date;
-	}[];
+	) as (typeof userConversationParticipant.$inferSelect)[];
 
 	pubsub.publish(`userConversationParticipants|${conversationId}`, {});
 

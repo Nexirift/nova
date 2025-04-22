@@ -4,6 +4,7 @@ import { builder } from '../../builder';
 import type { Context } from '../../context';
 import { throwError } from '../../helpers/common';
 import { UserProfileField } from '../../types/user';
+import { createProfile } from '../../helpers/user/Profile';
 
 builder.mutationField('createProfileField', (t) =>
 	t.field({
@@ -14,6 +15,8 @@ builder.mutationField('createProfileField', (t) =>
 		},
 		authScopes: { loggedIn: true },
 		resolve: async (_root, _args, ctx: Context) => {
+			await createProfile(ctx.auth.user.id);
+
 			const existingField = await db.query.userProfileField.findFirst({
 				where: (profileField, { eq, and }) =>
 					and(
@@ -52,6 +55,8 @@ builder.mutationField('updateProfileField', (t) =>
 		},
 		authScopes: { loggedIn: true },
 		resolve: async (_root, _args, ctx: Context) => {
+			await createProfile(ctx.auth.user.id);
+
 			const existingFields = await db.query.userProfileField.findMany({
 				where: (profileField, { eq }) =>
 					eq(profileField.userId, ctx.auth?.user?.id)

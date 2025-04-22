@@ -9,13 +9,13 @@ import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
 async function createPostCollection(
 	id: string,
 	userId: string,
-	visibility: 'PUBLIC' | 'PRIVATE'
+	type: 'PUBLIC' | 'PRIVATE'
 ) {
 	await db.insert(postCollection).values({
 		id,
 		name: 'Test Collection',
 		description: 'This is a collection for testing purposes.',
-		visibility,
+		type,
 		userId
 	});
 }
@@ -69,7 +69,7 @@ for (const type of types) {
 					id
 					name
 					description
-					visibility
+					type
 				}
 			}
 		`,
@@ -92,7 +92,7 @@ for (const type of types) {
 			'This is a collection for testing purposes.'
 		);
 
-		expect(data).toHaveProperty('data.getPostCollection.visibility', type);
+		expect(data).toHaveProperty('data.getPostCollection.type', type);
 
 		// Remove that test post from the database for future tests.
 		await removePostCollection(existingPostCollection);
@@ -125,7 +125,7 @@ for (const type of authTypes) {
 				id
 				name
 				description
-				visibility
+				type
 			}
 		}
 	`,

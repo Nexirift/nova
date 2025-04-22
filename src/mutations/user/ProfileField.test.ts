@@ -3,6 +3,7 @@ import { db, userProfileField } from '@nexirift/db';
 import { expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { createUser, makeGQLRequest, removeUser } from '../../lib/tests';
+import { createProfile } from '../../helpers/user/Profile';
 
 const createProfileFieldMutation = (name: string, value: string) => `
 	mutation {
@@ -60,6 +61,8 @@ test('Authenticated | Profile Fields - It should update a profile field', async 
 	const newFieldValue = faker.lorem.words(5);
 	const user1 = await setupUser();
 
+	await createProfile(user1);
+
 	await db
 		.insert(userProfileField)
 		.values({ name: fieldName, value: fieldValue, userId: user1 });
@@ -98,6 +101,8 @@ test('Authenticated | Profile Fields - It should fail if the profile field does 
 test('Authenticated | Profile Fields - It should fail if the profile field already exists', async () => {
 	const user1 = await setupUser();
 
+	await createProfile(user1);
+
 	await db
 		.insert(userProfileField)
 		.values({ name: 'test', value: 'value', userId: user1 });
@@ -122,9 +127,12 @@ test('Authenticated | Profile Fields - It should fail if the profile field alrea
 test('Authenticated | Profile Fields - It should fail if the profile field already exists for update', async () => {
 	const user1 = await setupUser();
 
+	await createProfile(user1);
+
 	await db
 		.insert(userProfileField)
 		.values({ name: 'test', value: 'value', userId: user1 });
+
 	await db
 		.insert(userProfileField)
 		.values({ name: 'test2', value: 'value', userId: user1 });

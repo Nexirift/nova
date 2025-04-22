@@ -19,7 +19,7 @@ builder.mutationField('createPostCollection', (t) =>
 		args: {
 			name: t.arg.string({ required: true }),
 			description: t.arg.string(),
-			visibility: t.arg.string({ defaultValue: 'PUBLIC' })
+			type: t.arg.string({ defaultValue: 'PUBLIC' })
 		},
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args, ctx: Context) => {
@@ -47,7 +47,7 @@ builder.mutationField('createPostCollection', (t) =>
 				.values({
 					name: args.name,
 					description: args.description,
-					visibility: args.visibility as 'PUBLIC' | 'PRIVATE',
+					type: args.type as 'PUBLIC' | 'PRIVATE',
 					userId: ctx.auth?.user?.id
 				})
 				.returning()
@@ -65,7 +65,7 @@ builder.mutationField('updatePostCollection', (t) =>
 			id: t.arg.string({ required: true }),
 			name: t.arg.string({ required: true }),
 			description: t.arg.string(),
-			visibility: t.arg.string({ defaultValue: 'PUBLIC' })
+			type: t.arg.string({ defaultValue: 'PUBLIC' })
 		},
 		authScopes: { loggedIn: true },
 		resolve: async (_root, args) => {
@@ -88,7 +88,7 @@ builder.mutationField('updatePostCollection', (t) =>
 				.set({
 					name: args.name,
 					description: args.description,
-					visibility: args.visibility as 'PUBLIC' | 'PRIVATE'
+					type: args.type as 'PUBLIC' | 'PRIVATE'
 				})
 				.where(eq(postCollection.id, args.id))
 				.returning()

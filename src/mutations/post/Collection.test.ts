@@ -36,11 +36,11 @@ for (const type of types) {
 
 		const data = await makeGQLRequest(
 			`mutation {
-				createPostCollection(name: "${postCollectionName}", description: "${postCollectionDescription}", visibility: "${type}") {
+				createPostCollection(name: "${postCollectionName}", description: "${postCollectionDescription}", type: "${type}") {
 					id
 					name
 					description
-					visibility
+					type
 				}
 			}`,
 			user1
@@ -54,10 +54,7 @@ for (const type of types) {
 			'data.createPostCollection.description',
 			postCollectionDescription
 		);
-		expect(data).toHaveProperty(
-			'data.createPostCollection.visibility',
-			type
-		);
+		expect(data).toHaveProperty('data.createPostCollection.type', type);
 
 		await cleanup(user1, data.data.createPostCollection.id);
 	});
@@ -75,17 +72,17 @@ for (const type of types) {
 			id: existingPostCollection,
 			name: postCollectionName,
 			description: postCollectionDescription,
-			visibility: type === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC',
+			type: type === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC',
 			userId: user1
 		});
 
 		const data = await makeGQLRequest(
 			`mutation {
-				updatePostCollection(id: "${existingPostCollection}", name: "Test Collection", description: "This is a test collection.", visibility: "${type}") {
+				updatePostCollection(id: "${existingPostCollection}", name: "Test Collection", description: "This is a test collection.", type: "${type}") {
 					id
 					name
 					description
-					visibility
+					type
 				}
 			}`,
 			user1
@@ -103,10 +100,7 @@ for (const type of types) {
 			'data.updatePostCollection.description',
 			'This is a test collection.'
 		);
-		expect(data).toHaveProperty(
-			'data.updatePostCollection.visibility',
-			type
-		);
+		expect(data).toHaveProperty('data.updatePostCollection.type', type);
 
 		await cleanup(user1, existingPostCollection);
 	});
@@ -120,7 +114,7 @@ test('Authenticated | Collections - It should delete an existing post collection
 		id: existingPostCollection,
 		name: 'Test Collection',
 		description: 'This is a collection for testing purposes.',
-		visibility: 'PUBLIC',
+		type: 'PUBLIC',
 		userId: user1
 	});
 
@@ -143,7 +137,7 @@ test('Authenticated | Collections - It should add a post to a collection', async
 		id: existingPostCollection,
 		name: 'Test Collection',
 		description: 'This is a collection for testing purposes.',
-		visibility: 'PUBLIC',
+		type: 'PUBLIC',
 		userId: user1
 	});
 
@@ -158,7 +152,7 @@ test('Authenticated | Collections - It should add a post to a collection', async
 		`mutation {
 			addPostToCollection(id: "${existingPostCollection}", postId: "${existingPost}") {
 				post { id content }
-				collection { id name description visibility }
+				collection { id name description type }
 			}
 		}`,
 		user1
@@ -185,7 +179,7 @@ test('Authenticated | Collections - It should add a post to a collection', async
 		'This is a collection for testing purposes.'
 	);
 	expect(data).toHaveProperty(
-		'data.addPostToCollection.collection.visibility',
+		'data.addPostToCollection.collection.type',
 		'PUBLIC'
 	);
 
@@ -201,7 +195,7 @@ test('Authenticated | Collections - It should remove a post from a collection', 
 		id: existingPostCollection,
 		name: 'Test Collection',
 		description: 'This is a collection for testing purposes.',
-		visibility: 'PUBLIC',
+		type: 'PUBLIC',
 		userId: user1
 	});
 
@@ -243,7 +237,7 @@ test('Authenticated | Collections - It should fail if the post collection alread
 		id: existingPostCollection,
 		name: postCollectionName,
 		description: 'This is a collection for testing purposes.',
-		visibility: 'PUBLIC',
+		type: 'PUBLIC',
 		userId: user1
 	});
 

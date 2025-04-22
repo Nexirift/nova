@@ -41,6 +41,7 @@ UserConversationParticipant.implement({
 						eq(role.participantId, conversationId)
 				})
 		}),
+		active: t.exposeBoolean('active', { nullable: false }),
 		joinedAt: t.expose('joinedAt', { type: 'Date', nullable: false })
 	})
 });
