@@ -18,7 +18,7 @@
 		},
 		"verification": {
 			"enabled": true,
-			"types": ["notable", "business", "tester", "official"]
+			"types": ["notable", "business", "tester", "government"]
 		},
 		"age_verification": {
 			"enabled": false
