@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta
+			name="description"
+			content="Nexirift Nova API - GraphQL Server Interface"
+		/>
+		<title>Nexirift Nova API</title>
+		<style>
+			:root {
+				--primary-color: #3a9fff;
+				--text-color: #e4e4e4;
+				--bg-color: #121212;
+				--secondary-color: #a0a0a0;
+				--border-color: #444;
+				--container-bg: #1e1e1e;
+				--hint-color: #7ac5ff;
+			}
+			body {
+				background-color: var(--bg-color);
+				color: var(--text-color);
+				font-family:
+					system-ui,
+					-apple-system,
+					Arial,
+					sans-serif;
+				line-height: 1.6;
+				max-width: 800px;
+				margin: 40px auto;
+				padding: 0 20px;
+				text-align: center;
+			}
+			h1 {
+				color: var(--primary-color);
+				font-size: 2.5rem;
+				margin: 0 0 0.5em;
+			}
+			p {
+				font-size: 1.1rem;
+				margin-bottom: 1.5em;
+			}
+			hr {
+				border: none;
+				border-top: 1px solid var(--border-color);
+				margin: 2em auto;
+				width: 50%;
+			}
+			address {
+				color: var(--secondary-color);
+				font-style: normal;
+				font-size: 0.9rem;
+			}
+			a {
+				color: var(--primary-color);
+				text-decoration: none;
+				transition: opacity 0.2s ease;
+			}
+			a:hover {
+				text-decoration: underline;
+				opacity: 0.8;
+			}
+			.container {
+				padding: 2rem;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+				border-radius: 8px;
+				background-color: var(--container-bg);
+				margin-top: 20px;
+				border: 1px solid var(--border-color);
+			}
+			.hint {
+				color: var(--hint-color);
+				display: block;
+				margin-top: 1rem;
+				font-size: 0.9rem;
+			}
+			@media (max-width: 600px) {
+				body {
+					margin: 20px auto;
+				}
+				h1 {
+					font-size: 2rem;
+				}
+				.container {
+					padding: 1.5rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>Welcome to the Nexirift Nova API!</h1>
+			<p>
+				Your API is up and running. You're ready to build something
+				amazing.
+			</p>
+			<p>
+				<strong>API Owners:</strong> Access the full documentation
+				<a
+					href="https://docs.nexirift.com"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					here</a
+				>.
+			</p>
+			<p>
+				<strong>Developers:</strong> Please refer to the service
+				powering this endpoint for integration details.
+			</p>
+			<small class="hint">
+				Psst: This is a GraphQL server! You can explore the API using
+				GraphQL introspection.
+			</small>
+			<hr />
+			<address>
+				Nexirift Nova API &mdash; Accessible at {SERVER_ADDRESS}
+			</address>
+		</div>
+	</body>
+</html>

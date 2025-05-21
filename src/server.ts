@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { db, migrator, prodDbClient, user } from '@nexirift/db';
 import { authorize, useBetterAuth } from '@nexirift/plugin-better-auth';
@@ -15,6 +16,8 @@ import { isTestMode, mediaUploadEndpoint } from './lib/server';
 import { pubsub } from './pubsub';
 import { redisClient, tokenClient } from './redis';
 import { schema } from './schema';
+
+export const rootHtml = readFileSync('./root.html', 'utf8');
 
 // Create a new instance of GraphQL Yoga with the schema and plugins.
 const yoga = createYoga({
@@ -92,8 +95,21 @@ export async function startServer() {
 					// We are waiting on the Backblaze B2 team to allow us.
 					return mediaUploadEndpoint(req);
 				} else {
-					// Let the GraphQL server handle the rest.
-					return yoga.fetch(req);
+					if (req.method !== 'POST' && url.pathname === '/') {
+						const _root = rootHtml.replace(
+							'{SERVER_ADDRESS}',
+							url.hostname
+						);
+
+						return new Response(_root, {
+							headers: {
+								'Content-Type': 'text/html; charset=utf-8'
+							}
+						});
+					} else {
+						// Let the GraphQL server handle the rest.
+						return yoga.fetch(req);
+					}
 				}
 			}
 		},
