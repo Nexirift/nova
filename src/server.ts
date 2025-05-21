@@ -17,7 +17,8 @@ import { pubsub } from './pubsub';
 import { redisClient, tokenClient } from './redis';
 import { schema } from './schema';
 
-export const rootHtml = readFileSync('./root.html', 'utf8');
+export const rootHtml = readFileSync('./static/root.html', 'utf8');
+export const notFoundHtml = readFileSync('./static/404.html', 'utf8');
 
 // Create a new instance of GraphQL Yoga with the schema and plugins.
 const yoga = createYoga({
@@ -46,7 +47,20 @@ const yoga = createYoga({
 				'Query.me': 'PRIVATE'
 			}
 		})
-	]
+	],
+	landingPage: ({ url, fetchAPI }) => {
+		const _notFound = notFoundHtml.replace(
+			'{SERVER_ADDRESS}',
+			url.hostname
+		);
+
+		return new fetchAPI.Response(_notFound, {
+			status: 404,
+			headers: {
+				'Content-Type': 'text/html; charset=utf-8'
+			}
+		});
+	}
 });
 
 export async function startServer() {
