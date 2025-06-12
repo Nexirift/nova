@@ -57,7 +57,11 @@ Post.implement({
 			},
 			resolve: async (parent, args) => {
 				const result = await db.query.post.findMany({
-					where: (post, { eq }) => eq(post.parentId, parent.id),
+					where: (post, { and, eq }) =>
+						and(
+							eq(post.parentId, parent.id),
+							eq(post.quoted, false)
+						),
 					limit: args.first!,
 					offset: args.offset!
 				});
@@ -222,7 +226,11 @@ Post.implement({
 			nullable: false,
 			resolve: async (parent) => {
 				const result = await db.query.post.findMany({
-					where: (post, { eq }) => eq(post.parentId, parent.id)
+					where: (post, { and, eq }) =>
+						and(
+							eq(post.parentId, parent.id),
+							eq(post.quoted, false)
+						)
 				});
 				return result!.length ?? 0;
 			}
@@ -235,6 +243,7 @@ Post.implement({
 					where: (post, { and, eq }) =>
 						and(
 							eq(post.parentId, parent.id),
+							eq(post.quoted, false),
 							eq(post.authorId, context.auth?.user.id)
 						)
 				});
