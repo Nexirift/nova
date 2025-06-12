@@ -180,6 +180,7 @@ Post.implement({
 				return result!.length > 0;
 			}
 		}),
+		quoted: t.exposeBoolean('quoted', { nullable: false }),
 		likesCount: t.field({
 			type: 'Int',
 			nullable: false,
@@ -198,14 +199,22 @@ Post.implement({
 			type: 'Int',
 			nullable: false,
 			resolve: async (parent) => {
-				const result = await db.query.postInteraction.findMany({
+				const repostsResult = await db.query.postInteraction.findMany({
 					where: (postInteraction, { and, eq }) =>
 						and(
 							eq(postInteraction.postId, parent.id),
 							eq(postInteraction.type, 'REPOST')
 						)
 				});
-				return result!.length ?? 0;
+
+				const quotesResult = await db.query.post.findMany({
+					where: (post, { and, eq }) =>
+						and(eq(post.quoted, true), eq(post.parentId, parent.id))
+				});
+
+				return (
+					(repostsResult?.length ?? 0) + (quotesResult?.length ?? 0)
+				);
 			}
 		}),
 		repliesCount: t.field({

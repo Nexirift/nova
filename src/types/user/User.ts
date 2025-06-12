@@ -94,24 +94,81 @@ User.implement({
 			nullable: true,
 			args: {
 				first: t.arg({ type: 'Int' }),
-				offset: t.arg({ type: 'Int' })
+				offset: t.arg({ type: 'Int' }),
+				includeReposts: t.arg({ type: 'Boolean', defaultValue: true })
 			},
 			authScopes: (parent, _args, context) =>
 				privacyGuardian(parent, context.auth),
 			unauthorizedResolver: () => [],
 			resolve: async (user, args) => {
-				const { first = 10, offset = 0 } = args;
-				return await db.query.post.findMany({
-					where: (post, { and, eq, isNull }) =>
+				const first = args.first ?? 10;
+				const offset = args.offset ?? 0;
+				const includeReposts = args.includeReposts ?? true;
+
+				// Get regular posts
+				const posts = await db.query.post.findMany({
+					where: (post, { and, eq, isNull, or }) =>
 						and(
 							eq(post.authorId, user.id),
-							isNull(post.parentId),
+							or(isNull(post.parentId), eq(post.quoted, true)),
 							eq(post.deleted, false),
 							eq(post.published, true)
 						),
-					limit: first ?? 10,
-					offset: offset ?? 0
+					orderBy: (post, { desc }) => [desc(post.createdAt)],
+					// Only apply limit/offset immediately if we're not combining with reposts
+					limit: includeReposts ? undefined : first,
+					offset: includeReposts ? undefined : offset
 				});
+
+				if (!includeReposts) {
+					return posts;
+				}
+
+				// Get reposts if requested
+				const repostInteractions =
+					await db.query.postInteraction.findMany({
+						where: (interaction, { and, eq }) =>
+							and(
+								eq(interaction.userId, user.id),
+								eq(interaction.type, 'REPOST')
+							),
+						with: {
+							post: true
+						}
+					});
+
+				// Type-safe filtering and mapping of reposts
+				const validReposts = repostInteractions
+					.filter(
+						(interaction) =>
+							interaction.post &&
+							!interaction.post.deleted &&
+							interaction.post.published
+					)
+					.map((interaction) => ({
+						...interaction.post!,
+						repostedAt: interaction.createdAt
+					}));
+
+				// Combine regular posts with reposts
+				const postsWithRepostAtNull = posts.map((post) => ({
+					...post,
+					repostedAt: null as Date | null
+				}));
+
+				const combined = [...postsWithRepostAtNull, ...validReposts];
+
+				// Sort by post date or repost date, whichever is more recent
+				combined.sort((a, b) => {
+					const dateA = a.repostedAt || a.createdAt;
+					const dateB = b.repostedAt || b.createdAt;
+					return (
+						new Date(dateB).getTime() - new Date(dateA).getTime()
+					);
+				});
+
+				// Apply pagination after sorting
+				return combined.slice(offset, offset + first);
 			}
 		}),
 		replies: t.field({
@@ -134,6 +191,7 @@ User.implement({
 							eq(post.deleted, false),
 							eq(post.published, true)
 						),
+					orderBy: (post, { desc }) => [desc(post.createdAt)],
 					limit: first ?? 10,
 					offset: offset ?? 0
 				});
