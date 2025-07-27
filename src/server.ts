@@ -1,10 +1,13 @@
 import { readFileSync } from 'fs';
+import fastifyWebsocket, { type WebSocket } from '@fastify/websocket';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { db, migrator, prodDbClient, user } from '@nexirift/db';
 import { authorize, useBetterAuth } from '@nexirift/plugin-better-auth';
 import { beforeAll } from 'bun:test';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import Fastify from 'fastify';
 import gradient from 'gradient-string';
-import { handleProtocols, makeHandler } from 'graphql-ws/use/bun';
+import { makeHandler } from 'graphql-ws/dist/use/@fastify/websocket';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import { version } from '../package.json';
 import { config } from './config';
@@ -21,11 +24,13 @@ export const rootHtml = readFileSync('./static/root.html', 'utf8');
 export const notFoundHtml = readFileSync('./static/404.html', 'utf8');
 
 // Create a new instance of GraphQL Yoga with the schema and plugins.
-const yoga = createYoga({
+const yoga = createYoga<{
+	req: FastifyRequest;
+	reply: FastifyReply;
+}>({
 	schema: schema,
 	graphiql: false,
 	maskedErrors: false,
-	logging: 'debug',
 	graphqlEndpoint: '/',
 	plugins: [
 		useBetterAuth(config.auth),
@@ -60,103 +65,95 @@ const yoga = createYoga({
 				'Content-Type': 'text/html; charset=utf-8'
 			}
 		});
+	},
+	// Integrate Fastify logger
+	logging: {
+		debug: (...args) => args.forEach((arg) => console.debug(arg)),
+		info: (...args) => args.forEach((arg) => console.info(arg)),
+		warn: (...args) => args.forEach((arg) => console.warn(arg)),
+		error: (...args) => args.forEach((arg) => console.error(arg))
 	}
 });
 
 export async function startServer() {
-	const server = Bun.serve({
-		async fetch(req, server) {
-			// Determine whether or not the user is trying to access websockets.
-			// This probably isn't perfect but i don't know any other ways to do this.
-			if (
-				req.headers.get('sec-websocket-protocol') ||
-				req.headers.get('sec-websocket-version') ||
-				req.headers.get('sec-websocket-key') ||
-				req.headers.get('sec-websocket-extensions') ||
-				req.headers.get('upgrade') === 'websocket' ||
-				req.headers.get('connection') === 'upgrade'
-			) {
-				// Require websockets to be upgraded.
-				if (req.headers.get('upgrade') != 'websocket') {
-					return new Response('Upgrade Required', {
-						status: 426
-					});
-				}
-				// Require the protocol to be valid.
-				if (
-					!handleProtocols(
-						req.headers.get('sec-websocket-protocol') || ''
-					)
-				) {
-					return new Response('Bad Request', { status: 404 });
-				}
-				// Upgrade the connection.
-				// This function uses a hacky way to pass the Authorization header.
-				// Hopefully, Bun will provide the full request object in the future.
-				if (
-					!server.upgrade(req, {
-						data: req.headers.get('authorization')
-					})
-				) {
-					return new Response('Internal Server Error', {
-						status: 500
-					});
-				}
-			} else {
-				const url = new URL(req.url);
-				if (url.pathname === '/upload') {
-					// TODO: Remove this and use event notifications instead.
-					// We are waiting on the Backblaze B2 team to allow us.
-					return mediaUploadEndpoint(req);
-				} else {
-					if (req.method !== 'POST' && url.pathname === '/') {
-						const _root = rootHtml.replace(
-							'{SERVER_ADDRESS}',
-							url.hostname
-						);
+	const port = isTestMode ? 25447 : (env.PORT ?? 3000);
+	const fastify = Fastify({
+		logger: true
+	});
 
-						return new Response(_root, {
-							headers: {
-								'Content-Type': 'text/html; charset=utf-8'
+	// Register WebSocket support
+	await fastify.register(fastifyWebsocket, {
+		options: { maxPayload: 1048576 }
+	});
+
+	// Handle root path for GET requests
+	fastify.get('/', (request, reply) => {
+		const _root = rootHtml.replace('{SERVER_ADDRESS}', request.hostname);
+		reply.type('text/html; charset=utf-8').send(_root);
+	});
+
+	// Handle upload endpoint
+	fastify.all('/upload', async (request: FastifyRequest, reply) => {
+		const response = await mediaUploadEndpoint(request);
+		const body = await response.text();
+		reply
+			.code(response.status)
+			.headers(Object.fromEntries(response.headers.entries()))
+			.send(body);
+	});
+
+	// Register GraphQL endpoint
+	fastify.route({
+		url: yoga.graphqlEndpoint,
+		method: ['POST', 'OPTIONS'],
+		handler: (request, reply) =>
+			yoga.handleNodeRequestAndResponse(request, reply, {
+				req: request,
+				reply
+			})
+	});
+
+	// Set up WebSockets for GraphQL subscriptions
+	fastify.register(async (fastify) => {
+		fastify.get(
+			'/ws',
+			{ websocket: true },
+			(connection: WebSocket, request) => {
+				const authHeader = request.headers.authorization;
+
+				makeHandler(
+					{
+						schema,
+						context: async () => {
+							if (authHeader) {
+								const auth = await authorize(
+									config.auth,
+									authHeader.split(' ')[1]!
+								);
+								const authString = JSON.stringify(auth);
+								try {
+									return {
+										auth,
+										pubsub
+									} as Context;
+								} catch {
+									connection.socket.send(
+										JSON.stringify({
+											type: 'error',
+											payload: { message: authString }
+										})
+									);
+									connection.socket.close();
+								}
+							} else {
+								return { pubsub } as Context;
 							}
-						});
-					} else {
-						// Let the GraphQL server handle the rest.
-						return yoga.fetch(req);
-					}
-				}
+						}
+					},
+					connection.socket
+				);
 			}
-		},
-		websocket: makeHandler({
-			schema,
-			context: async (ctx) => {
-				if (ctx.extra.socket.data) {
-					const auth = await authorize(
-						config.auth,
-						(ctx.extra.socket.data! as string).split(' ')[1]!
-					);
-					const authString = JSON.stringify(auth);
-					try {
-						return {
-							auth,
-							pubsub
-						} as Context;
-					} catch {
-						ctx.extra.socket.send(
-							JSON.stringify({
-								type: 'pong',
-								payload: { message: authString }
-							})
-						);
-						ctx.extra.socket.close(3003, authString);
-					}
-				} else {
-					return { pubsub } as Context;
-				}
-			}
-		}),
-		port: isTestMode ? 25447 : (env.PORT ?? 3000),
-		development: !!(env.NODE_ENV === 'development') || isTestMode
+		);
 	});
 
 	// Connect to Redis.
@@ -174,6 +171,17 @@ export async function startServer() {
 		// Migrate the database.
 		await migrator();
 	}
+
+	// Start the server
+	await fastify.listen({
+		port,
+		host: '0.0.0.0'
+	});
+
+	const address = fastify.server.address();
+	const hostname = typeof address === 'string' ? address : '0.0.0.0';
+	const serverPort =
+		typeof address === 'string' ? port : address?.port || port;
 
 	// Log the server information to the console.
 	console.log('');
@@ -201,16 +209,10 @@ export async function startServer() {
 	}
 	console.log('🧰 Configuration File:', config.file);
 	console.log(
-		`🌐 Serving HTTP at ${new URL(
-			yoga.graphqlEndpoint,
-			`http://${server.hostname}:${server.port}`
-		)}`
+		`🌐 Serving HTTP at ${new URL(`http://${hostname}:${serverPort}`)}`
 	);
 	console.log(
-		`🔌 Serving WS at ${new URL(
-			yoga.graphqlEndpoint,
-			`ws://${server.hostname}:${server.port}`
-		)}`
+		`🔌 Serving WS at ${new URL(`ws://${hostname}:${serverPort}/ws`)}`
 	);
 
 	if (isTestMode) {

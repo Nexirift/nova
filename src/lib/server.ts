@@ -10,15 +10,16 @@ import { mockClient } from 'aws-sdk-client-mock';
 import mime from 'mime-types';
 import { config } from '../config';
 import { env } from '../env';
+import type { FastifyRequest } from 'fastify';
 
 /**
  * "Legacy" endpoint for uploading media.
  * @param req The request object containing the file to upload and authentication headers.
  * @returns A JSON response with a status and message.
  */
-async function mediaUploadEndpoint(req: Request) {
+async function mediaUploadEndpoint(req: FastifyRequest) {
 	// Get the token from the request headers.
-	const token = req.headers.get('Authorization')?.split(' ')[1];
+	const token = req.headers.authorization?.split(' ')[1];
 
 	// If the token is not present, return an error.
 	if (!token) {

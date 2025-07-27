@@ -22,6 +22,7 @@
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.850.0",
 		"@aws-sdk/lib-storage": "^3.850.0",
+		"@fastify/websocket": "^11.2.0",
 		"@graphql-yoga/plugin-response-cache": "^3.17.1",
 		"@nexirift/db": "^0.0.1-main.ba1bc1958882d373a004f8b3c27620beb0358051",
 		"@nexirift/plugin-better-auth": "^0.0.1-main.9673a2c297ba42243b6fe4b1518006428bf914ae",
@@ -36,6 +37,7 @@
 		"better-auth": "^1.3.4",
 		"debug": "^4.4.1",
 		"drizzle-orm": "^0.44.3",
+		"fastify": "^5.4.0",
 		"gradient-string": "^3.0.0",
 		"graphql": "^16.11.0",
 		"graphql-scalars": "^1.24.2",
@@ -50,7 +52,6 @@
 		"@electric-sql/pglite": "^0.3.5",
 		"@eslint/js": "^9.32.0",
 		"@faker-js/faker": "^9.9.0",
-		"@types/bun": "latest",
 		"@types/debug": "^4.1.12",
 		"@types/gradient-string": "^1.1.6",
 		"@types/mime-types": "^3.0.1",

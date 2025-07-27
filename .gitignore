@@ -40,3 +40,4 @@ schema.graphql
 bunfig.toml
 migrations/
 docker-data/
+*.bak
