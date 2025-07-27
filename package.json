@@ -8,15 +8,15 @@
 	"scripts": {
 		"dev": "NODE_ENV=development bun --watch src/server.ts",
 		"start": "bun src/server.ts",
-		"switch-registry": "chmod +x ./utility-scripts/switch-registry.sh && ./utility-scripts/switch-registry.sh",
-		"db:generate": "cd node_modules/@nexirift/db && bun db:generate",
-		"db:migrate": "set -a && source .env && cd node_modules/@nexirift/db && bun db:migrate",
-		"db:studio": "set -a && source .env && cd node_modules/@nexirift/db && bun db:studio",
-		"db:all": "set -a && source .env && cd node_modules/@nexirift/db && bun db:all",
-		"db:start": "set -a && source .env && ./utility-scripts/db/start.sh",
-		"db:reset": "set -a && source .env && ./utility-scripts/db/reset.sh",
-		"kv:start": "set -a && source .env && ./utility-scripts/kv/start.sh",
-		"kv:reset": "set -a && source .env && ./utility-scripts/kv/reset.sh"
+		"switch-registry": "./utility-scripts/wrapper.sh switch-registry",
+		"db:generate": "./utility-scripts/wrapper.sh db/run generate",
+		"db:migrate": "./utility-scripts/wrapper.sh db/run migrate",
+		"db:studio": "./utility-scripts/wrapper.sh db/run studio",
+		"db:all": "./utility-scripts/wrapper.sh db/run all",
+		"db:start": "./utility-scripts/wrapper.sh db/start",
+		"db:reset": "./utility-scripts/wrapper.sh db/reset",
+		"kv:start": "./utility-scripts/wrapper.sh kv/start",
+		"kv:reset": "./utility-scripts/wrapper.sh kv/reset"
 	},
 	"keywords": [],
 	"dependencies": {
