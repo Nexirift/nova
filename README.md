@@ -4,6 +4,8 @@
 
 # Nova
 
+*Small "rewrite" in progress (all GraphQL endpoints should be intact).*
+
 Nova is the core API server for Nexirift.
 
 ## Getting Started (Development)
@@ -12,8 +14,10 @@ Nova is the core API server for Nexirift.
 
 - Redis compatible server
 - Node.js v22.13.0 or greater
-- Bun v1.2.2 or greater
+- (Optional*) pnpm
 - Read the [contributing guide](https://github.com/Nexirift/.github/blob/main/contributing/README.md)
+
+*We use pnpm in testing and production, not npm.*
 
 #### For Database
 
@@ -33,6 +37,10 @@ Nova is the core API server for Nexirift.
 ## Disclaimer
 
 This software is currently in development and should not be used in production until the official Nexirift public release. By deploying this software in a production environment, you acknowledge and accept all associated risks. Please wait for production-ready status before implementation.
+
+## Contributing
+
+Please read our [contributing guide](https://github.com/Nexirift/.github/blob/main/contributing/README.md) and [code of conduct](https://github.com/Nexirift/.github/blob/main/contributing/CODE_OF_CONDUCT.md) before contributing to this project.
 
 ## License
 

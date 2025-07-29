@@ -1,1 +1,0 @@
-echo "Welcome to the Nexirift Nova container!"
