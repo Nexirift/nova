@@ -7,7 +7,7 @@ import {
 } from "@/graphql/helpers/common";
 import { findPostCollectionById } from "@/graphql/helpers/post/Collection";
 import { PostCollection } from "@/graphql/types";
-import { postCollection } from "@nexirift/db/schema";
+import { postCollection } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 builder.mutationField("updatePostCollection", (t) =>

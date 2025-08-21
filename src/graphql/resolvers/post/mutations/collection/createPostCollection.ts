@@ -7,7 +7,7 @@ import {
   throwFeatureDisabledError,
 } from "@/graphql/helpers/common";
 import { Post, PostCollection } from "@/graphql/types";
-import { postCollection } from "@nexirift/db/schema";
+import { postCollection } from "@/db/schema";
 
 builder.mutationField("createPostCollection", (t) =>
   t.field({

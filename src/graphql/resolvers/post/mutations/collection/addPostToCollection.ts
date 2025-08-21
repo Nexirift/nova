@@ -7,7 +7,7 @@ import {
 } from "@/graphql/helpers/common";
 import { findPostCollectionById } from "@/graphql/helpers/post/Collection";
 import { PostCollectionItem } from "@/graphql/types";
-import { postCollectionItem } from "@nexirift/db/schema";
+import { postCollectionItem } from "@/db/schema";
 
 builder.mutationField("addPostToCollection", (t) =>
   t.field({

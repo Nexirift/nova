@@ -4,10 +4,7 @@ import builder from "@/graphql/builder";
 import { throwError } from "@/graphql/helpers/common";
 import { privacyGuardian } from "@/graphql/lib/guardian";
 import { PostInteraction } from "@/graphql/types";
-import {
-  postInteraction,
-  PostInteractionSchemaType,
-} from "@nexirift/db/schema";
+import { postInteraction, PostInteractionSchemaType } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 
 // Define the possible interaction types

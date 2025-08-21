@@ -2,7 +2,7 @@ import { Context } from "@/context";
 import { db } from "@/db";
 import builder from "@/graphql/builder";
 import { throwError } from "@/graphql/helpers/common";
-import { userRelationship } from "@nexirift/db/schema";
+import { userRelationship } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 
 builder.mutationField("denyFollowRequest", (t) =>

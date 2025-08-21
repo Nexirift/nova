@@ -1,7 +1,7 @@
 import { pgTable, serial, text } from "drizzle-orm/pg-core";
 
 // Export the default schema
-export * from "@nexirift/db/schema";
+export * from "@nexirift/db";
 
 // Custom schema!!
 export const test = pgTable("test", {

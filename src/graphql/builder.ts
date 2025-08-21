@@ -8,7 +8,7 @@ import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
 import SmartSubscriptionsPlugin, {
   subscribeOptionsFromIterator,
 } from "@pothos/plugin-smart-subscriptions";
-import ValidationPlugin from "@pothos/plugin-validation";
+import ZodPlugin from "@pothos/plugin-zod";
 import { DateTimeResolver } from "graphql-scalars";
 
 const builder = new SchemaBuilder<{
@@ -25,12 +25,12 @@ const builder = new SchemaBuilder<{
 }>({
   plugins: [
     ScopeAuthPlugin,
-    ValidationPlugin,
+    ZodPlugin,
     ErrorsPlugin,
     SmartSubscriptionsPlugin,
     SimpleObjectsPlugin,
   ],
-  validationOptions: {
+  zod: {
     // optionally customize how errors are formatted
     validationError: (zodError) => {
       // the default behavior is to just throw the zod error directly

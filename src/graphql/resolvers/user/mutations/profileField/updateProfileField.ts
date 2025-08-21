@@ -4,7 +4,7 @@ import builder from "@/graphql/builder";
 import { throwError } from "@/graphql/helpers/common";
 import { createProfile } from "@/graphql/helpers/user/Profile";
 import { UserProfileField } from "@/graphql/types";
-import { userProfileField } from "@nexirift/db/schema";
+import { userProfileField } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 
 builder.mutationField("updateProfileField", (t) =>
